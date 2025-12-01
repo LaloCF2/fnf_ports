@@ -49,7 +49,7 @@
         0 0 80px var(--neon-purple);
     }
 
-    /* MENÚ */
+    /* ======= BOTÓN MENÚ ======= */
     .menu-btn {
       width:32px;
       height:26px;
@@ -65,37 +65,62 @@
       box-shadow:0 0 6px var(--neon-blue);
     }
 
-    .side-menu {
-      position:fixed;
-      top:0;
-      left:-260px;
-      width:260px;
-      height:100%;
-      background: rgba(5,5,5,0.87);
-      box-shadow:0 0 25px var(--neon-blue);
-      padding:20px;
-      transition:0.35s;
-      z-index:999;
-    }
-    .side-menu.open { left:0; }
 
-    .side-menu a {
-      display:block;
-      margin:20px 0;
-      text-decoration:none;
-      font-size:20px;
+    /* ======= NUEVO POPUP-MENÚ ======= */
+    #menuPopup {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: .3s ease;
+    }
+    #menuPopup.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #menuContent {
+      width: 80%;
+      max-width: 360px;
+      background: rgba(15,15,15,0.95);
+      padding: 25px;
+      border-radius: 14px;
+      text-align: center;
+      border: 2px solid var(--neon-blue);
+      box-shadow: 0 0 25px var(--neon-blue);
+    }
+
+    #menuContent h2 {
       color:white;
-      font-weight:600;
-      text-shadow:0 0 8px var(--neon-blue);
-      cursor:pointer;
+      margin-bottom:20px;
+      text-shadow:0 0 10px var(--neon-blue);
     }
 
-    .close-menu {
-      font-size:26px;
-      text-align:right;
+    .menu-option {
+      display:block;
+      margin:18px 0;
+      padding:12px;
+      font-size:20px;
+      font-weight:600;
+      color:white;
+      border-radius:10px;
+      text-shadow:0 0 10px var(--neon-blue);
+      border:1px solid var(--neon-blue);
       cursor:pointer;
-      color: var(--neon-pink);
-      text-shadow:0 0 8px var(--neon-pink);
+      background: rgba(0,0,0,0.45);
+    }
+
+    #closeMenuPopup {
+      margin-top:18px;
+      font-size:22px;
+      cursor:pointer;
+      color:var(--neon-pink);
+      text-shadow:0 0 10px var(--neon-pink);
     }
 
     /* TARJETAS */
@@ -137,7 +162,7 @@
       cursor: pointer;
     }
 
-    /* POPUP */
+    /* POPUP INFO */
     .popup {
       position: fixed;
       inset: 0;
@@ -212,14 +237,19 @@
   <!-- AUDIO -->
   <audio id="openSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9b9ffad60a.mp3?filename=click-124467.mp3"></audio>
 
-  <!-- MENU -->
-  <div class="side-menu" id="sideMenu">
-    <div class="close-menu" onclick="toggleMenu()">✖</div>
+  <!-- NUEVO POPUP-MENU -->
+  <div id="menuPopup">
+    <div id="menuContent">
+      <h2>Menú</h2>
 
-    <a onclick="showSection('apks')">APKs</a>
-    <a onclick="showSection('mods')">MODs</a>
-    <a onclick="showSection('contact')">Contacto</a>
+      <div class="menu-option" onclick="selectSection('apks')">APKs</div>
+      <div class="menu-option" onclick="selectSection('mods')">MODs</div>
+      <div class="menu-option" onclick="selectSection('contact')">Contacto</div>
+
+      <div id="closeMenuPopup" onclick="toggleMenu()">Cerrar ✖</div>
+    </div>
   </div>
+
 
   <div class="container">
 
@@ -236,7 +266,7 @@
       <p>Tu rincón de mods para Friday Night Funkin' Mobile. ¡Explora y descarga!</p>
     </section>
 
-      <div class="games-grid">
+    <div class="games-grid">
 
     <!-- ================= APKs ================= -->
     <section id="apks" class="section active">
@@ -252,7 +282,7 @@
 
         <div class="apk-card">
           <img src="assets/images/logoonline.png">
-          <h3>Psych Online</h3>
+          <h3>Psych Online</hh3>
           <button class="btn" onclick="openApkInfo('apk2')">Más información</button>
         </div>
 
@@ -344,19 +374,25 @@
   </div>
 
 <script>
-/* ======= MENU ======= */
+
+/* ======= POPUP MENÚ ======= */
+
 function toggleMenu() {
-  const menu = document.getElementById("sideMenu");
+  const popup = document.getElementById("menuPopup");
   const sound = document.getElementById("openSound");
-  menu.classList.toggle("open");
+
+  popup.classList.toggle("show");
   sound.currentTime = 0;
   sound.play();
 }
 
-function showSection(id) {
+function selectSection(id) {
   document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+
+  toggleMenu();
 }
+
 
 /* =================== MANEJO DE MODS =================== */
 const MOD_DATA = {
@@ -403,12 +439,13 @@ function closeModInfo() {
   document.getElementById("mod-popup").classList.remove("show");
 }
 
+
 /* =================== MANEJO DE APKs =================== */
 const APK_DATA = {
   apk1: {
     img: "assets/images/logopsychengine.png",
     title: "Psych Engine",
-    desc: "Motor usado originalmente en Mind Games Mod , concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual. También busca ser una alternativa más sencilla para programadores principiantes.",
+    desc: "Motor usado originalmente en Mind Games Mod...",
     version: "v1.0.4",
     downloads: [
       { name: "Descarga Windows64", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
@@ -421,7 +458,7 @@ const APK_DATA = {
   apk2: {
     img: "assets/images/logopsychonline.png",
     title: "Psych Online",
-    desc: "Mod de Psych Engine que utiliza funciones en línea.",
+    desc: "Mod de Psych Engine con funciones en línea.",
     version: "v0.13.2 Bugfix",
     downloads: [
       { name: "Descarga Android", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
@@ -452,38 +489,9 @@ function closeApkInfo() {
   document.getElementById("apk-popup").classList.remove("show");
 }
 
-function openApkInfo(id) {
-  const data = APK_DATA[id];
-
-  document.getElementById("apk-img").src = data.img;
-  document.getElementById("apk-title").innerText = data.title;
-  document.getElementById("apk-desc").innerText = data.desc;
-  document.getElementById("apk-version").innerText = data.version;
-
-  let html = "";
-  data.downloads.forEach(d => {
-    html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" download>${d.name}</a>`;
-  });
-
-  document.getElementById("apk-downloads").innerHTML = html;
-
-  document.getElementById("apk-popup").classList.add("show");
-}
-
-function closeApkInfo() {
-  document.getElementById("apk-popup").classList.remove("show");
-}
-
 document.getElementById("year").textContent = new Date().getFullYear();
+
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
