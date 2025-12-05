@@ -262,7 +262,7 @@
 <body>
 
   <!-- AUDIO -->
-  <audio id="openSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9b9ffad60a.mp3?filename=click-124467.mp3"></audio>
+  <audio id="openSound" src="assets/sound/evil.mp3"></audio>
 
   <!-- NUEVO POPUP-MENU -->
   <div id="menuPopup">
@@ -311,6 +311,12 @@
           <button class="btn" onclick="openApkInfo('apk2')">Más información</button>
         </div>
 
+        <div class="apk-card">
+          <img src="assets/images/logocode.png">
+          <h3>CodeName Engine</h3>
+          <button class="btn" onclick="openApkInfo('apk3')">Más información</button>
+        </div>
+
       </div>
     </section>
 
@@ -341,7 +347,13 @@
           <h3>VS Jeffy V3 (BABY BF VS BABY PICO)</h3>
           <button class="btn" onclick="openModInfo('mod1')">Más información</button>
         </div>
-        
+
+        <div class="mod-card">
+          <img src="assets/images/mods/logonusky.jpeg">
+          <h3>VS Nusky</h3>
+          <button class="btn" onclick="openModInfo('mod2')">Más información</button>
+        </div>
+
       </div>
     </section>
 
@@ -367,7 +379,7 @@
 
       <div class="social-item">
         <img src="assets/icons/youtube.jpeg">
-        <a class="btn" href="" target="_blank">YouTube</a>
+        <a class="btn" href="https://youtube.com/@lalocf_1?si=ASXtn2p-4HBn9H1L" target="_blank">YouTube</a>
       </div>
 
       <div class="social-item">
@@ -419,8 +431,18 @@ const MOD_DATA = {
     downloads: [
       { name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }
     ]
+  },
+  mod2: {
+    img: "assets/images/mods/logonusky.jpeg",
+    title: "VS Nusky",
+    desc: "Friday Night Funkin' FNF Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android/iOS)",
+    version: "v1.0",
+    downloads: [
+      { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
+      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/369981" }
+    ]
   }
-},
+};
 
 function openModInfo(id) {
   const data = MOD_DATA[id];
@@ -453,19 +475,38 @@ const APK_DATA = {
     downloads: [
       { name: "Descarga Windows64", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
       { name: "Descarga Windows32", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
+      { name: "Descarga Linux", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
+      { name: "Descarga Mac", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
       { name: "Descarga Android", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
       { name: "Descarga iOS", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
     ]
   },
 
-  apk2: {
+   apk2: {
     img: "assets/images/logopsychonline.png",
     title: "Psych Online",
     desc: "Mod de Psych Engine con funciones en línea.",
     version: "v0.13.2 Bugfix",
     downloads: [
+      { name: "Descarga Windows", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/windowsBuild.zip" },
+      { name: "Descarga Linux", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/linuxBuild.zip" },
+      { name: "Descarga Mac", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/macBuild.zip"},
       { name: "Descarga Android", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
       { name: "Descarga iOS", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-iOS.ipa" }
+    ]
+  },
+
+  apk3: {
+    img: "assets/images/logocodename.png",
+    title: "CodeName Engine",
+    desc: "- Codename Engine es una bifurcación de Friday Night Funkin' con un enfoque en codificación suave y modding.",
+    version: "v1.0.1",
+    downloads: [
+      { name: "Descarga Windows", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
+      { name: "Descarga Linux", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
+      { name: "Descarga Mac", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"},
+      { name: "Descarga Android", link: "https://github.com/CPsP-Team/CodenameEngine-Mobile/releases/download/v1.0.1-mobile/CodenameEngineAndroid.apk"},
+      { name: "Descarga iOS", link: "https://github.com/CPsP-Team/CodenameEngine-Mobile/releases/download/v1.0.1-mobile/CodenameEngineiOS.ipa"}
     ]
   }
 };
