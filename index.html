@@ -3,13 +3,41 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>LaloCF - Gamer Mods</title>
+  <title>FNF - Mobile</title>
 
   <style>
+
+    @font-face {
+      font-family: "MiFuente";
+      src: url("assets/fonts/funkin.ttf") format("opentype");
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      font-family: "MiFuente", system-ui, -apple-system, sans-serif;
+    }
+
+  /* ===================== VARIABLES ===================== */
+:root {
+  --text: #e0e0e0;
+  --card-bg: rgba(0, 0, 0, 0.55);
+  --neon-blue: #00eaff;
+  --neon-pink: #ff00c8;
+  --neon-purple: #b400ff;
+  --bg: linear-gradient(45deg, #0f0f0f, #000428, #1a1a1a);
+}
+
+body.light {
+  --text: #1a1a1a;
+  --card-bg: rgba(255,255,255,0.7);
+  --bg: linear-gradient(45deg, #e6f7ff, #ffffff, #f0f0f0);
+}
+
+
     /* ======= FONDO ANIMADO ======= */
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, sans-serif;
       color: var(--text);
       background: linear-gradient(45deg, #0f0f0f, #000428, #1a1a1a);
       background-size: 600% 600%;
@@ -21,7 +49,7 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* ======= EFECTO DE NEBULOSA NEÓN (AGREGADO) ======= */
+    /* ======= EFECTO DE NEBULOSA NEÓN ======= */
     body::before {
       content: "";
       position: fixed;
@@ -33,6 +61,16 @@
       filter: blur(80px);
       animation: nebulaMove 18s ease-in-out infinite alternate;
     }
+
+.container {
+  max-width:1100px;
+  margin:40px auto;
+  background:var(--card-bg);
+  padding:24px;
+  border-radius:14px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 0 25px rgba(0,0,0,.6);
+}
 
     @keyframes nebulaMove {
       0% {
@@ -67,7 +105,6 @@
       box-shadow: 0 0 25px rgba(0,0,0,0.6);
     }
 
-    /* ======= NEÓN GLOW ======= */
     .glow {
       color: white;
       text-shadow:
@@ -77,7 +114,31 @@
         0 0 80px var(--neon-purple);
     }
 
-    /* ======= BOTÓN MENÚ ======= */
+    .header-left {
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+     .theme-btn {
+       font-size:30px;
+       cursor:pointer;
+      animation: spinGlow 6s linear infinite;
+      filter: drop-shadow(0 0 6px var(--neon-blue));
+    }
+
+@keyframes spinGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+    .theme-btn {
+      position: fixed;
+      top: 47px;
+      left: 70px;
+      z-index: 9999;
+    }
+
     .menu-btn {
       width:32px;
       height:26px;
@@ -93,7 +154,6 @@
       box-shadow:0 0 6px var(--neon-blue);
     }
 
-    /* ======= NUEVO POPUP-MENÚ ======= */
     #menuPopup {
       position: fixed;
       inset: 0;
@@ -150,7 +210,6 @@
       text-shadow:0 0 10px var(--neon-pink);
     }
 
-    /* TARJETAS */
     .apks-grid, .mods-grid {
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -189,7 +248,6 @@
       cursor: pointer;
     }
 
-    /* POPUP INFO */
     .popup {
       position: fixed;
       inset: 0;
@@ -234,7 +292,6 @@
       margin-bottom: 10px;
     }
 
-    /* CONTACTO */
     .social-item {
       display:flex;
       align-items:center;
@@ -262,7 +319,7 @@
 <body>
 
   <!-- AUDIO -->
-  <audio id="openSound" src="assets/sound/evil.mp3"></audio>
+  <audio id="openSound" src=""></audio>
 
   <!-- NUEVO POPUP-MENU -->
   <div id="menuPopup">
@@ -280,14 +337,17 @@
   <div class="container">
 
     <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <div class="theme-btn" onclick="toggleTheme()">☼</div>
       <div class="menu-btn" onclick="toggleMenu()">
+
         <div></div><div></div><div></div>
       </div>
-      <h1 class="glow">LaloCF</h1>
+
+      <h1 class="glow">Friday Night Funkin'</h1>
     </header>
 
     <section>
-      <h1>Bienvenido a LaloCF</h1>
+      <h1>Bienvenido a FNF - Mobile</h1>
       <p>Tu rincón de mods para Friday Night Funkin' Mobile. ¡Explora y descarga!</p>
     </section>
 
@@ -400,11 +460,28 @@
     </section>
 
     <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF — Test Web
+      © <span id="year"></span> LaloCF
     </footer>
   </div>
 
 <script>
+
+const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+const savedTheme = localStorage.getItem("theme");
+
+if (savedTheme) {
+  document.body.classList.toggle("light", savedTheme === "light");
+} else if (prefersLight) {
+  document.body.classList.add("light");
+}
+
+function toggleTheme() {
+  document.body.classList.toggle("light");
+  localStorage.setItem(
+    "theme",
+    document.body.classList.contains("light") ? "light" : "dark"
+  );
+}
 
 function toggleMenu() {
   const popup = document.getElementById("menuPopup");
@@ -506,7 +583,7 @@ const APK_DATA = {
       { name: "Descarga Linux", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
       { name: "Descarga Mac", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"},
       { name: "Descarga Android", link: "https://github.com/CPsP-Team/CodenameEngine-Mobile/releases/download/v1.0.1-mobile/CodenameEngineAndroid.apk"},
-      { name: "Descarga iOS", link: "https://github.com/CPsP-Team/CodenameEngine-Mobile/releases/download/v1.0.1-mobile/CodenameEngineiOS.ipa"}
+      { name: "Descarga iOS", link: "https://github.com/CPsP-Team/CodenameEngine-Mobile/releases/download/v1.0.1-mobile/CodenameEngineiOS.ipa" }
     ]
   }
 };
