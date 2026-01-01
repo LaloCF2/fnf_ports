@@ -326,7 +326,7 @@ body.light {
     <div id="menuContent">
       <h2>Menú</h2>
 
-      <div class="menu-option" onclick="selectSection('apks')">Descargas</div>
+      <div class="menu-option" onclick="selectSection('apks')">Bases</div>
       <div class="menu-option" onclick="selectSection('mods')">MODs</div>
       <div class="menu-option" onclick="selectSection('contact')">Contacto</div>
 
@@ -355,7 +355,7 @@ body.light {
 
     <!-- ================= APKs ================= -->
     <section id="apks" class="section active">
-      <h2 class="glow">Bases Disponibles</h2>
+      <h2 class="glow">Descargas</h2>
 
       <div class="apks-grid">
 
@@ -403,15 +403,18 @@ body.light {
       <div class="mods-grid">
 
         <div class="mod-card">
-          <img src="assets/images/mods/logojeffy.jpeg">
           <h3>VS Jeffy V3 (BABY BF VS BABY PICO)</h3>
           <button class="btn" onclick="openModInfo('mod1')">Más información</button>
         </div>
 
         <div class="mod-card">
-          <img src="assets/images/mods/logonusky.jpeg">
           <h3>VS Nusky</h3>
           <button class="btn" onclick="openModInfo('mod2')">Más información</button>
+        </div>
+
+        <div class="mod-card">
+          <h3>Cocoa Noimix</h3>
+          <button class="btn" onclick="openModInfo('mod3')">Más información</button>
         </div>
 
       </div>
@@ -518,6 +521,16 @@ const MOD_DATA = {
       { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/369981" }
     ]
+  },
+  mod3: {
+    img: "assets/images/mods/chritmas.jpe",
+    title: "Cocoa Noimix",
+    desc: "Friday Night Funkin' FNF Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android)",
+    version: "v1.0",
+    downloads: [
+      { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/LCF.Cocoa.Noimix.7z" },
+      { name: "Descarga Opt", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/LCF.Cocoa.Noimix.Opt.7z"}
+    ]
   }
 };
 
@@ -616,3 +629,4 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 </body>
 </html>
+
