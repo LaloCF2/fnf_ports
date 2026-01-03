@@ -325,7 +325,6 @@ body.light {
   <div id="menuPopup">
     <div id="menuContent">
       <h2>Menú</h2>
-
       <div class="menu-option" onclick="selectSection('apks')">Bases</div>
       <div class="menu-option" onclick="selectSection('mods')">MODs</div>
       <div class="menu-option" onclick="selectSection('contact')">Contacto</div>
@@ -417,6 +416,11 @@ body.light {
           <button class="btn" onclick="openModInfo('mod3')">Más información</button>
         </div>
 
+        <div class="mod-card">
+          <h3>Vs Metal Pipe V2</h3>
+          <button class="btn" onclick="openModInfo('mod4')">Más información</button>
+        </div>
+
       </div>
     </section>
 
@@ -506,7 +510,7 @@ const MOD_DATA = {
   mod1: {
     img: "assets/images/mods/logojeffy.jpeg",
     title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
-    desc: "Friday Night Funkin' FNF Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android)",
+    desc: "Friday Night Funkin' FNF Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android).",
     version: "v1.0",
     downloads: [
       { name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }
@@ -515,7 +519,7 @@ const MOD_DATA = {
   mod2: {
     img: "assets/images/mods/logonusky.jpeg",
     title: "VS Nusky",
-    desc: "Friday Night Funkin' FNF Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android)",
+    desc: "Friday Night Funkin' FNF Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android).",
     version: "v1.0",
     downloads: [
       { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
@@ -525,13 +529,23 @@ const MOD_DATA = {
   mod3: {
     img: "assets/images/mods/chritmas.jpeg",
     title: "Cocoa Noimix",
-    desc: "Friday Night Funkin' FNF Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS)",
+    desc: "Friday Night Funkin' FNF Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS).",
     version: "v1.0",
     downloads: [
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/643242" },
-      { name: "Descarga", link: "https://drive.google.com/file/d/1wnnGhworUMdReUrlEMMh5C4in4OoHHrU/view?usp=drivesdk" },
-      { name: "Descarga iOS", link: "https://drive.google.com/file/d/11AUlGXUvPrxszI5xnjssMS5OvZDFp64_/view?usp=drivesdk" },
-      { name: "Descarga Opt", link: "https://drive.google.com/file/d/1EO-TOh4KByE0gSf24DXx2pG10WR8wdhU/view?usp=drivesdk" }
+      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1wnnGhworUMdReUrlEMMh5C4in4OoHHrU/view?usp=drivesdk" },
+      { name: "Descarga iOS (Drive)", link: "https://drive.google.com/file/d/11AUlGXUvPrxszI5xnjssMS5OvZDFp64_/view?usp=drivesdk" },
+      { name: "Descarga Opt (Drive)", link: "https://drive.google.com/file/d/1EO-TOh4KByE0gSf24DXx2pG10WR8wdhU/view?usp=drivesdk" }
+    ]
+  },
+  mod4: {
+    img: "assets/images/mods/metal.png",
+    title: "Vs Metal Pipe V2",
+    desc: "Friday Night Funkin' FNF Vs Metal Pipe V2 Port Psych Engine Optimizado Para (Pc/Android) y en especial iOS.",
+    version: "v1.0",
+    downloads: [
+      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/441630"},
+      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1g5liWScsGSSd_FCmDtLEOVPQSQtp6E8B/view?usp=drivesdk"}
     ]
   }
 };
@@ -631,6 +645,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 </body>
 </html>
+
 
 
 
