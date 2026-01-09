@@ -444,7 +444,449 @@
       background: none; border: 1px solid var(--neon-pink); color: var(--neon-pink);
       padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 12px;
     }
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FNF' - Mobile</title>
 
+  <style>
+    @font-face {
+      font-family: "MiFuente";
+      src: url("assets/fonts/funkin.ttf") format("opentype");
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      font-family: "MiFuente", system-ui, -apple-system, sans-serif;
+    }
+
+    /* ===================== VARIABLES ===================== */
+    :root {
+      --text: #e0e0e0;
+      --card-bg: rgba(0, 0, 0, 0.55);
+      --neon-blue: #00eaff;
+      --neon-pink: #ff00c8;
+      --neon-purple: #b400ff;
+      --bg: linear-gradient(45deg, #0f0f0f, #000428, #1a1a1a);
+    }
+
+    body.light {
+      --text: #1a1a1a;
+      --card-bg: rgba(255,255,255,0.7);
+      --bg: linear-gradient(45deg, #e6f7ff, #ffffff, #f0f0f0);
+    }
+
+    /* ======= FONDO ANIMADO ======= */
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(45deg, #0f0f0f, #000638, #1a1a1a);
+      background-size: 600% 600%;
+      animation: moveBg 12s ease infinite;
+    }
+    @keyframes moveBg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ======= EFECTO DE NEBULOSA NEÓN ======= */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.295), transparent 60%),
+                  radial-gradient(circle at 80% 70%, rgba(255, 0, 200, 0.288), transparent 60%),
+                  radial-gradient(circle at 50% 50%, rgba(179, 0, 255, 0.267), transparent 70%);
+      filter: blur(80px);
+      animation: nebulaMove 10s ease-in-out infinite alternate;
+    }
+
+    .container {
+      max-width:1100px;
+      margin:40px auto;
+      background:var(--card-bg);
+      padding:24px;
+      border-radius:14px;
+      backdrop-filter:blur(12px);
+      box-shadow:0 0 25px rgba(0,0,0,.6);
+    }
+
+    @keyframes nebulaMove {
+      0% { transform: translate(-40px, -40px) scale(1.1); opacity: 0.7; }
+      50% { transform: translate(40px, 20px) scale(1.3); opacity: 1; }
+      100% { transform: translate(-20px, 40px) scale(1.2); opacity: 0.8; }
+    }
+
+    .glow {
+      color: white;
+      text-shadow:
+        0 0 10px var(--neon-blue),
+        0 0 20px var(--neon-blue),
+        0 0 40px var(--neon-purple),
+        0 0 80px var(--neon-purple);
+    }
+
+    .theme-btn {
+      font-size:30px;
+      cursor:pointer;
+      animation: spinGlow 6s linear infinite;
+      filter: drop-shadow(0 0 6px var(--neon-blue));
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      background: rgba(0,0,0,0.3);
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid var(--neon-blue);
+    }
+
+    @keyframes spinGlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .menu-btn {
+      width:32px;
+      height:26px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      cursor:pointer;
+    }
+    .menu-btn div {
+      height:4px;
+      background: white;
+      border-radius:4px;
+      box-shadow:0 0 6px var(--neon-blue);
+    }
+
+    #menuPopup {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: .3s ease;
+    }
+    #menuPopup.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #menuContent {
+      width: 80%;
+      max-width: 360px;
+      background: rgba(15,15,15,0.95);
+      padding: 25px;
+      border-radius: 14px;
+      text-align: center;
+      border: 2px solid var(--neon-blue);
+      box-shadow: 0 0 25px var(--neon-blue);
+    }
+
+    #menuContent h2 {
+      color:white;
+      margin-bottom:20px;
+      text-shadow:0 0 10px var(--neon-blue);
+    }
+
+    .menu-option {
+      display:block;
+      margin:18px 0;
+      padding:12px;
+      font-size:20px;
+      font-weight:600;
+      color:white;
+      border-radius:10px;
+      text-shadow:0 0 10px var(--neon-blue);
+      border:1px solid var(--neon-blue);
+      cursor:pointer;
+      background: rgba(0,0,0,0.45);
+    }
+
+    #closeMenuPopup {
+      margin-top:18px;
+      font-size:22px;
+      cursor:pointer;
+      color:var(--neon-pink);
+      text-shadow:0 0 10px var(--neon-pink);
+    }
+
+    .apks-grid, .mods-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:24px;
+      margin-top:20px;
+    }
+
+    .apk-card, .mod-card {
+      background: rgba(0,0,0,0.45);
+      padding:18px;
+      border-radius:12px;
+      border:1px solid var(--neon-blue);
+      box-shadow:0 0 15px var(--neon-blue);
+      text-align:center;
+      position: relative;
+    }
+
+    .apk-card img, .mod-card img {
+      width:100%;
+      height:150px;
+      object-fit:cover;
+      border-radius:10px;
+      margin-bottom:14px;
+      box-shadow:0 0 12px var(--neon-blue);
+    }
+
+    .like-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.6);
+      padding: 5px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--neon-pink);
+      cursor: pointer;
+      z-index: 5;
+    }
+    .like-icon { color: #555; transition: 0.3s; }
+    .like-container.active .like-icon { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+    .like-count { font-size: 14px; color: white; }
+
+    .coming-soon-card {
+      background: rgba(40, 0, 40, 0.4);
+      border: 1px dashed var(--neon-pink);
+      box-shadow: 0 0 10px var(--neon-pink);
+      opacity: 0.8;
+      position: relative;
+      overflow: hidden;
+    }
+    .coming-soon-card img {
+      filter: blur(8px) grayscale(1);
+    }
+    .coming-soon-badge {
+      position: absolute;
+      top: 10px;
+      right: -30px;
+      background: var(--neon-pink);
+      color: white;
+      padding: 5px 40px;
+      transform: rotate(45deg);
+      font-size: 12px;
+      font-weight: bold;
+      box-shadow: 0 0 10px var(--neon-pink);
+    }
+
+    .btn {
+      display:inline-block;
+      padding:10px 16px;
+      margin-top:10px;
+      border-radius:8px;
+      background: var(--neon-pink);
+      color:white;
+      font-weight:600;
+      text-decoration:none;
+      box-shadow:0 0 12px var(--neon-pink);
+      cursor: pointer;
+      border:none;
+    }
+
+    .popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    .popup.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .popup-content {
+      width: 85%;
+      max-width: 450px;
+      padding: 20px;
+      background: rgba(10,10,10,0.95);
+      border-radius: 15px;
+      position: relative;
+      border: 2px solid var(--neon-blue);
+      box-shadow: 0 0 25px var(--neon-blue);
+      color: white;
+    }
+
+    .popup-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 26px;
+      cursor: pointer;
+      color: var(--neon-blue);
+    }
+
+    .popup-content img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .social-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .social-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(0,0,0,0.6);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid var(--neon-blue);
+      box-shadow: 0 0 15px var(--neon-blue);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      width: 140px; 
+    }
+
+    .social-item:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 0 25px var(--neon-pink);
+      border-color: var(--neon-pink);
+    }
+
+    .social-item img {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 10px var(--neon-blue);
+    }
+
+    .section { display:none; }
+    .active{ display:block; }
+
+    .news-list {
+      text-align: left;
+      margin: 15px 0;
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+    .news-list li {
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .visitor-counter {
+      margin-top: 15px;
+      font-size: 14px;
+      color: var(--neon-blue);
+      text-shadow: 0 0 5px var(--neon-blue);
+      border: 1px solid var(--neon-blue);
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.3);
+    }
+
+    /* ======= SISTEMA DE COMENTARIOS ======= */
+    .comments-section {
+      margin-top: 50px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      border: 1px solid var(--neon-blue);
+    }
+    .comment-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+    .comment-input-group input, .comment-input-group textarea {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--neon-blue);
+      border-radius: 8px;
+      padding: 12px;
+      color: white;
+      font-family: inherit;
+    }
+    .comment-input-group textarea { min-height: 80px; resize: none; margin-bottom: 0; }
+    
+    .char-counter {
+      text-align: right;
+      font-size: 12px;
+      color: var(--neon-blue);
+      margin-top: -5px;
+      margin-bottom: 5px;
+      transition: color 0.3s;
+    }
+    .char-counter.limit {
+      color: var(--neon-pink);
+      font-weight: bold;
+    }
+
+    .comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    .comment-item {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid var(--neon-pink);
+      position: relative;
+    }
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+    }
+    .comment-user { color: var(--neon-blue); font-weight: bold; }
+    .comment-date { opacity: 0.6; font-size: 0.8em; }
+    .comment-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .btn-edit {
+      background: none; border: 1px solid var(--neon-blue); color: var(--neon-blue);
+      padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 12px;
+    }
+    .btn-delete {
+      background: none; border: 1px solid var(--neon-pink); color: var(--neon-pink);
+      padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 12px;
+    }
   </style>
 </head>
 
@@ -568,7 +1010,7 @@
           <div class="mod-card coming-soon-card">
             <div class="coming-soon-badge">PRÓXIMAMENTE</div>
             <img src="assets/images/mods/tales.png"> <h3>Vs. Herobrine Reborn Tales</h3>
-            <p style="font-size: 12px; color: var(--neon-pink);">Estado: 70% Completado</p>
+            <p style="font-size: 12px; color: var(--neon-pink);">Estado: 74% Completado</p>
           </div>
           <div class="mod-card coming-soon-card">
             <div class="coming-soon-badge">PRÓXIMAMENTE</div>
@@ -606,163 +1048,176 @@
       </section>
 
       <footer style="margin-top:40px; text-align:center; color:white;">
-        © <span id="year"></span> LaloCF | V2.2.1
+        © <span id="year"></span> LaloCF | V2.2.2
         <br>
-        <div class="visitor-counter">Visitas: <span id="count">...</span></div>
+        <div class="visitor-counter">Visitas: <span id="count">Habilitado</span></div>
       </footer>
     </div>
   </div>
 
-<script>
-const APP_VERSION = "v2.2.1"; 
-let editModeId = null;
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-if(!localStorage.getItem('fnf_user_key')) {
-    localStorage.setItem('fnf_user_key', 'user_' + Math.random().toString(36).substr(2, 9));
-}
-const MY_KEY = localStorage.getItem('fnf_user_key');
+    const firebaseConfig = {
+      apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
+      authDomain: "fnf-mobile-lalocf.firebaseapp.com",
+      databaseURL: "https://fnf-mobile-lalocf-default-rtdb.firebaseio.com",
+      projectId: "fnf-mobile-lalocf",
+      storageBucket: "fnf-mobile-lalocf.firebasestorage.app",
+      messagingSenderId: "407243542354",
+      appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
+    };
 
-window.addEventListener('load', () => {
-    const lastVersionSeen = localStorage.getItem('lastVersionSeen');
-    if (lastVersionSeen !== APP_VERSION) {
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const APP_VERSION = "v2.2.2";
+    let editModeId = null;
+
+    if(!localStorage.getItem('fnf_user_key')) {
+      localStorage.setItem('fnf_user_key', 'user_' + Math.random().toString(36).substr(2, 9));
+    }
+    const MY_KEY = localStorage.getItem('fnf_user_key');
+
+    // --- CARGA INICIAL ---
+    window.addEventListener('load', () => {
+      const lastVersionSeen = localStorage.getItem('lastVersionSeen');
+      if (lastVersionSeen !== APP_VERSION) {
         document.getElementById('update-popup').classList.add('show');
-    }
-    updateVisitorCount();
-    loadComments();
-    loadLikes();
-});
-
-/* --- FUNCION DEL CONTADOR DE CARACTERES --- */
-function updateCharCount() {
-    const textarea = document.getElementById('commentText');
-    const counter = document.getElementById('charCounter');
-    const length = textarea.value.length;
-    
-    counter.innerText = `${length} / 100`;
-    
-    if (length >= 100) {
-        counter.classList.add('limit');
-    } else {
-        counter.classList.remove('limit');
-    }
-}
-
-/* --- SISTEMA DE LIKES LOCALES --- */
-function loadLikes() {
-    const likes = JSON.parse(localStorage.getItem('fnf_likes') || '{}');
-    const userLikes = JSON.parse(localStorage.getItem('fnf_user_liked') || '[]');
-    
-    document.querySelectorAll('.like-container').forEach(container => {
-        const id = container.getAttribute('onclick').match(/'([^']+)'/)[1];
-        const countSpan = document.getElementById('count-' + id);
-        if(countSpan) countSpan.innerText = likes[id] || 0;
-        if(userLikes.includes(id)) container.classList.add('active');
+      }
+      loadGlobalLikes();
     });
-}
 
-function handleLike(id, element) {
-    let likes = JSON.parse(localStorage.getItem('fnf_likes') || '{}');
-    let userLikes = JSON.parse(localStorage.getItem('fnf_user_liked') || '[]');
-    
-    if(userLikes.includes(id)) {
-        likes[id] = (likes[id] || 1) - 1;
-        userLikes = userLikes.filter(item => item !== id);
-        element.classList.remove('active');
-    } else {
-        likes[id] = (likes[id] || 0) + 1;
-        userLikes.push(id);
-        element.classList.add('active');
+    // --- TEMA Y NAVEGACIÓN ---
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) { document.body.classList.toggle("light", savedTheme === "light"); }
+
+    window.toggleTheme = function() {
+      document.body.classList.toggle("light");
+      localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
     }
-    
-    localStorage.setItem('fnf_likes', JSON.stringify(likes));
-    localStorage.setItem('fnf_user_liked', JSON.stringify(userLikes));
-    document.getElementById('count-' + id).innerText = likes[id];
-}
 
-/* --- TEMA Y MENÚ --- */
-const savedTheme = localStorage.getItem("theme");
-if (savedTheme) { document.body.classList.toggle("light", savedTheme === "light"); }
+    window.toggleMenu = function() { document.getElementById("menuPopup").classList.toggle("show"); }
+    window.closeUpdatePopup = function() { 
+      document.getElementById('update-popup').classList.remove('show'); 
+      localStorage.setItem('lastVersionSeen', APP_VERSION); 
+    }
 
-function toggleTheme() {
-  document.body.classList.toggle("light");
-  localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
-}
+    window.selectSection = function(id) {
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      toggleMenu();
+    }
 
-function toggleMenu() { document.getElementById("menuPopup").classList.toggle("show"); }
-function closeUpdatePopup() { document.getElementById('update-popup').classList.remove('show'); localStorage.setItem('lastVersionSeen', APP_VERSION); }
+    // --- LIKES GLOBALES ---
+    function loadGlobalLikes() {
+      const likesRef = ref(db, 'likes');
+      onValue(likesRef, (snapshot) => {
+        const likesData = snapshot.val() || {};
+        const userLiked = JSON.parse(localStorage.getItem('fnf_user_liked') || '[]');
+        
+        document.querySelectorAll('.like-container').forEach(container => {
+          const id = container.getAttribute('onclick').match(/'([^']+)'/)[1];
+          const countSpan = document.getElementById('count-' + id);
+          if(countSpan) countSpan.innerText = likesData[id] || 0;
+          
+          if(userLiked.includes(id)) {
+            container.classList.add('active');
+          } else {
+            container.classList.remove('active');
+          }
+        });
+      });
+    }
 
-function selectSection(id) {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  toggleMenu();
-}
+    window.handleLike = function(id, element) {
+      const userLiked = JSON.parse(localStorage.getItem('fnf_user_liked') || '[]');
+      const isAdding = !userLiked.includes(id);
+      const itemRef = ref(db, 'likes/' + id);
 
-function updateVisitorCount() {
-    document.getElementById('count').innerText = "Habilitado";
-}
+      runTransaction(itemRef, (currentValue) => {
+        if (isAdding) {
+          return (currentValue || 0) + 1;
+        } else {
+          return (currentValue || 1) - 1;
+        }
+      }).then(() => {
+        if (isAdding) {
+          userLiked.push(id);
+        } else {
+          const index = userLiked.indexOf(id);
+          userLiked.splice(index, 1);
+        }
+        localStorage.setItem('fnf_user_liked', JSON.stringify(userLiked));
+      });
+    }
 
-function loadComments() {
-    const savedComments = JSON.parse(localStorage.getItem('fnf_comments') || '[]');
-    const list = document.getElementById('commentList');
-    list.innerHTML = savedComments.length ? '' : '<p style="text-align:center; opacity:0.5;">Aún no hay mensajes. ¡Sé el primero!</p>';
-    [...savedComments].reverse().forEach(c => {
-        const item = document.createElement('div');
-        item.className = 'comment-item';
-        const isOwner = c.ownerKey === MY_KEY;
-        const actionsHtml = isOwner ? `<div class="comment-actions"><button class="btn-edit" onclick="prepareEdit('${c.id}')">Editar</button><button class="btn-delete" onclick="deleteComment('${c.id}')">Eliminar</button></div>` : '';
-        item.innerHTML = `<div class="comment-header"><span class="comment-user">${c.user}</span><span class="comment-date">${c.date} ${c.edited ? '(editado)' : ''}</span></div><div class="comment-body">${c.text}</div>${actionsHtml}`;
-        list.appendChild(item);
+    // --- COMENTARIOS GLOBALES ---
+    const commentsRef = ref(db, 'comments');
+    onValue(commentsRef, (snapshot) => {
+      const list = document.getElementById('commentList');
+      list.innerHTML = '';
+      const data = snapshot.val();
+      if(data) {
+        const arr = Object.keys(data).map(k => ({id: k, ...data[k]}));
+        arr.reverse().forEach(c => {
+          const item = document.createElement('div');
+          item.className = 'comment-item';
+          const isOwner = c.ownerKey === MY_KEY;
+          const actions = isOwner ? `
+            <div class="comment-actions">
+              <button class="btn-edit" onclick="prepareEdit('${c.id}', '${c.user}', '${c.text.replace(/'/g, "\\'")}')">Editar</button>
+              <button class="btn-delete" onclick="deleteComment('${c.id}')">Eliminar</button>
+            </div>` : '';
+          item.innerHTML = `<div class="comment-header"><span class="comment-user">${c.user}</span><span class="comment-date">${c.date} ${c.edited ? '(editado)' : ''}</span></div><div class="comment-body">${c.text}</div>${actions}`;
+          list.appendChild(item);
+        });
+      } else {
+        list.innerHTML = '<p style="text-align:center; opacity:0.5;">Aún no hay mensajes. ¡Sé el primero!</p>';
+      }
     });
-}
 
-function addComment() {
-    const user = document.getElementById('userName').value.trim();
-    let text = document.getElementById('commentText').value.trim();
-    
-    if(!user || !text) return alert("Por favor, llena ambos campos.");
-    
-    if(text.length > 100) {
-        text = text.substring(0, 100);
-    }
-
-    let comments = JSON.parse(localStorage.getItem('fnf_comments') || '[]');
-    if(editModeId) {
-        const idx = comments.findIndex(c => c.id === editModeId);
-        if(idx !== -1) { comments[idx].text = text; comments[idx].user = user; comments[idx].edited = true; }
+    window.addComment = function() {
+      const user = document.getElementById('userName').value.trim();
+      const text = document.getElementById('commentText').value.trim();
+      if(!user || !text) return alert("Por favor, llena ambos campos.");
+      
+      if(editModeId) {
+        update(ref(db, 'comments/' + editModeId), { user, text, edited: true });
         editModeId = null;
         document.getElementById('commentBtn').innerText = "Publicar Comentario";
-    } else {
-        comments.push({ id: 'id_' + Date.now(), ownerKey: MY_KEY, user: user, text: text, date: new Date().toLocaleString(), edited: false });
+      } else {
+        push(commentsRef, { ownerKey: MY_KEY, user, text, date: new Date().toLocaleString(), edited: false });
+      }
+      document.getElementById('userName').value = '';
+      document.getElementById('commentText').value = '';
+      updateCharCount();
     }
-    localStorage.setItem('fnf_comments', JSON.stringify(comments));
-    document.getElementById('userName').value = ''; 
-    document.getElementById('commentText').value = '';
-    updateCharCount(); // Reiniciar contador visual
-    loadComments();
-}
 
-function prepareEdit(id) {
-    const comments = JSON.parse(localStorage.getItem('fnf_comments') || '[]');
-    const comment = comments.find(c => c.id === id);
-    if(comment) {
-        document.getElementById('userName').value = comment.user;
-        document.getElementById('commentText').value = comment.text;
-        document.getElementById('commentBtn').innerText = "Guardar Cambios";
-        editModeId = id;
-        updateCharCount(); // Actualizar contador al editar
-        document.getElementById('comments-area').scrollIntoView({behavior: 'smooth'});
+    window.prepareEdit = function(id, user, text) {
+      document.getElementById('userName').value = user;
+      document.getElementById('commentText').value = text;
+      document.getElementById('commentBtn').innerText = "Guardar Cambios";
+      editModeId = id;
+      updateCharCount();
+      document.getElementById('comments-area').scrollIntoView({behavior: 'smooth'});
     }
-}
 
-function deleteComment(id) {
-    if(!confirm("¿Seguro que quieres borrar este comentario?")) return;
-    let comments = JSON.parse(localStorage.getItem('fnf_comments') || '[]');
-    comments = comments.filter(c => c.id !== id);
-    localStorage.setItem('fnf_comments', JSON.stringify(comments));
-    loadComments();
-}
+    window.deleteComment = function(id) {
+      if(confirm("¿Borrar comentario?")) remove(ref(db, 'comments/' + id));
+    }
 
-const MOD_DATA = {
+    window.updateCharCount = function() {
+      const textarea = document.getElementById('commentText');
+      const counter = document.getElementById('charCounter');
+      const length = textarea.value.length;
+      counter.innerText = `${length} / 100`;
+      length >= 100 ? counter.classList.add('limit') : counter.classList.remove('limit');
+    }
+
+    // --- DATA Y POPUPS (Igual a tu original) ---
+    const MOD_DATA = {
   mod1: {
     img: "assets/images/mods/logojeffy.jpeg",
     title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
@@ -814,20 +1269,7 @@ const MOD_DATA = {
   }
 };
 
-function openModInfo(id) {
-  const data = MOD_DATA[id];
-  document.getElementById("popup-img").src = data.img;
-  document.getElementById("popup-title").innerText = data.title;
-  document.getElementById("popup-desc").innerText = data.desc;
-  document.getElementById("popup-version").innerText = data.version;
-  let html = "";
-  data.downloads.forEach(d => { html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" download>${d.name}</a>`; });
-  document.getElementById("popup-downloads").innerHTML = html;
-  document.getElementById("mod-popup").classList.add("show");
-}
-function closeModInfo() { document.getElementById("mod-popup").classList.remove("show"); }
-
-const APK_DATA = {
+    const APK_DATA = {
   apk1: {
     img: "assets/images/logopsychengine.png",
     title: "Psych Engine",
@@ -870,23 +1312,37 @@ const APK_DATA = {
   }
 };
 
-function openApkInfo(id) {
-  const data = APK_DATA[id];
-  document.getElementById("apk-img").src = data.img;
-  document.getElementById("apk-title").innerText = data.title;
-  document.getElementById("apk-desc").innerText = data.desc;
-  document.getElementById("apk-version").innerText = data.version;
-  let html = "";
-  data.downloads.forEach(d => { html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" download>${d.name}</a>`; });
-  document.getElementById("apk-downloads").innerHTML = html;
-  document.getElementById("apk-popup").classList.add("show");
-}
-function closeApkInfo() { document.getElementById("apk-popup").classList.remove("show"); }
+    window.openModInfo = function(id) {
+      const data = MOD_DATA[id];
+      document.getElementById("popup-img").src = data.img;
+      document.getElementById("popup-title").innerText = data.title;
+      document.getElementById("popup-desc").innerText = data.desc;
+      document.getElementById("popup-version").innerText = data.version;
+      let html = "";
+      data.downloads.forEach(d => { html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" target="_blank">${d.name}</a>`; });
+      document.getElementById("popup-downloads").innerHTML = html;
+      document.getElementById("mod-popup").classList.add("show");
+    }
+    window.closeModInfo = function() { document.getElementById("mod-popup").classList.remove("show"); }
 
-document.getElementById("year").textContent = new Date().getFullYear();
-</script>
+    window.openApkInfo = function(id) {
+      const data = APK_DATA[id];
+      document.getElementById("apk-img").src = data.img;
+      document.getElementById("apk-title").innerText = data.title;
+      document.getElementById("apk-desc").innerText = data.desc;
+      document.getElementById("apk-version").innerText = data.version;
+      let html = "";
+      data.downloads.forEach(d => { html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" target="_blank">${d.name}</a>`; });
+      document.getElementById("apk-downloads").innerHTML = html;
+      document.getElementById("apk-popup").classList.add("show");
+    }
+    window.closeApkInfo = function() { document.getElementById("apk-popup").classList.remove("show"); }
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
+
 
 
 
