@@ -445,15 +445,6 @@
       padding: 4px 8px; border-radius: 5px; cursor: pointer; font-size: 12px;
     }
 
-    /* BOTÓN ADMIN */
-    #btnDeleteAll {
-      display: none;
-      background: linear-gradient(to right, #ff416c, #ff4b2b);
-      margin-bottom: 20px;
-      width: 100%;
-      border: none;
-    }
-
   </style>
 </head>
 
@@ -470,7 +461,7 @@
         <li>📌 Botón de tema corregido y mejorado.</li>
         <li>🆕 Apartado de Próximos Lanzamientos en Mods.</li>
         <li>🆕 Hay tres Proximos Lanzamientos.</li>
-        <li>🆕 Nuevo apartado de Comunidad, en donde podras enviar comentarios.</li>
+        <li>🆕 Nuevo apartado de Comunidad, en donde podras enviar comentarios. (Estado: Beta)</li>
         <li>🛠️ Corrección de errores menores y mejoras de rendimiento.</li>
       </ul>
       <button class="btn" onclick="closeUpdatePopup()" style="width: 100%; padding: 15px; font-size: 18px;">¡Entendido!</button>
@@ -482,7 +473,7 @@
       <h2>Menú</h2>
       <div class="menu-option" onclick="selectSection('apks')">Bases</div>
       <div class="menu-option" onclick="selectSection('mods')">MODs</div>
-      <div class="menu-option" onclick="selectSection('comments-area')">Comunidad</div>
+      <div class="menu-option" onclick="selectSection('comments-area')">Comunidad (Beta)</div>
       <div class="menu-option" onclick="selectSection('contact')">Contacto</div>
       <div id="closeMenuPopup" onclick="toggleMenu()">✖</div>
     </div>
@@ -541,7 +532,12 @@
             </div>
             <h3>VS Jeffy V3 (BABY BF VS BABY PICO)</h3><button class="btn" onclick="openModInfo('mod1')">Más información</button>
           </div>
-
+          <div class="mod-card">
+            <div class="like-container" onclick="handleLike('mod2', this)">
+                <span class="like-icon">❤</span> <span class="like-count" id="count-mod2">0</span>
+            </div>
+            <h3>VS Nusky</h3><button class="btn" onclick="openModInfo('mod2')">Más información</button>
+          </div>
           <div class="mod-card">
             <div class="like-container" onclick="handleLike('mod3', this)">
                 <span class="like-icon">❤</span> <span class="like-count" id="count-mod3">0</span>
@@ -576,7 +572,7 @@
           </div>
           <div class="mod-card coming-soon-card">
             <div class="coming-soon-badge">PRÓXIMAMENTE</div>
-            <img src="assets/images/mods/over.png"> <h3>FCR: Overwritten</h3>
+            <img src="assets/images/mods/over.jpeg"> <h3>FCR: Overwritten</h3>
             <p style="font-size: 12px; color: var(--neon-pink);">Estado: En desarrollo...</p>
           </div>
         </div>
@@ -588,8 +584,6 @@
       <section id="comments-area" class="section">
         <h2 class="glow">Caja de Comentarios</h2>
         <div class="comments-section">
-          <button id="btnDeleteAll" class="btn" onclick="deleteAllComments()">⚠️ ELIMINAR TODOS LOS MENSAJES ⚠️</button>
-
           <div class="comment-input-group">
             <input type="text" id="userName" placeholder="Tu apodo (ej: LaloCF)*">
             <textarea id="commentText" placeholder="Escribe tu mensaje... (Máx 100 caracteres)*" maxlength="100" oninput="updateCharCount()"></textarea>
@@ -612,7 +606,7 @@
       </section>
 
       <footer style="margin-top:40px; text-align:center; color:white;">
-        © <span id="year"></span> LaloCF | V2.2.0
+        © <span id="year"></span> LaloCF | V2.2.1
         <br>
         <div class="visitor-counter">Visitas: <span id="count">...</span></div>
       </footer>
@@ -620,49 +614,46 @@
   </div>
 
 <script>
-const APP_VERSION = "v2.2.0"; 
+const APP_VERSION = "v2.2.1"; 
 let editModeId = null;
 
-// LÓGICA DE KEY
-// 1. Define tu clave secreta aquí (nadie debe saberla)
-const MASTER_KEY = "user_6v6rmccb5"; 
-
-// 2. Si el navegador no tiene una llave, le asignamos una de usuario normal
 if(!localStorage.getItem('fnf_user_key')) {
     localStorage.setItem('fnf_user_key', 'user_' + Math.random().toString(36).substr(2, 9));
 }
-
-// 3. Obtenemos la llave que tiene este navegador actualmente
 const MY_KEY = localStorage.getItem('fnf_user_key');
 
-// 4. Esta función decide si mostrar el botón rojo o no
-function checkAdminStatus() {
-    const btn = document.getElementById('btnDeleteAll');
-    if (MY_KEY === MASTER_KEY) {
-        btn.style.display = 'block'; // Te lo muestra solo si eres tú
-    } else {
-        btn.style.display = 'none';  // Se lo oculta a todos los demás
+window.addEventListener('load', () => {
+    const lastVersionSeen = localStorage.getItem('lastVersionSeen');
+    if (lastVersionSeen !== APP_VERSION) {
+        document.getElementById('update-popup').classList.add('show');
     }
-}
+    updateVisitorCount();
+    loadComments();
+    loadLikes();
+});
 
+/* --- FUNCION DEL CONTADOR DE CARACTERES --- */
 function updateCharCount() {
     const textarea = document.getElementById('commentText');
     const counter = document.getElementById('charCounter');
     const length = textarea.value.length;
+    
     counter.innerText = `${length} / 100`;
-    if (length >= 100) counter.classList.add('limit');
-    else counter.classList.remove('limit');
+    
+    if (length >= 100) {
+        counter.classList.add('limit');
+    } else {
+        counter.classList.remove('limit');
+    }
 }
 
+/* --- SISTEMA DE LIKES LOCALES --- */
 function loadLikes() {
     const likes = JSON.parse(localStorage.getItem('fnf_likes') || '{}');
     const userLikes = JSON.parse(localStorage.getItem('fnf_user_liked') || '[]');
+    
     document.querySelectorAll('.like-container').forEach(container => {
-        const onclickAttr = container.getAttribute('onclick');
-        if(!onclickAttr) return;
-        const match = onclickAttr.match(/'([^']+)'/);
-        if(!match) return;
-        const id = match[1];
+        const id = container.getAttribute('onclick').match(/'([^']+)'/)[1];
         const countSpan = document.getElementById('count-' + id);
         if(countSpan) countSpan.innerText = likes[id] || 0;
         if(userLikes.includes(id)) container.classList.add('active');
@@ -672,8 +663,9 @@ function loadLikes() {
 function handleLike(id, element) {
     let likes = JSON.parse(localStorage.getItem('fnf_likes') || '{}');
     let userLikes = JSON.parse(localStorage.getItem('fnf_user_liked') || '[]');
+    
     if(userLikes.includes(id)) {
-        likes[id] = Math.max(0, (likes[id] || 1) - 1);
+        likes[id] = (likes[id] || 1) - 1;
         userLikes = userLikes.filter(item => item !== id);
         element.classList.remove('active');
     } else {
@@ -681,10 +673,15 @@ function handleLike(id, element) {
         userLikes.push(id);
         element.classList.add('active');
     }
+    
     localStorage.setItem('fnf_likes', JSON.stringify(likes));
     localStorage.setItem('fnf_user_liked', JSON.stringify(userLikes));
     document.getElementById('count-' + id).innerText = likes[id];
 }
+
+/* --- TEMA Y MENÚ --- */
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme) { document.body.classList.toggle("light", savedTheme === "light"); }
 
 function toggleTheme() {
   document.body.classList.toggle("light");
@@ -700,7 +697,9 @@ function selectSection(id) {
   toggleMenu();
 }
 
-function updateVisitorCount() { document.getElementById('count').innerText = "Habilitado"; }
+function updateVisitorCount() {
+    document.getElementById('count').innerText = "Habilitado";
+}
 
 function loadComments() {
     const savedComments = JSON.parse(localStorage.getItem('fnf_comments') || '[]');
@@ -719,7 +718,13 @@ function loadComments() {
 function addComment() {
     const user = document.getElementById('userName').value.trim();
     let text = document.getElementById('commentText').value.trim();
+    
     if(!user || !text) return alert("Por favor, llena ambos campos.");
+    
+    if(text.length > 100) {
+        text = text.substring(0, 100);
+    }
+
     let comments = JSON.parse(localStorage.getItem('fnf_comments') || '[]');
     if(editModeId) {
         const idx = comments.findIndex(c => c.id === editModeId);
@@ -732,7 +737,8 @@ function addComment() {
     localStorage.setItem('fnf_comments', JSON.stringify(comments));
     document.getElementById('userName').value = ''; 
     document.getElementById('commentText').value = '';
-    updateCharCount(); loadComments();
+    updateCharCount(); // Reiniciar contador visual
+    loadComments();
 }
 
 function prepareEdit(id) {
@@ -743,7 +749,7 @@ function prepareEdit(id) {
         document.getElementById('commentText').value = comment.text;
         document.getElementById('commentBtn').innerText = "Guardar Cambios";
         editModeId = id;
-        updateCharCount();
+        updateCharCount(); // Actualizar contador al editar
         document.getElementById('comments-area').scrollIntoView({behavior: 'smooth'});
     }
 }
@@ -756,20 +762,19 @@ function deleteComment(id) {
     loadComments();
 }
 
-// DATOS DE MODS Y BASES
 const MOD_DATA = {
   mod1: {
     img: "assets/images/mods/logojeffy.jpeg",
     title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
     desc: "Friday Night Funkin' FNF' Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android).",
-    version: "1.0",
+    version: "v1.0",
     downloads: [{ name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }]
   },
   mod2: {
     img: "assets/images/mods/logonusky.jpeg",
     title: "VS Nusky",
     desc: "Friday Night Funkin' FNF' Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android).",
-    version: "1.0",
+    version: "v1.0",
     downloads: [
       { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/369981" }
@@ -779,7 +784,7 @@ const MOD_DATA = {
     img: "assets/images/mods/chritmas.jpeg",
     title: "Cocoa Noimix",
     desc: "Friday Night Funkin' FNF' Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "1.0",
+    version: "v1.0",
     downloads: [
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/643242" },
       { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1wnnGhworUMdReUrlEMMh5C4in4OoHHrU&export=download" },
@@ -791,7 +796,7 @@ const MOD_DATA = {
     img: "assets/images/mods/metal.png",
     title: "Vs Metal Pipe V2",
     desc: "Friday Night Funkin' FNF' Vs Metal Pipe V2 Port Psych Engine Optimizado Para (Pc/Android) y en especial iOS.",
-    version: "1.0",
+    version: "v1.0",
     downloads: [
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/441630"},
       { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1g5liWScsGSSd_FCmDtLEOVPQSQtp6E8B&export=download"}
@@ -809,12 +814,25 @@ const MOD_DATA = {
   }
 };
 
+function openModInfo(id) {
+  const data = MOD_DATA[id];
+  document.getElementById("popup-img").src = data.img;
+  document.getElementById("popup-title").innerText = data.title;
+  document.getElementById("popup-desc").innerText = data.desc;
+  document.getElementById("popup-version").innerText = data.version;
+  let html = "";
+  data.downloads.forEach(d => { html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" download>${d.name}</a>`; });
+  document.getElementById("popup-downloads").innerHTML = html;
+  document.getElementById("mod-popup").classList.add("show");
+}
+function closeModInfo() { document.getElementById("mod-popup").classList.remove("show"); }
+
 const APK_DATA = {
   apk1: {
     img: "assets/images/logopsychengine.png",
     title: "Psych Engine",
     desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual. También busca ser una alternativa más sencilla para programadores principiantes.",
-    version: "1.0.4",
+    version: "v1.0.4",
     downloads: [
       { name: "Descarga Windows64 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
       { name: "Descarga Windows32 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
@@ -828,7 +846,7 @@ const APK_DATA = {
     img: "assets/images/logopsychonline.png",
     title: "Psych Online",
     desc: "Mod de Psych Engine con funciones en línea.",
-    version: "0.13.2 Bugfix",
+    version: "v0.13.2 Bugfix",
     downloads: [
       { name: "Descarga Windows (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/windowsBuild.zip" },
       { name: "Descarga Linux (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/linuxBuild.zip" },
@@ -841,7 +859,7 @@ const APK_DATA = {
     img: "assets/images/logocodename.png",
     title: "CodeName Engine",
     desc: "Codename Engine es una bifurcación de Friday Night Funkin' con un enfoque en codificación suave y modding.",
-    version: "1.0.1",
+    version: "v1.0.1",
     downloads: [
       { name: "Descarga Windows (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
       { name: "Descarga Linux (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
@@ -852,55 +870,24 @@ const APK_DATA = {
   }
 };
 
-// FUNCIONES DE POPUP COMPLETADAS
-function openModInfo(id) {
-  const data = MOD_DATA[id];
-  document.getElementById("popup-img").src = data.img;
-  document.getElementById("popup-title").innerText = data.title;
-  document.getElementById("popup-desc").innerText = data.desc;
-  document.getElementById("popup-version").innerText = "Versión: " + data.version;
-  const container = document.getElementById("popup-downloads");
-  container.innerHTML = "";
-  data.downloads.forEach(d => {
-    const a = document.createElement("a");
-    a.className = "btn";
-    a.href = d.link;
-    a.target = "_blank";
-    a.innerText = d.name;
-    a.style.display = "block";
-    a.style.marginBottom = "5px";
-    container.appendChild(a);
-  });
-  document.getElementById("mod-popup").classList.add("show");
-}
-
-function closeModInfo() { document.getElementById("mod-popup").classList.remove("show"); }
-
 function openApkInfo(id) {
   const data = APK_DATA[id];
   document.getElementById("apk-img").src = data.img;
   document.getElementById("apk-title").innerText = data.title;
   document.getElementById("apk-desc").innerText = data.desc;
-  document.getElementById("apk-version").innerText = "Versión: " + data.version;
-  const container = document.getElementById("apk-downloads");
-  container.innerHTML = "";
-  data.downloads.forEach(d => {
-    const a = document.createElement("a");
-    a.className = "btn";
-    a.href = d.link;
-    a.target = "_blank";
-    a.innerText = d.name;
-    a.style.display = "block";
-    a.style.marginBottom = "5px";
-    container.appendChild(a);
-  });
+  document.getElementById("apk-version").innerText = data.version;
+  let html = "";
+  data.downloads.forEach(d => { html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" download>${d.name}</a>`; });
+  document.getElementById("apk-downloads").innerHTML = html;
   document.getElementById("apk-popup").classList.add("show");
 }
-
 function closeApkInfo() { document.getElementById("apk-popup").classList.remove("show"); }
+
+document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
+
 
 
 
