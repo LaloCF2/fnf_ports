@@ -814,7 +814,7 @@ const APK_DATA = {
   apk1: {
     img: "assets/images/logopsychengine.png",
     title: "Psych Engine",
-    desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual. También busca ser una alternativa más sencilla para programadores principiantes.",
+    desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual.",
     version: "v1.0.4",
     downloads: [
       { name: "Descarga Windows64 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
@@ -849,7 +849,6 @@ const APK_DATA = {
       { name: "Descarga Mac (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"},
       { name: "Descarga Android (Github)", link: "https://github.com/CPsP-Team/CodenameEngine-Mobile/releases/download/v1.0.1-mobile/CodenameEngineAndroid.apk"},
       { name: "Descarga iOS (Github)", link: "https://github.com/CPsP-Team/CodenameEngine-Mobile/releases/download/v1.0.1-mobile/CodenameEngineiOS.ipa" }
-
     ]
   }
 };
@@ -859,12 +858,22 @@ function openModInfo(id) {
   document.getElementById("popup-img").src = data.img;
   document.getElementById("popup-title").innerText = data.title;
   document.getElementById("popup-desc").innerText = data.desc;
-  document.getElementById("popup-version").innerText = data.version;
-  let html = "";
-  data.downloads.forEach(d => { html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" target="_blank">${d.name}</a>`; });
-  document.getElementById("popup-downloads").innerHTML = html;
+  document.getElementById("popup-version").innerText = "Versión: " + data.version;
+  const container = document.getElementById("popup-downloads");
+  container.innerHTML = "";
+  data.downloads.forEach(d => {
+    const a = document.createElement("a");
+    a.className = "btn";
+    a.href = d.link;
+    a.target = "_blank";
+    a.innerText = d.name;
+    a.style.display = "block";
+    a.style.marginBottom = "5px";
+    container.appendChild(a);
+  });
   document.getElementById("mod-popup").classList.add("show");
 }
+
 function closeModInfo() { document.getElementById("mod-popup").classList.remove("show"); }
 
 function openApkInfo(id) {
@@ -872,19 +881,27 @@ function openApkInfo(id) {
   document.getElementById("apk-img").src = data.img;
   document.getElementById("apk-title").innerText = data.title;
   document.getElementById("apk-desc").innerText = data.desc;
-  document.getElementById("apk-version").innerText = data.version;
-  let html = "";
-  data.downloads.forEach(d => { html += `<a class="btn" style="display:block; margin-top:10px;" href="${d.link}" target="_blank">${d.name}</a>`; });
-  document.getElementById("apk-downloads").innerHTML = html;
+  document.getElementById("apk-version").innerText = "Versión: " + data.version;
+  const container = document.getElementById("apk-downloads");
+  container.innerHTML = "";
+  data.downloads.forEach(d => {
+    const a = document.createElement("a");
+    a.className = "btn";
+    a.href = d.link;
+    a.target = "_blank";
+    a.innerText = d.name;
+    a.style.display = "block";
+    a.style.marginBottom = "5px";
+    container.appendChild(a);
+  });
   document.getElementById("apk-popup").classList.add("show");
 }
-function closeApkInfo() { document.getElementById("apk-popup").classList.remove("show"); }
 
-const savedTheme = localStorage.getItem("theme");
-if (savedTheme === "light") document.body.classList.add("light");
+function closeApkInfo() { document.getElementById("apk-popup").classList.remove("show"); }
 </script>
 </body>
 </html>
+
 
 
 
