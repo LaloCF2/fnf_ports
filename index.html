@@ -623,37 +623,25 @@
 const APP_VERSION = "v2.2.0"; 
 let editModeId = null;
 
+// LÓGICA DE KEY
+// 1. Define tu clave secreta aquí (nadie debe saberla)
+const MASTER_KEY = "user_6v6rmccb5"; 
+
+// 2. Si el navegador no tiene una llave, le asignamos una de usuario normal
 if(!localStorage.getItem('fnf_user_key')) {
     localStorage.setItem('fnf_user_key', 'user_' + Math.random().toString(36).substr(2, 9));
 }
+
+// 3. Obtenemos la llave que tiene este navegador actualmente
 const MY_KEY = localStorage.getItem('fnf_user_key');
-const OWNER_KEY = localStorage.getItem('fnf_user_key'); // Se asocia al primer navegador que lo abre
 
-window.addEventListener('load', () => {
-    const lastVersionSeen = localStorage.getItem('lastVersionSeen');
-    if (lastVersionSeen !== APP_VERSION) {
-        document.getElementById('update-popup').classList.add('show');
-    }
-    document.getElementById('year').innerText = new Date().getFullYear();
-    updateVisitorCount();
-    loadComments();
-    loadLikes();
-    checkAdminStatus();
-});
-
+// 4. Esta función decide si mostrar el botón rojo o no
 function checkAdminStatus() {
     const btn = document.getElementById('btnDeleteAll');
-    if (MY_KEY === OWNER_KEY) {
-        btn.style.display = 'block';
-    }
-}
-
-function deleteAllComments() {
-    if (MY_KEY !== OWNER_KEY) return;
-    if (confirm("¿ESTÁS SEGURO? Esto borrará absolutamente todos los mensajes de la comunidad.")) {
-        localStorage.setItem('fnf_comments', JSON.stringify([]));
-        loadComments();
-        alert("Todos los mensajes han sido eliminados.");
+    if (MY_KEY === MASTER_KEY) {
+        btn.style.display = 'block'; // Te lo muestra solo si eres tú
+    } else {
+        btn.style.display = 'none';  // Se lo oculta a todos los demás
     }
 }
 
@@ -768,19 +756,30 @@ function deleteComment(id) {
     loadComments();
 }
 
+// DATOS DE MODS Y BASES
 const MOD_DATA = {
   mod1: {
     img: "assets/images/mods/logojeffy.jpeg",
     title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
     desc: "Friday Night Funkin' FNF' Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android).",
-    version: "v1.0",
+    version: "1.0",
     downloads: [{ name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }]
+  },
+  mod2: {
+    img: "assets/images/mods/logonusky.jpeg",
+    title: "VS Nusky",
+    desc: "Friday Night Funkin' FNF' Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android).",
+    version: "1.0",
+    downloads: [
+      { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
+      { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/369981" }
+    ]
   },
   mod3: {
     img: "assets/images/mods/chritmas.jpeg",
     title: "Cocoa Noimix",
     desc: "Friday Night Funkin' FNF' Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "v1.0",
+    version: "1.0",
     downloads: [
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/643242" },
       { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1wnnGhworUMdReUrlEMMh5C4in4OoHHrU&export=download" },
@@ -792,7 +791,7 @@ const MOD_DATA = {
     img: "assets/images/mods/metal.png",
     title: "Vs Metal Pipe V2",
     desc: "Friday Night Funkin' FNF' Vs Metal Pipe V2 Port Psych Engine Optimizado Para (Pc/Android) y en especial iOS.",
-    version: "v1.0",
+    version: "1.0",
     downloads: [
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/441630"},
       { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1g5liWScsGSSd_FCmDtLEOVPQSQtp6E8B&export=download"}
@@ -814,8 +813,8 @@ const APK_DATA = {
   apk1: {
     img: "assets/images/logopsychengine.png",
     title: "Psych Engine",
-    desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual.",
-    version: "v1.0.4",
+    desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual. También busca ser una alternativa más sencilla para programadores principiantes.",
+    version: "1.0.4",
     downloads: [
       { name: "Descarga Windows64 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
       { name: "Descarga Windows32 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
@@ -828,8 +827,8 @@ const APK_DATA = {
   apk2: {
     img: "assets/images/logopsychonline.png",
     title: "Psych Online",
-    desc: "Versión de Psych Engine con soporte para multijugador online.",
-    version: "v0.13.2",
+    desc: "Mod de Psych Engine con funciones en línea.",
+    version: "0.13.2 Bugfix",
     downloads: [
       { name: "Descarga Windows (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/windowsBuild.zip" },
       { name: "Descarga Linux (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/linuxBuild.zip" },
@@ -839,10 +838,10 @@ const APK_DATA = {
     ]
   },
   apk3: {
-    img: "assets/images/logocode.png",
+    img: "assets/images/logocodename.png",
     title: "CodeName Engine",
     desc: "Codename Engine es una bifurcación de Friday Night Funkin' con un enfoque en codificación suave y modding.",
-    version: "v1.0",
+    version: "1.0.1",
     downloads: [
       { name: "Descarga Windows (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
       { name: "Descarga Linux (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
@@ -853,6 +852,7 @@ const APK_DATA = {
   }
 };
 
+// FUNCIONES DE POPUP COMPLETADAS
 function openModInfo(id) {
   const data = MOD_DATA[id];
   document.getElementById("popup-img").src = data.img;
@@ -901,6 +901,7 @@ function closeApkInfo() { document.getElementById("apk-popup").classList.remove(
 </script>
 </body>
 </html>
+
 
 
 
