@@ -232,9 +232,6 @@
       <p>Que hay de nuevo en esta versión:</p>
       <ul class="news-list">
         <li>🆕 Nuevo Port Añadido</li>
-        <li>🆕 Nueva base añadida.</li>
-        <li>🆕 Nuevo diseño en el apartado de comunidad. (Estado: Beta)</li>
-        <li>🆕 Nueva mecanica para simular un Inicio de Sesión</li>
         <li>🛠️ Corrección de errores menores y mejoras.</li>
       </ul>
       <button class="btn" onclick="closeUpdatePopup()" style="width: 100%; padding: 15px; font-size: 13px;">¡Entendido!</button>
@@ -310,7 +307,8 @@
         <div class="mod-card"><div class="like-container" id="like-mod3" onclick="handleLike('mod3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod3">0</span></div><h3>Cocoa Noimix</h3><button class="btn" onclick="openModInfo('mod3')">Más información</button></div>
         <div class="mod-card"><div class="like-container" id="like-mod4" onclick="handleLike('mod4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod4">0</span></div><h3>Vs Metal Pipe V2</h3><button class="btn" onclick="openModInfo('mod4')">Más información</button></div>
         <div class="mod-card"><div class="like-container" id="like-mod5" onclick="handleLike('mod5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod5">0</span></div><h3>Rolling Girl</h3><button class="btn" onclick="openModInfo('mod5')">Más información</button></div>
-        <div class="mod-card"><div class="like-container" id="like-mod6" onclick="handleLike('mod6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod6">0</span></div><h3>Herobrine Reborn Tales (NEW)</h3><button class="btn" onclick="openModInfo('mod6')">Más información</button></div>
+        <div class="mod-card"><div class="like-container" id="like-mod6" onclick="handleLike('mod6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod6">0</span></div><h3>Herobrine Reborn Tales</h3><button class="btn" onclick="openModInfo('mod6')">Más información</button></div>
+        <div class="mod-card"><div class="like-container" id="like-mod7" onclick="handleLike('mod7', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod7">0</span></div><h3>Vs. TheOdd1sOut ONESHOT (NEW)</h3><button class="btn" onclick="openModInfo('mod7')">Más información</button></div>
       </div>
       
       <h2 class="glow" style="margin-top: 50px;">Próximos Lanzamientos ⏳</h2>
@@ -350,7 +348,7 @@
     </section>
 
     <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V2.3.0 <br>
+      © <span id="year"></span> LaloCF | V2.3.1 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>
@@ -374,7 +372,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v2.3.0";
+    const APP_VERSION = "v2.3.1";
     let isSuperUser = localStorage.getItem('superUser') === 'true';
 
     async function checkBanStatus() {
@@ -615,6 +613,17 @@
     downloads: [
       { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1bPmKg62b6r5xiEOI5ZVFNHZqU0Mp0PLY/view" }
     ]
+  },
+  mod7: {
+    img: "assets/images/mods/odd.webp",
+    title: "Vs. TheOdd1sOut ONESHOT",
+    desc: "Friday Night Funkin' FNF' Vs. TheOdd1sOut ONESHOT Port Psych Engine Para (Pc/Android/iOS).",
+    version: "Engine v1.0.4",
+    downloads: [
+      { name: "Descarga Directa ES (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1rBL-hdK-_jeq-bByvK2xUfDu23D4QVEY&export=download" },
+      { name: "Descarga Directa EU (Drive)", limk: "https://drive.usercontent.google.com/u/0/uc?id=12gPg9wTnUa_JUSVj1IgUE7ETJieHNPIl&export=download" },
+      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/498584" }
+    ]
   }
 };
 
@@ -696,6 +705,7 @@
   </script>
 </body>
 </html>
+
 
 
 
