@@ -26,7 +26,7 @@
       --neon-green: #00ff41;
       --neon-yellow: #ffea00;
       --neon-red: #ff003c;
-      --neon-gold: #ffd700; /* Para fijados */
+      --neon-gold: #ffd700;
       --bg: linear-gradient(45deg, #0f0f0f, #000428, #1a1a1a);
     }
 
@@ -84,16 +84,39 @@
     }
 
     .admin-name {
-      color: #b9f2ff !important;
-      text-shadow: 0 0 5px #fff, 0 0 10px #00eaff, 0 0 20px #00eaff !important;
+      color: #00eaff !important;
       font-weight: bold;
-      animation: sparkle 1s infinite alternate;
+      position: relative;
+      display: inline-block;
       cursor: pointer;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
     }
-    @keyframes sparkle {
-      0% { filter: brightness(1) drop-shadow(0 0 2px #fff); }
-      100% { filter: brightness(1.5) drop-shadow(0 0 10px #00eaff); }
+
+    .admin-name::after {
+      content: "✦";
+      color: #fff;
+      position: absolute;
+      top: -6px;
+      right: -10px;
+      font-size: 10px;
+      text-shadow: 0 0 4px #00eaff;
+      animation: tinyStar 1.5s infinite alternate;
     }
+
+    .admin-name::before {
+      content: "✨";
+      position: absolute;
+      bottom: -2px;
+      left: -12px;
+      font-size: 9px;
+      animation: tinyStar 2s infinite alternate-reverse;
+    }
+
+    @keyframes tinyStar {
+      0% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
+      100% { opacity: 1; transform: scale(1.3) rotate(45deg); }
+    }
+    /* ------------------------------------------ */
 
     .theme-btn {
       font-size:30px; cursor:pointer; animation: spinGlow 6s linear infinite; filter: drop-shadow(0 0 6px var(--neon-blue));
@@ -127,15 +150,13 @@
     .like-container.active .like-icon { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
     .like-count { font-size: 14px; color: white; }
 
-    /* CONTADOR DESCARGAS EN CARD */
     .dl-counter {
-      position: absolute; top: 10px; left: 80px; /* Al lado del like */
+      position: absolute; top: 10px; left: 80px;
       background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 20px;
       display: flex; align-items: center; gap: 5px; border: 1px solid var(--neon-blue);
       font-size: 12px; color: #ccc; pointer-events: none;
     }
 
-    /* ETIQUETAS DE GAMA */
     .gama-badge {
       position: absolute; top: 10px; right: 10px;
       padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;
@@ -175,22 +196,10 @@
 
     .yt-comment-container { display: flex; gap: 12px; margin-bottom: 20px; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; text-align: left; }
     
-    /* ESTILOS COMENTARIO FIJADO */
-    .yt-comment-container.pinned {
-      border: 1px solid var(--neon-gold);
-      background: rgba(255, 215, 0, 0.05);
-      border-radius: 12px; padding: 10px;
-    }
-    .pinned-badge {
-      display: inline-block; background: var(--neon-gold); color: black;
-      font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 5px;
-    }
+    .yt-comment-container.pinned { border: 1px solid var(--neon-gold); background: rgba(255, 215, 0, 0.05); border-radius: 12px; padding: 10px; }
+    .pinned-badge { display: inline-block; background: var(--neon-gold); color: black; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-bottom: 5px; }
 
-    /* ESTILO VERIFICADO */
-    .verified-icon {
-      color: #00eaff; margin-left: 4px; font-size: 14px;
-      text-shadow: 0 0 5px #00eaff;
-    }
+    .verified-icon { color: #00eaff; margin-left: 4px; font-size: 14px; text-shadow: 0 0 5px #00eaff; }
 
     .yt-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; flex-shrink: 0; }
     .yt-content { flex: 1; }
@@ -254,16 +263,14 @@
 
   <div id="update-popup" class="popup">
     <div class="popup-content" style="text-align: center;">
-      <h2 class="glow" style="margin-top:10px;">¡Novedades v2.4.0!</h2>
+      <h2 class="glow" style="margin-top:10px;">¡Novedades v2.4.1!</h2>
       <p>Que hay de nuevo:</p>
       <ul class="news-list" style="text-align: left; display: inline-block;">
-        <li>🆕 Nuevo Contador de descargas.</li>
-        <li>🆕 Links que no funcionaban en el Motor Codename ya fueron corregidos.</li>
-        <li>🆕 Nuevo buscador para Motores y Mods.</li>
-        <li>🆕 Filtros para saber la optimizacion del los Ports.</li>
-        <li>🛠️ Mejoras en el apartado de Comunidad.</li>
-        <li>🛠️ Corrección de errores menores y mejoras de rendimiento.</li>
-        <li>Cualquier duda o sugerencia, ¡puedes contactarme!</li>
+        <li>🆕 Nueva Descarga Base en Psych Engine Para Android.</li>
+        <li>✨ Interfaz más limpia en Contacto/Comunidad.</li>
+        <li>✨ Solucionado el buscador y los filtros.</li>
+        <li>🛠️ Optimizaciones generales.</li>
+        <li>Cualquier duda o sugerencia lo puedes decir en el apartado de comunidad o bien en contactos. ¡Disfruta!</li>
       </ul>
       <button class="btn" onclick="closeUpdatePopup()" style="width: 100%; padding: 15px; font-size: 13px;">¡Entendido!</button>
     </div>
@@ -304,11 +311,11 @@
       <p>Tu rincón de mods para Friday Night Funkin' Mobile. ¡Explora y descarga!</p>
     </section>
     
-    <div class="search-wrapper">
+    <div id="searchContainer" class="search-wrapper">
       <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Buscar Mods o Bases..." onkeyup="filterContent()">
     </div>
     
-    <div class="filter-bar">
+    <div id="filterContainer" class="filter-bar" style="display:none;">
       <div class="filter-btn active" onclick="setFilter('all', this)">Todos</div>
       <div class="filter-btn" onclick="setFilter('low', this)">🟢 Gama Baja</div>
       <div class="filter-btn" onclick="setFilter('mid', this)">🟡 Gama Media</div>
@@ -352,7 +359,7 @@
     <section id="mods" class="section">
       <h2 class="glow">MODs Disponibles</h2>
       <div class="mods-grid" id="modsContainer">
-
+        
         <div class="mod-card" data-gama="low">
           <span class="gama-badge gama-low">Baja</span>
           <div class="like-container" id="like-mod99_4" onclick="handleLike('mod99_4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_4">0</span></div>
@@ -404,8 +411,8 @@
       
       <h2 class="glow" style="margin-top: 50px;">Próximos Lanzamientos ⏳</h2>
       <div class="mods-grid">
-        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/fate.png"> <h3>Vs. Impostor: Tainted Fate</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 67% Completado</p></div>
-        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.jpeg"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 70% Completado</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/fate.webp"> <h3>Vs. Impostor: Tainted Fate</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 95% Completado</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 40% Completado</p></div>
       </div>
     </section>
 
@@ -439,7 +446,7 @@
     </section>
 
     <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V2.4.0 <br>
+      © <span id="year"></span> LaloCF | V2.4.1 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>
@@ -463,14 +470,12 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v2.4.0";
+    const APP_VERSION = "v2.4.1";
     let isSuperUser = localStorage.getItem('superUser') === 'true';
 
-    // --- VARIABLES DE ESTADO ---
     let verifiedUsers = {};
     let downloadCounts = {};
 
-    // --- LISTENER DESCARGAS REALES ---
     onValue(ref(db, 'downloads'), (snap) => {
       downloadCounts = snap.val() || {};
       Object.keys(downloadCounts).forEach(id => {
@@ -479,19 +484,14 @@
       });
     });
 
-    // --- LISTENER USUARIOS VERIFICADOS ---
     onValue(ref(db, 'verified_users'), (snap) => {
       verifiedUsers = snap.val() || {};
-      // Forzar re-render de comentarios si cambian verificados
-      // Se hará automático en la próxima actualización de comentarios, pero podríamos forzarlo si quisiéramos.
     });
 
-    // --- FUNCION REGISTRAR DESCARGA ---
     window.trackDownload = (id) => {
       runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
     };
 
-    // --- LOGICA COMENTARIOS MEJORADA (PIN + VERIFICADO) ---
     onValue(ref(db, 'comments'), (snapshot) => {
       const list = document.getElementById('commentList');
       list.innerHTML = '';
@@ -499,29 +499,24 @@
       const myProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
 
       if(data) {
-        // Convertir a array para ordenar
         let commentsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
         
-        // ORDENAR: Primero Pinned (true), Luego Fecha (reciente primero)
-        // Usamos la key (timestamp) para orden cronológico inverso
         commentsArray.sort((a, b) => {
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
-            return b.id.localeCompare(a.id); // Orden inverso por ID (tiempo)
+            return b.id.localeCompare(a.id);
         });
 
         commentsArray.forEach(c => {
           const isLalo = c.user.toLowerCase() === 'lalocf';
-          const isVerified = verifiedUsers[c.ownerKey] || isLalo; // Lalo siempre verificado
+          const isVerified = verifiedUsers[c.ownerKey] || isLalo;
           const myLikedComments = JSON.parse(localStorage.getItem('my_liked_comments') || '{}');
           const activeClass = myLikedComments[c.id] ? 'active' : '';
           
-          // Renderizar Pin
           const pinClass = c.isPinned ? 'pinned' : '';
           const pinBadge = c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : '';
           const verifyBadge = isVerified ? '<span class="verified-icon">☑️</span>' : '';
 
-          // Botones Admin
           let adminBtns = '';
           if (isSuperUser) {
              adminBtns = `
@@ -557,19 +552,9 @@
       }
     });
 
-    // --- ACCIONES ADMIN NUEVAS ---
-    window.togglePin = (commentId, currentState) => {
-        update(ref(db, `comments/${commentId}`), { isPinned: !currentState });
-    };
+    window.togglePin = (commentId, currentState) => { update(ref(db, `comments/${commentId}`), { isPinned: !currentState }); };
+    window.toggleVerify = (userKey) => { if(confirm("¿Dar insignia de verificado?")) { update(ref(db, `verified_users`), { [userKey]: true }); } };
 
-    window.toggleVerify = (userKey) => {
-        if(confirm("¿Dar insignia de verificado a este usuario?")) {
-            update(ref(db, `verified_users`), { [userKey]: true });
-        }
-    };
-    // -----------------------------
-
-    // --- LOGICA SERVER STATUS ---
     onValue(ref(db, ".info/connected"), (snap) => {
       if (snap.val() === true) {
         document.getElementById("statusDot").classList.add("online");
@@ -582,7 +567,30 @@
       }
     });
 
-    // --- LOGICA FILTROS ---
+    window.toggleTheme = () => document.body.classList.toggle("light");
+    window.toggleMenu = () => document.getElementById("menuPopup").classList.toggle("show");
+    
+    window.selectSection = (id) => { 
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active")); 
+      document.getElementById(id).classList.add("active"); 
+      
+      const searchUI = document.getElementById("searchContainer");
+      const filterUI = document.getElementById("filterContainer");
+
+      if (id === 'apks') {
+          searchUI.style.display = 'block';
+          filterUI.style.display = 'none';
+      } else if (id === 'mods') {
+          searchUI.style.display = 'block';
+          filterUI.style.display = 'flex';
+      } else {
+          searchUI.style.display = 'none';
+          filterUI.style.display = 'none';
+      }
+
+      toggleMenu(); 
+    };
+
     let currentFilter = 'all';
     window.setFilter = (filter, btn) => {
       currentFilter = filter;
@@ -611,7 +619,6 @@
       });
     };
 
-    // --- SISTEMA BANEO ---
     async function checkBanStatus() {
       const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
       if (!profile) return false;
@@ -620,7 +627,7 @@
         const banData = snap.val();
         if (Date.now() < banData.expiresAt) {
           const timeLeft = Math.ceil((banData.expiresAt - Date.now()) / 3600000);
-          alert(`⛔ ACCESO DENEGADO\nHas sido baneado.\nMotivo: ${banData.reason}\nExpira en: ${timeLeft}h`);
+          alert(`⛔ ACCESO DENEGADO\nMotivo: ${banData.reason}\nExpira en: ${timeLeft}h`);
           return true;
         } else {
           await set(ref(db, `banned_users/${profile.key}`), null);
@@ -751,20 +758,19 @@
     window.replyComment = (name) => { const txt = document.getElementById('commentText'); txt.value = `@${name} `; txt.focus(); };
     window.deleteComment = (id) => confirm("¿Borrar?") && remove(ref(db, 'comments/'+id));
 
-    // --- DATOS MODS Y APK (ACTUALIZADOS CON ONCLICK TRACKER) ---
     const MOD_DATA = {
   mod99_4: {
     img: "assets/images/mods/logojeffy.jpeg",
     title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
     desc: "Friday Night Funkin' FNF' Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android).",
-    version: "Engine v1.0.4",
+    version: "Psych v1.0.4",
     downloads: [{ name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }]
   },
   mod99_5: {
     img: "assets/images/mods/logonusky.jpeg",
     title: "VS Nusky",
     desc: "Friday Night Funkin' FNF' Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android).",
-    version: "Engine v1.0.4",
+    version: "Psych v1.0.4",
     downloads: [
       { name: "Descarga", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Ports/Vs.Nusky.zip" },
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/369981" }
@@ -774,7 +780,7 @@
     img: "assets/images/mods/chritmas.jpeg",
     title: "Cocoa Noimix",
     desc: "Friday Night Funkin' FNF' Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Engine v1.0.4",
+    version: "Psych v1.0.4",
     downloads: [
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/643242" },
       { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1wnnGhworUMdReUrlEMMh5C4in4OoHHrU&export=download" },
@@ -786,7 +792,7 @@
     img: "assets/images/mods/metal.png",
     title: "Vs Metal Pipe V2",
     desc: "Friday Night Funkin' FNF' Vs Metal Pipe V2 Port Psych Engine Optimizado Para (Pc/Android) y en especial iOS.",
-    version: "Engine v1.0.4",
+    version: "Psych v1.0.4",
     downloads: [
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/441630"},
       { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1g5liWScsGSSd_FCmDtLEOVPQSQtp6E8B&export=download"}
@@ -796,7 +802,7 @@
     img: "assets/images/mods/Girl.png",
     title: "Rolling Girl",
     desc: "Friday Night Funkin' FNF' Rolling Girl Port Psych Engine Optimizado Para (Pc/Android/iOS).",
-    version: "Engine v1.0.4",
+    version: "Psych v1.0.4",
     downloads: [
       { name: "Descarga (GameBanana)", link: "https://gamebanana.com/mods/42313?lang=es" },
       { name: "Descarga Directa (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1n_e-lmvGFeIybTIDkdHXnduEIeXziD8I&export=download" }
@@ -806,7 +812,7 @@
     img: "assets/images/mods/tales.webp",
     title: "Herobrine Reborn Tales",
     desc: "Friday Night Funkin' FNF' Herobrine Reborn Tales Port Psych Engine Para (Pc/Android/iOS).",
-    version: "Engine v1.0.4",
+    version: "Psych v1.0.4",
     downloads: [
       { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1bPmKg62b6r5xiEOI5ZVFNHZqU0Mp0PLY/view" }
     ]
@@ -815,7 +821,7 @@
     img: "assets/images/mods/odd.webp",
     title: "Vs. TheOdd1sOut ONESHOT",
     desc: "Friday Night Funkin' FNF' Vs. TheOdd1sOut ONESHOT Port Psych Engine Para (Pc/Android/iOS).",
-    version: "Engine v1.0.4",
+    version: "Psych v1.0.4",
     downloads: [
       { name: "Descarga Directa ES (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=1rBL-hdK-_jeq-bByvK2xUfDu23D4QVEY&export=download" },
       { name: "Descarga Directa EU (Drive)", link: "https://drive.usercontent.google.com/u/0/uc?id=12gPg9wTnUa_JUSVj1IgUE7ETJieHNPIl&export=download" },
@@ -836,6 +842,7 @@
       { name: "Descarga Directa Linux (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
       { name: "Descarga Directa Mac (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
       { name: "Descarga Directa Android (Github)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
+      { name: "Descarga Android No Optimizado (Drive)", link: "https://drive.google.com/file/d/1OLfDEtB_-ItFS0WqRut9xfsnfXSWlBgq/view" },
       { name: "Descarga Directa iOS (Github)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
     ]
   },
@@ -881,7 +888,6 @@
   }
 };
 
-    // FUNCIONES POPUP CON TRACKING
     window.openModInfo = (id) => { 
       const d = MOD_DATA[id]; 
       document.getElementById("popup-img").src = d.img; 
@@ -912,21 +918,23 @@
     };
     window.closeApkInfo = () => document.getElementById("apk-popup").classList.remove("show");
 
-    window.toggleTheme = () => document.body.classList.toggle("light");
-    window.toggleMenu = () => document.getElementById("menuPopup").classList.toggle("show");
-    window.selectSection = (id) => { document.querySelectorAll(".section").forEach(s => s.classList.remove("active")); document.getElementById(id).classList.add("active"); toggleMenu(); };
     onValue(ref(db, 'likes'), (s) => { const d = s.val() || {}; Object.keys(d).forEach(k => { if(document.getElementById('count-'+k)) document.getElementById('count-'+k).innerText = d[k]; }); });
     
     window.onload = () => {
       document.getElementById("year").textContent = new Date().getFullYear();
       if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
       else checkUserStatus();
+      
+      if(document.getElementById('apks').classList.contains('active')) {
+          document.getElementById('searchContainer').style.display = 'block';
+      }
     };
     window.closeUpdatePopup = () => { document.getElementById('update-popup').classList.remove('show'); localStorage.setItem('lastVersionSeen', APP_VERSION); checkUserStatus(); };
     document.getElementById('commentText').addEventListener('input', function() { document.getElementById('charCounter').innerText = this.value.length; });
   </script>
 </body>
 </html>
+
 
 
 
