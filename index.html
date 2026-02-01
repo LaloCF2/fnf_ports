@@ -263,13 +263,11 @@
 
   <div id="update-popup" class="popup">
     <div class="popup-content" style="text-align: center;">
-      <h2 class="glow" style="margin-top:10px;">¡Novedades v2.4.1!</h2>
+      <h2 class="glow" style="margin-top:10px;">¡Novedades v2.4.2!</h2>
       <p>Que hay de nuevo:</p>
       <ul class="news-list" style="text-align: left; display: inline-block;">
-        <li>🆕 Nueva Descarga Base en Psych Engine Para Android.</li>
-        <li>✨ Interfaz más limpia en Contacto/Comunidad.</li>
-        <li>✨ Solucionado el buscador y los filtros.</li>
-        <li>🛠️ Optimizaciones generales.</li>
+        <li>🆕 Nuevo Port Añadido.</li>
+        <li>🛠️ Corrección de errores y mejoras.</li>
         <li>Cualquier duda o sugerencia lo puedes decir en el apartado de comunidad o bien en contactos. ¡Disfruta!</li>
       </ul>
       <button class="btn" onclick="closeUpdatePopup()" style="width: 100%; padding: 15px; font-size: 13px;">¡Entendido!</button>
@@ -359,6 +357,14 @@
     <section id="mods" class="section">
       <h2 class="glow">MODs Disponibles</h2>
       <div class="mods-grid" id="modsContainer">
+
+         <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Media-Baja</span>
+          <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_3">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_3">0</span></div>
+          <h3>TaintedFate</h3>
+          <button class="btn" onclick="openModInfo('mod99_3')">Más información</button>
+        </div>
         
         <div class="mod-card" data-gama="low">
           <span class="gama-badge gama-low">Baja</span>
@@ -411,7 +417,6 @@
       
       <h2 class="glow" style="margin-top: 50px;">Próximos Lanzamientos ⏳</h2>
       <div class="mods-grid">
-        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/fate.webp"> <h3>Vs. Impostor: Tainted Fate</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 95% Completado</p></div>
         <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 40% Completado</p></div>
       </div>
     </section>
@@ -446,7 +451,7 @@
     </section>
 
     <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V2.4.1 <br>
+      © <span id="year"></span> LaloCF | V2.4.2 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>
@@ -470,7 +475,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v2.4.1";
+    const APP_VERSION = "v2.4.2";
     let isSuperUser = localStorage.getItem('superUser') === 'true';
 
     let verifiedUsers = {};
@@ -759,6 +764,16 @@
     window.deleteComment = (id) => confirm("¿Borrar?") && remove(ref(db, 'comments/'+id));
 
     const MOD_DATA = {
+  mod99_3: {
+    img: "assets/images/mods/fate.webp",
+    title: "TaintedFate",
+    desc: "Friday Night Funkin' FNF' TaintedFate Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga (Drive)", link: "https://drive.usercontent.google.com/download?id=12kYlM1XbLGa_3o9uIjYtFfUMGE7PLe4E&export=download&authuser=0" },
+      { name: "Descarga Original", link: "https://gamebanana.com/mods/504445" }
+    ]
+  },
   mod99_4: {
     img: "assets/images/mods/logojeffy.jpeg",
     title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
@@ -934,6 +949,7 @@
   </script>
 </body>
 </html>
+
 
 
 
