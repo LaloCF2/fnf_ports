@@ -61,6 +61,87 @@
       animation: nebulaMove 10s ease-in-out infinite alternate;
     }
 
+    /* --- NUEVO DISEÑO POPUP NOVEDADES --- */
+.update-card-modern {
+  background: #151515 !important;
+  border: 1px solid var(--neon-blue);
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(0, 234, 255, 0.15) !important;
+  max-width: 420px !important;
+  overflow: visible !important; /* Permitir que el icono salga */
+  animation: floatUp 0.4s ease-out;
+}
+
+.update-header-art {
+  height: 90px;
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+  border-radius: 20px 20px 0 0;
+  position: relative;
+  margin-bottom: 40px; /* Espacio para el icono */
+}
+
+.update-icon-circle {
+  width: 70px;
+  height: 70px;
+  background: #151515;
+  border-radius: 50%;
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  border: 3px solid var(--neon-blue);
+  box-shadow: 0 0 20px var(--neon-blue);
+  z-index: 10;
+}
+
+.update-body {
+  padding: 0 25px 25px 25px;
+  text-align: center;
+}
+
+.update-list-modern {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.update-list-modern li {
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 10px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border-left: 3px solid var(--neon-purple);
+  font-size: 14px;
+  color: #ddd;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-update-action {
+  background: transparent;
+  border: 2px solid var(--neon-blue);
+  color: var(--neon-blue);
+  padding: 12px;
+  width: 100%;
+  border-radius: 50px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  text-transform: uppercase;
+}
+
+.btn-update-action:hover {
+  background: var(--neon-blue);
+  color: black;
+  box-shadow: 0 0 15px var(--neon-blue);
+}
+
     .container {
       max-width:1100px;
       margin:40px auto;
@@ -262,17 +343,41 @@
   </div>
 
   <div id="update-popup" class="popup">
-    <div class="popup-content" style="text-align: center;">
-      <h2 class="glow" style="margin-top:10px;">¡Novedades v2.4.2!</h2>
-      <p>Que hay de nuevo:</p>
-      <ul class="news-list" style="text-align: left; display: inline-block;">
-        <li>🆕 Nuevo Port Añadido.</li>
-        <li>🛠️ Corrección de errores y mejoras.</li>
-        <li>Cualquier duda o sugerencia lo puedes decir en el apartado de comunidad o bien en contactos. ¡Disfruta!</li>
-      </ul>
-      <button class="btn" onclick="closeUpdatePopup()" style="width: 100%; padding: 15px; font-size: 13px;">¡Entendido!</button>
+  <div class="popup-content update-card-modern" style="padding: 0; border: none;">
+    
+    <div class="update-header-art">
+      <div class="update-icon-circle">🚀</div>
+      <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
     </div>
+
+    <div class="update-body">
+      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v2.4.3!</h2>
+      <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Que hay de nuevo</p>
+
+      <ul class="update-list-modern">
+        <li>
+          <span>🔥</span> 
+          <span><b>Nuevo Port:</b> Child's Play Pico Mix.</span>
+        </li>
+         <li>
+          <span>🔥</span> 
+          <span><b>Nueva Base:</b> P-Slice Engine.</span>
+        </li>
+        <li>
+          <span>🔧</span> 
+          <span>Corrección de errores y optimización.</span>
+        </li>
+        <li style="border-left-color: var(--neon-green);">
+          <span>🆕</span> 
+          <span>Nuevo Cuadro de Novedades Mejorado.</span>
+        </li>
+      </ul>
+
+      <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido!</button>
+    </div>
+
   </div>
+</div>
 
   <div id="register-popup" class="popup">
     <div class="popup-content" style="text-align: center; padding: 20px;">
@@ -323,6 +428,7 @@
     <section id="apks" class="section active">
       <h2 class="glow">Descargas</h2>
       <div class="apks-grid" id="apksContainer">
+
         <div class="apk-card">
           <div class="like-container" id="like-apk1" onclick="handleLike('apk1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk1">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk1">0</span></div>
@@ -330,6 +436,7 @@
           <h3>Psych Engine</h3>
           <button class="btn" onclick="openApkInfo('apk1')">Más información</button>
         </div>
+
         <div class="apk-card">
           <div class="like-container" id="like-apk2" onclick="handleLike('apk2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk2">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk2">0</span></div>
@@ -337,6 +444,7 @@
           <h3>Psych Online</h3>
           <button class="btn" onclick="openApkInfo('apk2')">Más información</button>
         </div>
+
         <div class="apk-card">
           <div class="like-container" id="like-apk3" onclick="handleLike('apk3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk3">0</span></div>
@@ -344,12 +452,21 @@
           <h3>CodeName Engine</h3>
           <button class="btn" onclick="openApkInfo('apk3')">Más información</button>
         </div>
+
         <div class="apk-card">
           <div class="like-container" id="like-apk4" onclick="handleLike('apk4', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk4">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-apk4">0</span></div>
           <img src="assets/images/webp/logopsych.webp">
           <h3>Plus Engine</h3>
           <button class="btn" onclick="openApkInfo('apk4')">Más información</button>
+        </div>
+
+        <div class="apk-card">
+          <div class="like-container" id="like-apk5" onclick="handleLike('apk5', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk5">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk5">0</span></div>
+          <img src="assets/images/webp/logop.webp">
+          <h3>P-Slice Engine</h3>
+          <button class="btn" onclick="openApkInfo('apk5')">Más información</button>
         </div>
       </div>
     </section>
@@ -358,11 +475,19 @@
       <h2 class="glow">MODs Disponibles</h2>
       <div class="mods-grid" id="modsContainer">
 
+        <div class="mod-card" data-gama="low">
+          <span class="gama-badge gama-low">Baja</span>
+          <div class="like-container" id="like-mod99_2" onclick="handleLike('mod99_2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_2">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_2">0</span></div>
+          <h3>Child's Play Pico Mix (NEW)</h3>
+          <button class="btn" onclick="openModInfo('mod99_2')">Más información</button>
+        </div>
+
          <div class="mod-card" data-gama="low">
           <span class="gama-badge gama-low">Media-Baja</span>
           <div class="like-container" id="like-mod99_3" onclick="handleLike('mod99_3', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_3">0</span></div>
           <div class="dl-counter">⬇️ <span id="dl-mod99_3">0</span></div>
-          <h3>TaintedFate (NEW)</h3>
+          <h3>TaintedFate</h3>
           <button class="btn" onclick="openModInfo('mod99_3')">Más información</button>
         </div>
         
@@ -451,7 +576,7 @@
     </section>
 
     <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V2.4.2 <br>
+      © <span id="year"></span> LaloCF | V2.4.3 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>
@@ -475,7 +600,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v2.4.2";
+    const APP_VERSION = "v2.4.3";
     let isSuperUser = localStorage.getItem('superUser') === 'true';
 
     let verifiedUsers = {};
@@ -764,6 +889,17 @@
     window.deleteComment = (id) => confirm("¿Borrar?") && remove(ref(db, 'comments/'+id));
 
     const MOD_DATA = {
+  mod99_2: {
+    img: "assets/images/mods/play.webp",
+    title: "Child's Play Pico Mix",
+    desc: "Friday Night Funkin' FNF' Child's Play Pico Mix & Wip Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
+    version: "Psych v1.0.4",
+    downloads: [
+      { name: "Descarga (Drive) Mejorado y Opt por LaloCF", link: "https://drive.google.com/file/d/1qyMKXjaGwH4PG3DPVqphTrMskvU-sX_4/view?usp=drivesdk" },
+      { name: "Descarga (Tik Tok) Wip", link: "https://vt.tiktok.com/ZSawhN2LN/" },
+      { name: "Descarga Original", link: "https://gamebanana.com/mods/546317" }
+    ]
+  },
   mod99_3: {
     img: "assets/images/mods/fate.webp",
     title: "TaintedFate",
@@ -900,6 +1036,21 @@
       { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-Android.zip"},
       { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2/PlusEngine-iOS.zip" }
     ]
+  },
+  apk5: {
+    img: "assets/images/webp/logop-slice.webp",
+    title: "P-Slice Engine",
+    desc: "El motor P-Slice es un cruce entre Psych Engine y la versión más reciente de Friday Night Funkin.\n\nSu objetivo es incorporar nuevos elementos visuales y características de las versiones más nuevas de FNF y realizar cambios en las existentes para que se sientan más cercanas a las de V-Slice.",
+    version: "v3.4.2",
+    downloads: [
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Slice/P-Slice/releases" },
+      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/535203" },
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.windows.zip" },
+      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.linux.zip" },
+      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
+    ]
   }
 };
 
@@ -949,6 +1100,7 @@
   </script>
 </body>
 </html>
+
 
 
 
