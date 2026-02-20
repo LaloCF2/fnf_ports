@@ -1,0 +1,21 @@
+{
+  "name": "FNF' Mobile Ports",
+  "short_name": "FNF' Mobile",
+  "description": "Los mejores ports de Friday Night Funkin para móvil.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#00eaff",
+  "icons": [
+    {
+      "src": "assets/icons/logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
