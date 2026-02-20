@@ -1,9 +1,19 @@
 <!doctype html>
 <html lang="es">
 <head>
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FNF' - Mobile</title>
+
+  <link rel="apple-touch-icon" href="assets/icons/logo192.png">
+  <link rel="icon" type="image/png" href="assets/icons/logo192.png">
+  <link rel="shortcut icon" href="assets/icons/logo192.png">
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00eaff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/icons/logo192.png">
 
   <style>
     @font-face {
@@ -314,20 +324,21 @@
     .filter-btn.active { background: var(--neon-blue); color: black; font-weight: bold; box-shadow: 0 0 10px var(--neon-blue); }
     .filter-btn:hover { border-color: var(--neon-pink); }
 
-    /* =========================================
-       🍏 TEMA EXCLUSIVO iOS (ESTILO APPLE) 🍏
-       ========================================= */
+
     body.ios-theme {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-      background: #000000 !important; /* Fondo negro puro de iOS */
+      background: #000000 !important;
       animation: none !important;
     }
 
+    body.ios-theme .theme-btn {
+      display: none !important;
+}
+
     body.ios-theme::before {
-      display: none !important; /* Quitar nebulosa espacial */
+      display: none !important;
     }
 
-    /* Contenedor principal sin bordes raros */
     body.ios-theme .container {
       background: transparent !important;
       box-shadow: none !important;
@@ -336,7 +347,6 @@
       margin-top: 20px !important;
     }
 
-    /* Quitar brillos neon en textos, hacerlo limpio */
     body.ios-theme .glow {
       text-shadow: none !important;
       color: #FFFFFF !important;
@@ -344,10 +354,9 @@
       letter-spacing: 0.3px !important;
     }
 
-    /* Tarjetas estilo App Store */
     body.ios-theme .apk-card, 
     body.ios-theme .mod-card {
-      background: #1C1C1E !important; /* Gris oscuro característico de iOS */
+      background: #1C1C1E !important;
       border: none !important;
       border-radius: 20px !important;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
@@ -357,7 +366,7 @@
 
     body.ios-theme .apk-card:hover, 
     body.ios-theme .mod-card:hover {
-      transform: scale(0.97) !important; /* Efecto de toque nativo */
+      transform: scale(0.97) !important;
       box-shadow: none !important;
     }
 
@@ -367,11 +376,10 @@
       box-shadow: none !important;
     }
 
-    /* Botones estilo iOS */
     body.ios-theme .btn {
-      background: #0A84FF !important; /* Azul oficial de Apple */
+      background: #0A84FF !important;
       color: white !important;
-      border-radius: 20px !important; /* Forma de píldora */
+      border-radius: 20px !important;
       box-shadow: none !important;
       font-weight: 600 !important;
       font-size: 15px !important;
@@ -382,7 +390,6 @@
       opacity: 0.6 !important;
     }
 
-    /* Buscador estilo Spotlight */
     body.ios-theme .search-input {
       background: rgba(118, 118, 128, 0.24) !important;
       border: none !important;
@@ -396,7 +403,6 @@
       background: rgba(118, 118, 128, 0.35) !important;
     }
 
-    /* Popups estilo Modal (Frosted Glass real) */
     body.ios-theme .popup-content {
       background: rgba(28, 28, 30, 0.75) !important;
       backdrop-filter: blur(25px) saturate(200%) !important;
@@ -406,7 +412,6 @@
       box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
     }
 
-    /* Adaptación del Popup de Novedades */
     body.ios-theme .update-card-modern {
       background: rgba(28, 28, 30, 0.75) !important;
       backdrop-filter: blur(25px) saturate(200%) !important;
@@ -430,7 +435,6 @@
       box-shadow: none !important;
     }
 
-    /* Filtros (Botones superiores) */
     body.ios-theme .filter-btn {
       background: rgba(118, 118, 128, 0.24) !important;
       border: none !important;
@@ -442,7 +446,6 @@
       font-weight: 600 !important;
     }
 
-    /* Menú lateral (Clean look) */
     body.ios-theme #menuContent {
       background: rgba(28, 28, 30, 0.85) !important;
       backdrop-filter: blur(20px) !important;
@@ -498,13 +501,25 @@
     </div>
 
     <div class="update-body">
-      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v2.5.0!</h2>
+      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v3.0.0!</h2>
       <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Que hay de nuevo</p>
 
       <ul class="update-list-modern">
         <li>
+          <span>🔥</span> 
+          <span><b>Se ha hecho una actualizacion mayor:</b> <n>Ahora puedes instalar la pagina web en una aplicación, para provechar la eficiencia.</n></span>
+        </li>
+        <li>
           <span>🆕</span> 
-          <span><b>Nuevo Diseño Especial:</b> <n>(Solo funciona si usas sistema iOS)</n></span>
+          <span><b>Nuevo Diseño Especial:</b> <n>(Solo funciona si usas sistema iOS, Estado: BETA)</n></span>
+        </li>
+         <li>
+          <span>🆕</span> 
+          <span><b>Nuevo Motor Agregado:</b> <n>NovaFleare Engine</n></span>
+        </li>
+        <li style="border-left-color: var(--neon-green);">
+          <span>🆕</span> 
+          <span>Se han agregado dos nuevos lanzamientos.</span>
         </li>
         <li style="border-left-color: var(--neon-green);">
           <span>🔧</span> 
@@ -606,6 +621,14 @@
           <h3>P-Slice Engine</h3>
           <button class="btn" onclick="openApkInfo('apk5')">Más información</button>
         </div>
+
+        <div class="apk-card">
+          <div class="like-container" id="like-apk6" onclick="handleLike('apk6', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-apk6">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-apk6">0</span></div>
+          <img src="assets/images/webp/logof.webp">
+          <h3>NovaFleare Engine</h3>
+          <button class="btn" onclick="openApkInfo('apk6')">Más información</button>
+        </div>
       </div>
     </section>
 
@@ -680,7 +703,9 @@
       
       <h2 class="glow" style="margin-top: 50px;">Próximos Lanzamientos ⏳</h2>
       <div class="mods-grid">
-        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 40% Completado</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>Vs. Matt V3</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 75% Completado</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>Vs BotFriend</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: 50% Completado</p></div>
+        <div class="mod-card coming-soon-card"><div class="coming-soon-badge">PRÓXIMAMENTE</div><img src="assets/images/mods/over.webp"> <h3>FCR: Overwritten</h3><p style="font-size: 12px; color: var(--neon-pink);">Estado: Se detuvo</p></div>
       </div>
     </section>
 
@@ -714,7 +739,7 @@
     </section>
 
     <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V2.5.0 <br>
+      © <span id="year"></span> LaloCF | V3.0.0 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>
@@ -738,7 +763,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v2.5.0"
+    const APP_VERSION = "v3.0.0"
     let isSuperUser = localStorage.getItem('superUser') === 'true';
 
     let verifiedUsers = {};
@@ -1189,6 +1214,21 @@
       { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
       { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
     ]
+  },
+  apk6: {
+    img: "assets/images/webp/logonova.webp",
+    title: "NovaFleare Engine",
+    desc: "NovaFlare-Engine es una rama de FNF Psych Engine , dedicada a proporcionar excelentes efectos visuales y funciones intuitivas. Nuestro objetivo es ofrecer una experiencia de desarrollo y juego potente y divertida tanto para creadores como para jugadores.",
+    version: "v1.1.8 HOTFIX",
+    downloads: [
+      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases" },
+      { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/505473" },
+      { name: "Descarga Directa Windows (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/windows.zip" },
+      { name: "Descarga Directa Mac14 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS14.zip" },
+      { name: "Descarga Directa Mac15 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS15.tar"},
+      { name: "Descarga Directa Android (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/android.apk"},
+      { name: "Descarga Directa iOS (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/iOS.zip" }
+    ]
   }
 };
 
@@ -1238,23 +1278,29 @@
   </script>
 
   <script>
-    // --- DETECCIÓN DE SISTEMA OPERATIVO (iOS vs Android/PC) ---
     document.addEventListener('DOMContentLoaded', () => {
-      // Verifica si es un dispositivo Apple (iPhone, iPad, iPod o Mac con pantalla táctil)
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       
       if (isIOS) {
-        // Agrega la clase que transforma todo el diseño
         document.body.classList.add('ios-theme');
         console.log("🍏 iOS Detectado: Activando diseño Apple.");
       } else {
         console.log("🤖 Android/PC Detectado: Manteniendo diseño.");
       }
     });
+
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('App lista para instalar'))
+        .catch(err => console.log('Error de registro', err));
+    });
+  }
   </script>
 
 </body>
 </html>
+
 
 
 
