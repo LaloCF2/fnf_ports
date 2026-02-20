@@ -27,6 +27,10 @@
       font-family: "MiFuente", system-ui, -apple-system, sans-serif;
     }
 
+    body.ios-theme .theme-btn {
+      display: none !important;
+    }
+
     :root {
       --text: #e0e0e0;
       --card-bg: rgba(0, 0, 0, 0.55);
@@ -71,86 +75,85 @@
       animation: nebulaMove 10s ease-in-out infinite alternate;
     }
 
-    /* --- NUEVO DISEÑO POPUP NOVEDADES --- */
-    .update-card-modern {
-      background: #151515 !important;
-      border: 1px solid var(--neon-blue);
-      border-radius: 20px;
-      box-shadow: 0 0 40px rgba(0, 234, 255, 0.15) !important;
-      max-width: 420px !important;
-      overflow: visible !important;
-      animation: floatUp 0.4s ease-out;
-    }
+.update-card-modern {
+  background: #151515 !important;
+  border: 1px solid var(--neon-blue);
+  border-radius: 20px;
+  box-shadow: 0 0 40px rgba(0, 234, 255, 0.15) !important;
+  max-width: 420px !important;
+  overflow: visible !important;
+  animation: floatUp 0.4s ease-out;
+}
 
-    .update-header-art {
-      height: 90px;
-      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-      border-radius: 20px 20px 0 0;
-      position: relative;
-      margin-bottom: 40px;
-    }
+.update-header-art {
+  height: 90px;
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+  border-radius: 20px 20px 0 0;
+  position: relative;
+  margin-bottom: 40px;
+}
 
-    .update-icon-circle {
-      width: 70px;
-      height: 70px;
-      background: #151515;
-      border-radius: 50%;
-      position: absolute;
-      bottom: -35px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 35px;
-      border: 3px solid var(--neon-blue);
-      box-shadow: 0 0 20px var(--neon-blue);
-      z-index: 10;
-    }
+.update-icon-circle {
+  width: 70px;
+  height: 70px;
+  background: #151515;
+  border-radius: 50%;
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 35px;
+  border: 3px solid var(--neon-blue);
+  box-shadow: 0 0 20px var(--neon-blue);
+  z-index: 10;
+}
 
-    .update-body {
-      padding: 0 25px 25px 25px;
-      text-align: center;
-    }
+.update-body {
+  padding: 0 25px 25px 25px;
+  text-align: center;
+}
 
-    .update-list-modern {
-      list-style: none;
-      padding: 0;
-      margin: 20px 0;
-      text-align: left;
-    }
+.update-list-modern {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  text-align: left;
+}
 
-    .update-list-modern li {
-      background: rgba(255, 255, 255, 0.05);
-      margin-bottom: 10px;
-      padding: 12px 15px;
-      border-radius: 12px;
-      border-left: 3px solid var(--neon-purple);
-      font-size: 14px;
-      color: #ddd;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+.update-list-modern li {
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 10px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border-left: 3px solid var(--neon-purple);
+  font-size: 14px;
+  color: #ddd;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-    .btn-update-action {
-      background: transparent;
-      border: 2px solid var(--neon-blue);
-      color: var(--neon-blue);
-      padding: 12px;
-      width: 100%;
-      border-radius: 50px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-      text-transform: uppercase;
-    }
+.btn-update-action {
+  background: transparent;
+  border: 2px solid var(--neon-blue);
+  color: var(--neon-blue);
+  padding: 12px;
+  width: 100%;
+  border-radius: 50px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  text-transform: uppercase;
+}
 
-    .btn-update-action:hover {
-      background: var(--neon-blue);
-      color: black;
-      box-shadow: 0 0 15px var(--neon-blue);
-    }
+.btn-update-action:hover {
+  background: var(--neon-blue);
+  color: black;
+  box-shadow: 0 0 15px var(--neon-blue);
+}
 
     .container {
       max-width:1100px;
@@ -207,6 +210,7 @@
       0% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
       100% { opacity: 1; transform: scale(1.3) rotate(45deg); }
     }
+    /* ------------------------------------------ */
 
     .theme-btn {
       font-size:30px; cursor:pointer; animation: spinGlow 6s linear infinite; filter: drop-shadow(0 0 6px var(--neon-blue));
@@ -323,147 +327,6 @@
     .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--neon-blue); background: rgba(0,0,0,0.4); color: white; font-size: 13px; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .filter-btn.active { background: var(--neon-blue); color: black; font-weight: bold; box-shadow: 0 0 10px var(--neon-blue); }
     .filter-btn:hover { border-color: var(--neon-pink); }
-
-
-    body.ios-theme {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-      background: #000000 !important;
-      animation: none !important;
-    }
-
-    body.ios-theme .theme-btn {
-      display: none !important;
-}
-
-    body.ios-theme::before {
-      display: none !important;
-    }
-
-    body.ios-theme .container {
-      background: transparent !important;
-      box-shadow: none !important;
-      border: none !important;
-      padding: 15px !important;
-      margin-top: 20px !important;
-    }
-
-    body.ios-theme .glow {
-      text-shadow: none !important;
-      color: #FFFFFF !important;
-      font-weight: 700 !important;
-      letter-spacing: 0.3px !important;
-    }
-
-    body.ios-theme .apk-card, 
-    body.ios-theme .mod-card {
-      background: #1C1C1E !important;
-      border: none !important;
-      border-radius: 20px !important;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-      padding: 16px !important;
-      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) !important;
-    }
-
-    body.ios-theme .apk-card:hover, 
-    body.ios-theme .mod-card:hover {
-      transform: scale(0.97) !important;
-      box-shadow: none !important;
-    }
-
-    body.ios-theme .apk-card img, 
-    body.ios-theme .mod-card img {
-      border-radius: 14px !important;
-      box-shadow: none !important;
-    }
-
-    body.ios-theme .btn {
-      background: #0A84FF !important;
-      color: white !important;
-      border-radius: 20px !important;
-      box-shadow: none !important;
-      font-weight: 600 !important;
-      font-size: 15px !important;
-      padding: 10px 20px !important;
-      transition: opacity 0.2s !important;
-    }
-    body.ios-theme .btn:active {
-      opacity: 0.6 !important;
-    }
-
-    body.ios-theme .search-input {
-      background: rgba(118, 118, 128, 0.24) !important;
-      border: none !important;
-      border-radius: 12px !important;
-      color: #fff !important;
-      box-shadow: none !important;
-      padding: 12px 15px !important;
-      font-size: 17px !important;
-    }
-    body.ios-theme .search-input:focus {
-      background: rgba(118, 118, 128, 0.35) !important;
-    }
-
-    body.ios-theme .popup-content {
-      background: rgba(28, 28, 30, 0.75) !important;
-      backdrop-filter: blur(25px) saturate(200%) !important;
-      -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-      border: 1px solid rgba(255,255,255,0.1) !important;
-      border-radius: 24px !important;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
-    }
-
-    body.ios-theme .update-card-modern {
-      background: rgba(28, 28, 30, 0.75) !important;
-      backdrop-filter: blur(25px) saturate(200%) !important;
-      -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
-      border: 1px solid rgba(255,255,255,0.1) !important;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
-    }
-    body.ios-theme .update-header-art {
-      background: transparent !important;
-    }
-    body.ios-theme .update-icon-circle {
-      background: #2C2C2E !important;
-      border: none !important;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
-    }
-    body.ios-theme .btn-update-action {
-      background: #0A84FF !important;
-      color: white !important;
-      border: none !important;
-      border-radius: 14px !important;
-      box-shadow: none !important;
-    }
-
-    body.ios-theme .filter-btn {
-      background: rgba(118, 118, 128, 0.24) !important;
-      border: none !important;
-      color: #fff !important;
-    }
-    body.ios-theme .filter-btn.active {
-      background: #FFFFFF !important;
-      color: #000000 !important;
-      font-weight: 600 !important;
-    }
-
-    body.ios-theme #menuContent {
-      background: rgba(28, 28, 30, 0.85) !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
-      border: none !important;
-    }
-    body.ios-theme .menu-option {
-      background: transparent !important;
-      border: none !important;
-      border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-      border-radius: 0 !important;
-      text-shadow: none !important;
-      text-align: left !important;
-      padding: 15px 5px !important;
-    }
-    body.ios-theme .menu-option:last-child {
-      border-bottom: none !important;
-    }
   </style>
 </head>
 
@@ -504,6 +367,7 @@
       <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v3.0.0!</h2>
       <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Que hay de nuevo</p>
 
+      <ul class="update-list-modern">
       <ul class="update-list-modern">
         <li>
           <span>🔥</span> 
@@ -763,7 +627,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v3.0.0"
+    const APP_VERSION = "v3.0.0";
     let isSuperUser = localStorage.getItem('superUser') === 'true';
 
     let verifiedUsers = {};
@@ -1275,21 +1139,8 @@
     };
     window.closeUpdatePopup = () => { document.getElementById('update-popup').classList.remove('show'); localStorage.setItem('lastVersionSeen', APP_VERSION); checkUserStatus(); };
     document.getElementById('commentText').addEventListener('input', function() { document.getElementById('charCounter').innerText = this.value.length; });
-  </script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      
-      if (isIOS) {
-        document.body.classList.add('ios-theme');
-        console.log("🍏 iOS Detectado: Activando diseño Apple.");
-      } else {
-        console.log("🤖 Android/PC Detectado: Manteniendo diseño.");
-      }
-    });
-
-    if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
         .then(reg => console.log('App lista para instalar'))
@@ -1297,9 +1148,9 @@
     });
   }
   </script>
-
 </body>
 </html>
+
 
 
 
