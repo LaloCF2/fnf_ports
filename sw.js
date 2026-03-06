@@ -1,7 +1,8 @@
-const CACHE_NAME = 'fnf-mobile-v3.0.0';
+const CACHE_NAME = 'fnf-mobile-v3.0.1';
 
 const urlsToCache = [
   './',
+  './index.html',
   './fnf.html',
   './manifest.json',
   './assets/fonts/funkin.ttf'
