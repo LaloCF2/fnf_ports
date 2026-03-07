@@ -439,28 +439,16 @@
       <div class="popup-close" onclick="closeUpdatePopup()" style="top: 10px; right: 10px; background: rgba(0,0,0,0.3); width: 30px; height: 30px; font-size: 20px;">✖</div>
     </div>
     <div class="update-body">
-      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v3.1.0!</h2>
+      <h2 class="glow" style="margin: 0; font-size: 22px; color: white;">¡Novedades v3.2.0!</h2>
       <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Que hay de nuevo</p>
       <ul class="update-list-modern">
         <li style="border-left-color: var(--neon-red);">
           <span>🔥</span> 
           <span><b>Se ha hecho una actualizacion:</b> <n></n></span>
         </li>
-        <li style="border-left-color: var(--neon-pink);">
-          <span>🆕</span> 
-          <span><b>Nuevo Diseño Especial Mejorado:</b> <n>(Solo funciona si usas sistema iOS, Estado: BETA)</n></span>
-        </li>
-         <li style="border-left-color: var(--neon-purple);">
-          <span>🆕</span> 
-          <span><b>Nuevos enlaces al motor Plus Engine:</b> <n>Actualizacion de la base Plus Engine.</n></span>
-        </li>
         <li style="border-left-color: var(--neon-orange);">
           <span>🆕</span> 
-          <span><b>Nuevo Port Añadido:</b> <n>Vs Matt V3.</n></span>
-        </li>
-        <li style="border-left-color: var(--neon-gold);">
-          <span>🆕</span> 
-          <span><b>Nuevo apartado de chat en los Mods e Indicadores:</b> <n>Verde: Hay Nueva actualizacion, Amarillo: Hay nuevos comentarios.</n></span>
+          <span><b>Nuevo Port Añadido:</b> <n>Stargazer (2026) FanChart.</n></span>
         </li>
         <li style="border-left-color: var(--neon-green);">
           <span>🔧</span> 
@@ -613,6 +601,19 @@
     <section id="mods" class="section">
       <h2 class="glow">MODs Disponibles</h2>
       <div class="mods-grid" id="modsContainer">
+        
+        <div class="mod-card" data-gama="low" id="card-mod99_1">
+          <span class="gama-badge gama-low">Baja</span>
+          <button class="admin-pin-btn" onclick="toggleModPin('mod99_1', event)">📌 Fijar</button>
+          <button class="admin-led-btn" id="btn-led-mod99_0" onclick="toggleGreenLed('mod99_0', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-mod99_0" onclick="handleLike('mod99_1', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-mod99_0">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-mod99_0">0</span></div>
+          <h3><span class="led-dot led-green" id="led-green-mod99_1" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-mod99_0" style="display:none;" title="Nuevos comentarios"></span>Stargazer (2026) FanChart</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openModInfo('mod99_0')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('mod99_0', 'Stargazer (2026) FanChart')">💬 Chat</button>
+          </div>
+        </div>
 
         <div class="mod-card" data-gama="mid" id="card-mod99_1">
           <span class="gama-badge gama-mid">Media</span>
@@ -769,7 +770,7 @@
     </section>
 
     <footer style="margin-top:40px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V3.1.0 <br>
+      © <span id="year"></span> LaloCF | V3.2.0 <br>
       <div class="visitor-counter">Visitas: <span>Habilitado</span></div>
     </footer>
   </div>
@@ -817,7 +818,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const APP_VERSION = "v3.1.0";
+    const APP_VERSION = "v3.2.0";
     
     let isSuperUser = localStorage.getItem('superUser') === 'true';
     if(isSuperUser) { document.body.classList.add('is-admin'); }
@@ -841,7 +842,6 @@
       runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
     };
 
-    // --- SISTEMA DE LEDS VERDES (ADMIN) ---
     window.toggleGreenLed = async (id, event) => {
       event.stopPropagation();
       if (!isSuperUser) return;
@@ -1140,7 +1140,6 @@
         isPinned: false 
       });
       
-      // Actualizamos el reloj global para encender el LED amarillo a los demás
       set(ref(db, `last_comment_time/${currentModCommentsId}`), Date.now());
 
       document.getElementById('mc-commentText').value = '';
@@ -1382,6 +1381,16 @@
     window.deleteComment = (id) => confirm("¿Borrar?") && remove(ref(db, 'comments/'+id));
 
     const MOD_DATA = {
+  mod99_0: {
+    img: "assets/images/mods/star2026.webp",
+    title: "Stargazer (2026) FanChart",
+    desc: "Friday Night Funkin' FNF' Stargazer (2026) FanChart Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nEste solo esta optimizado y para que fuera compatible con iOS.\n\nPeso del archivo: 18.88MB",
+    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+    downloads: [
+      { name: "Descarga Original (GameBanana)", link: "https://gamebanana.com/mods/657873"},
+      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Stargazer2026/Stargazer.2026.FanChart-PE.1.0.4.zip" }
+    ]
+  },
   mod99_1: {
     img: "assets/images/mods/wii.webp",
     title: "VS Matt V3",
@@ -1608,7 +1617,6 @@
 
     onValue(ref(db, 'likes'), (s) => { const d = s.val() || {}; Object.keys(d).forEach(k => { if(document.getElementById('count-'+k)) document.getElementById('count-'+k).innerText = d[k]; }); });
     
-    // --- LÓGICA DE INSTALACIÓN (PWA) ---
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -1619,11 +1627,9 @@
       document.getElementById('update-popup').classList.remove('show'); 
       localStorage.setItem('lastVersionSeen', APP_VERSION); 
       
-      // Si el navegador permite la instalación, mostramos el popup de instalación
       if (deferredPrompt) {
         document.getElementById('install-popup').classList.add('show');
       } else {
-        // Si no se puede instalar (ya está instalada o es iOS Safari), pasamos al registro
         checkUserStatus(); 
       }
     };
@@ -1679,7 +1685,8 @@
   </script>
 
 </body>
-</html>
+  </html>
+
 
 
 
