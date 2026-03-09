@@ -415,4 +415,5 @@ body.ios-theme .carousel-btn { background: rgba(255,255,255,0.1) !important; bac
 
 body.ios-theme .filter-btn { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; color: #fff !important; }
 body.ios-theme .filter-btn.active { background: rgba(255, 255, 255, 0.2) !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; color: #ffffff !important; font-weight: 600 !important; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15) !important; }
+
 body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .server-status { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important; }
