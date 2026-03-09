@@ -827,7 +827,7 @@ const APK_DATA = {
     ]
   },
   apk8: {
-    img: "assets/images/webp/logoshadowengine.webp",
+    img: "assets/images/webp/logose.webp",
     title: "Shadow Engine",
     desc: "Soy Sombra, el Erizo. Y ahora, soy la forma de tenedor definitiva. - Sombra, el Erizo\n\nUn motor Psych Engine 0.7.3 altamente modificado.\n\nListo para ser modificado en origen.",
     version: "v0.7.0",
