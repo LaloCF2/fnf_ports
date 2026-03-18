@@ -554,6 +554,17 @@ const SCRIPTS_DATA = {
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/Custom Pause.zip" }
         ]
       },
+    script2: {
+        title: "FPS Custom",
+        desc: "Este script agrega FPS y RAM perzonalizado.\nTotalmente funcional para Pc, Android y iOS.\nEste tendra actualizaciones constantes, si tienen alguna duda u opinion, lo pueden decir en el apartado de chat.",
+        version: "v1.0",
+        images: [
+          "assets/images/scripts/sc1.webp"
+        ],
+        downloads: [
+          { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
+        ]
+      };
   
 let scriptImagesArray = [];
 let currentScriptImgIndex = 0;
