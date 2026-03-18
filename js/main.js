@@ -557,7 +557,7 @@ const SCRIPTS_DATA = {
   script2: {
         title: "FPS Custom",
         desc: "Este script le agrega una custom de fps y ram, funcional para dispositivos mobiles.\nTotalmente funcional para Pc, Android y iOS.\nEsta es una vercion de prueba, pronto abra mas actualizaciones y mejoras de esta script, si quieren que le agregue algo nuevo me lo pueden decir en la parte de Chat.",
-        vercion: "v1.0",
+        version: "v1.0",
         images: [
           "assets/images/scripts/sc1.webp"
         ],
