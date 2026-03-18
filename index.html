@@ -429,6 +429,18 @@
             <button class="btn btn-chat" onclick="openModComments('script1', 'Menu Pause')">💬 Chat</button>
           </div>
         </div>
+
+      <div class="mods-grid" id="scriptsContainer">
+        <div class="apk-card" id="card-script2">
+          <button class="admin-led-btn" id="btn-led-script2" onclick="toggleGreenLed('script2', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-script2" onclick="handleLike('script2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-script2">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-script2">0</span></div>
+          <h3><span class="led-dot led-red" id="led-red-script2" style="display:none;" title="¡Link Reportado!"></span><span class="led-dot led-green" id="led-green-script2" style="display:none;" title="¡Actualizado!"></span><span class="led-dot led-yellow" id="led-yellow-script1" style="display:none;" title="Nuevos comentarios"></span>FPS Counter</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openScriptInfo('script2')">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('script2', 'FPS Counter')">💬 Chat</button>
+          </div>
+        </div>  
       </div>
     </section>
 
