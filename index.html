@@ -87,10 +87,7 @@
         <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;">¡Novedades v4.1.0!</h2>
         <p style="font-size: 13px; color: #aaa; margin-top: 5px;">Lo nuevo de esta versión:</p>
         <ul class="update-list-modern">
-         <li style="border-left-color: var(--neon-gold);"><span>🔥</span> <span><b>Nuevo Port:</b> Vs BotFriend.</span></li>
-          <li style="border-left-color: var(--neon-orange);"><span>🔥</span> <span><b>Dos Nuevas Bases:</b> PsychEngine ExtraKeys y Shadow Engine.</span></li>
-          <li style="border-left-color: var(--neon-red);"><span>💻</span> <span><b>Nueva Sección:</b> ¡Scripts ahora disponibles!</span></li>
-          <li style="border-left-color: var(--neon-green);"><span>🆕</span> <span>Menú mejorado e interfaz refinada.</span></li>
+         <li style="border-left-color: var(--neon-gold);"><span>🔥</span> <span><b>Nuevo Script Añadido:</b> FPS Counter.</span></li>
           <li style="border-left-color: var(--neon-green);"><span>🆕</span> <span>Correccion de errores menores.</span></li>
         </ul>
         <button class="btn-update-action" onclick="closeUpdatePopup()">¡Entendido!</button>
@@ -429,6 +426,18 @@
           <div class="card-buttons">
             <button class="btn" onclick="openScriptInfo('script1')">Más Info</button>
             <button class="btn btn-chat" onclick="openModComments('script1', 'Menu Pause')">💬 Chat</button>
+          </div>
+        </div>
+
+        <div class="mods-grid" id="scriptsContainer">
+        <div class="apk-card" id="card-script2">
+          <button class="admin-led-btn" id="btn-led-script2" onclick="toggleGreenLed('script2', event)">🟢 Act. LED</button>
+          <div class="like-container" id="like-script2" onclick="handleLike('script2', this)"><span class="like-icon">❤</span> <span class="like-count" id="count-script2">0</span></div>
+          <div class="dl-counter">⬇️ <span id="dl-script2">0</span></div>
+          <h3><span class="led-dot led-green" id="led-green-script2" style="display:none;"></span>FPS Counter</h3>
+          <div class="card-buttons">
+            <button class="btn" onclick="openScriptInfo('script2')" data-es="Más Info" data-en="More Info">Más Info</button>
+            <button class="btn btn-chat" onclick="openModComments('script2', 'FPS Counter')">💬 Chat</button>
           </div>
         </div>
       </div>
