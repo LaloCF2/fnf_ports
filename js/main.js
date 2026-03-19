@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v4.0.0";
+const APP_VERSION = "v4.1.0";
 
 let isSuperUser = localStorage.getItem('superUser') === 'true';
 if(isSuperUser) { document.body.classList.add('is-admin'); }
@@ -563,6 +563,17 @@ const SCRIPTS_DATA = {
         downloads: [
           { name: "Descarga original (GameBanana)", link: "https://gamebanana.com/mods/464393" },
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/Custom Pause.zip" }
+        ]
+      },
+  script2: {
+        title: "FPS Counter",
+        desc: "Este script agrega un contador de fotogramas por segundo a tu juego.\nTotalmente funcional para Pc, Android y iOS.\nEste script tendra actualizaciones constantes, si tienes una duda o sugerencia puedes dercirlo en la parte de Chat.",
+        version: "v1.0",
+        images: [
+          "assets/images/scripts/sc1.webp"
+        ],
+        downloads: [
+          { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
         ]
       }
 };
