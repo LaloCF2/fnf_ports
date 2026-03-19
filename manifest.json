@@ -1,7 +1,7 @@
 {
   "name": "FNF' Ports Mobile",
   "short_name": "FNF' Ports Mobile",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Los mejores ports de Friday Night Funkin para móvil.",
   "start_url": "index.html",
   "display": "standalone",
