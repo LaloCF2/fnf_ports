@@ -1,24 +1,10 @@
-@font-face {
-  font-family: "MiFuente";
-  src: url("../assets/fonts/funkin.ttf") format("opentype");
-  font-weight: normal;
-  font-style: normal;
-}
-
-body {
-  font-family: "MiFuente", system-ui, -apple-system, sans-serif;
-}
-
-body.ios-theme .theme-btn {
-  display: none !important;
-}
 
 :root {
   --text: #e0e0e0;
   --card-bg: rgba(0, 0, 0, 0.55);
-  --neon-blue: #ff2a2a; /* Rojo Sangre */
-  --neon-pink: #ff8c00; /* Naranja Volcánico */
-  --neon-purple: #ffea00; /* Amarillo Eléctrico */
+  --neon-blue: #ff2a2a;
+  --neon-pink: #ff8c00;
+  --neon-purple: #ffea00;
   --neon-green: #00ffcc;
   --neon-yellow: #ffea00;
   --neon-red: #ff003c;
