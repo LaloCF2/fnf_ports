@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fnf-mobile-v4.1.0';
+const CACHE_NAME = 'fnf-mobile-v5.0.0';
 
 const urlsToCache = [
   './',
