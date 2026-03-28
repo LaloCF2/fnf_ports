@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v4.1.0";
+const APP_VERSION = "v5.0.0";
 
 let isSuperUser = localStorage.getItem('superUser') === 'true';
 if(isSuperUser) { document.body.classList.add('is-admin'); }
@@ -351,11 +351,11 @@ window.toggleVerify = (userKey) => { if(confirm("¿Dar insignia de verificado?")
 onValue(ref(db, ".info/connected"), (snap) => {
   if (snap.val() === true) {
     document.getElementById("statusDot").classList.add("online");
-    document.getElementById("statusText").innerText = "Servidor: Online";
+    document.getElementById("statusText").innerText = "Servidor: Activo";
     document.getElementById("statusText").style.color = "#00ff41";
   } else {
     document.getElementById("statusDot").classList.remove("online");
-    document.getElementById("statusText").innerText = "Desconectado";
+    document.getElementById("statusText").innerText = "Servidor: Desconectado";
     document.getElementById("statusText").style.color = "#aaa";
   }
 });
@@ -386,17 +386,6 @@ window.selectSection = (id, el) => {
   if(el) {
       document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
       el.classList.add("active");
-      
-      // --- MAGIA DE LA GOTA AL HACER CLIC ---
-      const drop = document.getElementById("waterDrop");
-      const nav = document.querySelector(".bottom-nav");
-      if (drop && nav && document.body.classList.contains("ios-theme")) {
-        drop.classList.add("snap");
-        const navRect = nav.getBoundingClientRect();
-        const itemRect = el.getBoundingClientRect();
-        drop.style.left = (itemRect.left - navRect.left + (itemRect.width / 2)) + "px";
-      }
-      // --------------------------------------
   }
   
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -488,7 +477,7 @@ window.saveRegistration = () => {
   const name = document.getElementById('regName').value.trim();
   const link = document.getElementById('regLink').value.trim() || "#";
   const avatar = document.getElementById('regAvatar').value.trim() || "";
-  if(name.length < 3) return alert("Nombre muy corto.");
+  if(name.length < 3) return alert("El nombre es corto, intenta agregarle mas caracteres.");
   
   const oldProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
   const key = oldProfile ? oldProfile.key : 'user_' + Math.random().toString(36).substr(2, 9);
@@ -565,9 +554,9 @@ const SCRIPTS_DATA = {
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/Custom Pause.zip" }
         ]
       },
-  script2: {
+   script2: {
         title: "FPS Counter",
-        desc: "Este script agrega un contador de fotogramas por segundo a tu juego.\nTotalmente funcional para Pc, Android y iOS.\nEste script tendra actualizaciones constantes, si tienes una duda o sugerencia puedes dercirlo en la parte de Chat.",
+        desc: "Este script agrega un contador de fotogramas por segundo a tu juego.\nTotalmente funcional para Pc, Android y iOS.",
         version: "v1.0",
         images: [
           "assets/images/scripts/sc1.webp"
@@ -576,7 +565,7 @@ const SCRIPTS_DATA = {
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
         ]
       }
-};
+    };
 
 let scriptImagesArray = [];
 let currentScriptImgIndex = 0;
@@ -622,6 +611,15 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+   mod98_8: {
+    img: "assets/images/mods/fan.webp",
+    title: "Naomi FanCharts",
+    desc: "Friday Night Funkin' FNF' Naomi FanCharts Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 44.10MB",
+    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+    downloads: [
+      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1uXJLV_0LdxY7JrEc4_E3Q2N8af1030XX/view?usp=drive_link" },
+    ]
+  },
   mod98_9: {
     img: "assets/images/mods/bot.webp",
     title: "Vs BotFriend",
@@ -752,26 +750,30 @@ const APK_DATA = {
     desc: "Motor usado originalmente en Mind Games Mod, concebido para solucionar los numerosos problemas de la versión original, manteniendo el aspecto de juego casual. También busca ser una alternativa más sencilla para programadores principiantes.",
     version: "v1.0.4",
     downloads: [
-      { name: "Descarga Directa Windows64 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
-      { name: "Descarga Directa Windows32 (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
-      { name: "Descarga Android No Optimizado (Drive)", link: "https://drive.google.com/file/d/1OLfDEtB_-ItFS0WqRut9xfsnfXSWlBgq/view" },
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
+      { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases" },
+      { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/309789" },
+      { name: "Descarga Directa Windows64 (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
+      { name: "Descarga Directa Windows32 (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
+      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
+      { name: "Descarga Android No Optimizado (GitHub)", link: "https://github.com/LaloCF2/fnf_ports/releases/download/Psych-Engine-v1.0.4/Friday.Night.Funkin.Psych.Engine_0.2.8.apk" },
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
     ]
   },
   apk2: {
     img: "assets/images/webp/logopsychonline.webp",
     title: "Psych Online",
     desc: "Mod de Psych Engine con funciones en línea.",
-    version: "v0.13.2 Bugfix",
+    version: "v0.14.6 (PC)\nv0.13.2 BugFix (Mobile)",
     downloads: [
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/windowsBuild.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/linuxBuild.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.13.2/macBuild.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-iOS.ipa" }
+      { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases" },
+      { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/479714" },
+      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/windowsBuild.zip" },
+      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/linuxBuild.zip" },
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/macBuild.zip"},
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-iOS.ipa" }
     ]
   },
   apk3: {
@@ -780,28 +782,30 @@ const APK_DATA = {
     desc: "Codename Engine es una bifurcación de Friday Night Funkin' con un enfoque en codificación suave y modding.",
     version: "v1.0.1",
     downloads: [
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-Android.apk"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-iOS.ipa" }
+      { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases" },
+      { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/598553" },
+      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
+      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"},
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-Android.apk"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-iOS.ipa" }
     ]
   },  
   apk4: {
     img: "assets/images/webp/logoplusengine.webp",
     title: "Plus Engine",
     desc: "Motor basado en Psych 1.0.4 con modcharts como NotITG y compatible con vídeos hxcodec de los mods Psych 0.6.3 y 0.7.3.",
-    version: "v1.2.6 HOTFIX",
+    version: "v1.2.6 HOTFIX\nv1.2.7 (Pc/Android)",
     downloads: [
       { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
       { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/602743" },
-      { name: "Descarga Directa Windows 32 (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x32.zip" },
-      { name: "Descarga Directa Windows 64 (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x64.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Linux-x64.zip" },
-      { name: "Descarga Directa Mac ARM (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-ARM.zip"},
-      { name: "Descarga Directa Mac Intel (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-Intel.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Android-x64-v7a.zip"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-iOS.zip" }
+      { name: "Descarga Directa Windows 32 (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x32.zip" },
+      { name: "Descarga Directa Windows 64 Actualizado (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.7/PlusEngine-Windows-x64.zip" },
+      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Linux-x64.zip" },
+      { name: "Descarga Directa Mac ARM (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-ARM.zip"},
+      { name: "Descarga Directa Mac Intel (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-Intel.zip"},
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.7/PlusEngine-Android-x64-v7a.zip"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-iOS.zip" }
     ]
   },
   apk5: {
@@ -810,28 +814,28 @@ const APK_DATA = {
     desc: "El motor P-Slice es un cruce entre Psych Engine y la versión más reciente de Friday Night Funkin.\n\nSu objetivo es incorporar nuevos elementos visuales y características de las versiones más nuevas de FNF y realizar cambios en las existentes para que se sientan más cercanas a las de V-Slice.",
     version: "v3.4.2",
     downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/Psych-Slice/P-Slice/releases" },
+      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases" },
       { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/535203" },
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.windows.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.linux.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
+      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.windows.zip" },
+      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.linux.zip" },
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
     ]
   },
   apk6: {
     img: "assets/images/webp/logonova.webp",
     title: "NovaFleare Engine",
     desc: "NovaFlare-Engine es una rama de FNF Psych Engine , dedicada a proporcionar excelentes efectos visuales y funciones intuitivas. Nuestro objetivo es ofrecer una experiencia de desarrollo y juego potente y divertida tanto para creadores como para jugadores.",
-    version: "v1.1.8 HOTFIX",
+    version: "v1.1.7 Versión Estable",
     downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases" },
+      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases" },
       { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/505473" },
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/windows.zip" },
-      { name: "Descarga Directa Mac14 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS14.zip" },
-      { name: "Descarga Directa Mac15 (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/macOS15.tar"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/android.apk"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.8-HOTFOX/iOS.zip" }
+      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/windows.zip" },
+      { name: "Descarga Directa Mac14 (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/macOS14.tar" },
+      { name: "Descarga Directa Mac15 (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/macOS15.tar"},
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/android.apk"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/iOSBuild.zip" }
     ]
   },
   apk7: {
@@ -840,12 +844,12 @@ const APK_DATA = {
     desc: "¡Bienvenido a la organización más genial del mundo!\n\n Alojamiento de Psych Engine con claves adicionales , Psych EK , claves adicionales de Psych Engine , claves adicionales o PE: ¡EK !",
     version: "v0.4.6",
     downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases" },
-      { name: "Descarga Directa Windows (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-windowsBuild-56acc57.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-linuxBuild-56acc57.zip" },
-      { name: "Descarga Directa Linux (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-macBuild-56acc57.zip"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-android-apk-32d1f1e.zip"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-iOS-ipa-32d1f1e.zip" }
+      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases" },
+      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-windowsBuild-56acc57.zip" },
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-linuxBuild-56acc57.zip" },
+      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-macBuild-56acc57.zip"},
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-android-apk-32d1f1e.zip"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-iOS-ipa-32d1f1e.zip" }
     ]
   },
   apk8: {
@@ -854,17 +858,17 @@ const APK_DATA = {
     desc: "Soy Sombra, el Erizo. Y ahora, soy la forma de tenedor definitiva. - Sombra, el Erizo\n\nUn motor Psych Engine 0.7.3 altamente modificado.\n\nListo para ser modificado en origen.",
     version: "v0.7.0",
     downloads: [
-      { name: "Descargas en el repositorio del desarrollador", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases" },
-      { name: "Descarga Directa Windows ARM64 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-arm64.zip" },
-      { name: "Descarga Directa Windows i686 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-i686.zip" },
-      { name: "Descarga Directa Windows x86_64 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-x86_64.zip" },
-      { name: "Descarga Directa Mac (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-macOS-Universal.tar" },
-      { name: "Descarga Directa Linux ARM64 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-linux-arm64.tar"},
-      { name: "Descarga Directa Linux ARMV7 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-linux-armv7.tar"},
-      { name: "Descarga Directa Linux i686 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-linux-i686.tar"},
-      { name: "Descarga Directa Linux x86_64 (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-linux-x86_64.tar"},
-      { name: "Descarga Directa Android (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-Android.apk"},
-      { name: "Descarga Directa iOS (Github)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-iOS.ipa" }
+      { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases" },
+      { name: "Descarga Directa Windows ARM64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-arm64.zip" },
+      { name: "Descarga Directa Windows i686 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-i686.zip" },
+      { name: "Descarga Directa Windows x86_64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-x86_64.zip" },
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-macOS-Universal.tar" },
+      { name: "Descarga Directa Linux ARM64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-linux-arm64.tar"},
+      { name: "Descarga Directa Linux ARMV7 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-linux-armv7.tar"},
+      { name: "Descarga Directa Linux i686 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-linux-i686.tar"},
+      { name: "Descarga Directa Linux x86_64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-linux-x86_64.tar"},
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-Android.apk"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-iOS.ipa" }
     ]
   }
 };
@@ -941,5 +945,476 @@ window.onload = () => {
   document.getElementById("year").textContent = new Date().getFullYear();
   if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
   else checkUserStatus();
-
 };
+
+let currentLang = localStorage.getItem('fnf_lang') || 'es';
+
+window.toggleLanguage = () => {
+  currentLang = currentLang === 'es' ? 'en' : 'es';
+  localStorage.setItem('fnf_lang', currentLang);
+  applyLanguage();
+};
+
+function applyLanguage() {
+  const elements = document.querySelectorAll('[data-es][data-en]');
+  elements.forEach(el => {
+    el.classList.add('lang-fade');
+    setTimeout(() => {
+      el.innerHTML = el.getAttribute(`data-${currentLang}`);
+      el.classList.remove('lang-fade');
+    }, 150);
+  });
+  const btn = document.getElementById('langBtn');
+  if (btn) btn.innerHTML = currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
+}
+
+const initV4 = setInterval(() => {
+  if(document.getElementById('langBtn')) {
+    clearInterval(initV4);
+    applyLanguage();
+    
+    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+    if (profile) {
+      const nameInput = document.getElementById('editProfileName');
+      const avatarInput = document.getElementById('editProfileAvatar');
+      const preview = document.getElementById('profile-avatar-preview');
+      
+      if(nameInput && profile.name) nameInput.value = profile.name;
+      if(avatarInput && profile.avatar) {
+        avatarInput.value = profile.avatar;
+        if(preview) preview.src = profile.avatar;
+      }
+    }
+
+    const avatarInput = document.getElementById('editProfileAvatar');
+    if(avatarInput) {
+      avatarInput.addEventListener('input', (e) => {
+        const url = e.target.value.trim();
+        const preview = document.getElementById('profile-avatar-preview');
+        if(preview) {
+          preview.src = url ? url : "https://via.placeholder.com/80/555/fff?text=?";
+        }
+      });
+    }
+  }
+}, 500);
+
+window.saveProfileChanges = () => {
+  let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
+  
+  const name = document.getElementById('editProfileName').value.trim();
+  const avatar = document.getElementById('editProfileAvatar').value.trim();
+  
+  if(name.length < 3) return alert(currentLang === 'es' ? "El nombre es corto, intenta agregarle mas caracteres." : "The name is too short, try adding more characters.");
+  
+  profile.name = name;
+  profile.avatar = avatar;
+  localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
+  
+  document.getElementById('profile-popup').classList.remove('show');
+
+  if (typeof window.showToast === 'function') {
+    window.showToast(currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
+  } else {
+    alert(currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
+  }
+};
+
+window.currentItemRatingId = null;
+
+setTimeout(() => {
+    if(window.openModInfo) {
+        const origOpenModInfo = window.openModInfo;
+        window.openModInfo = (id) => {
+          window.currentItemRatingId = id;
+          window.loadItemRating(id, 'mod');
+          origOpenModInfo(id);
+        };
+    }
+    if(window.openApkInfo) {
+        const origOpenApkInfo = window.openApkInfo;
+        window.openApkInfo = (id) => {
+          window.currentItemRatingId = id;
+          window.loadItemRating(id, 'apk');
+          origOpenApkInfo(id);
+        };
+    }
+    if(window.openScriptInfo) {
+        const origOpenScriptInfo = window.openScriptInfo;
+        window.openScriptInfo = (id) => {
+          window.currentItemRatingId = id;
+          window.loadItemRating(id, 'script');
+          origOpenScriptInfo(id);
+        };
+    }
+}, 1000);
+
+window.rateItem = (type, stars) => {
+  if (!window.currentItemRatingId) return;
+  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+  
+  if (!profile) {
+    alert(currentLang === 'es' ? "Debes registrarte o configurar tu perfil para calificar." : "You must register or set your profile to rate.");
+    return;
+  }
+  
+  const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
+  if (myRates[window.currentItemRatingId]) {
+      alert(currentLang === 'es' ? "Ya calificaste esto. ¡Gracias!" : "You already rated this. Thanks!");
+      return;
+  }
+  
+  myRates[window.currentItemRatingId] = stars;
+  localStorage.setItem('my_ratings', JSON.stringify(myRates));
+  
+  window.updateStarsUI(type, stars);
+  const txt = document.getElementById(`${type}-rating-text`);
+  if(txt) txt.innerText = currentLang === 'es' ? "¡Gracias por calificar!" : "Thanks for rating!";
+};
+
+window.loadItemRating = (id, type) => {
+    const container = document.getElementById(`rating-container-${type}`);
+    if(!container) return;
+    
+    const spans = container.querySelectorAll('span');
+    const txt = document.getElementById(`${type}-rating-text`);
+    if(txt) txt.innerText = currentLang === 'es' ? "Califica este contenido" : "Rate this content";
+
+    const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
+    if (myRates[id]) {
+        window.updateStarsUI(type, myRates[id]);
+        if(txt) txt.innerText = currentLang === 'es' ? "Tu calificación" : "Your rating";
+    } else {
+        spans.forEach(s => { s.style.color = 'gold'; s.style.textShadow = 'none'; });
+    }
+};
+
+window.updateStarsUI = (type, stars) => {
+    const container = document.getElementById(`rating-container-${type}`);
+    if(!container) return;
+    const spans = container.querySelectorAll('span');
+    spans.forEach((s, index) => {
+        if (index < stars) {
+            s.style.color = 'gold';
+            s.style.textShadow = '0 0 10px gold';
+        } else {
+            s.style.color = '#555';
+            s.style.textShadow = 'none';
+        }
+    });
+};
+
+
+    const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
+    document.documentElement.style.setProperty('--neon-blue', savedColor);
+    
+    const savedPillInset = localStorage.getItem('pillInset') || '5';
+    document.documentElement.style.setProperty('--pill-inset', savedPillInset + 'px');
+
+    const savedBlur = localStorage.getItem('glassBlur') || '15';
+    document.documentElement.style.setProperty('--glass-blur', savedBlur + 'px');
+
+    if(localStorage.getItem('lowEndMode') === 'true') document.body.classList.add('low-end-mode');
+
+    const applyCustomFont = (base64Font) => {
+        const newStyle = document.createElement('style');
+        newStyle.appendChild(document.createTextNode(`@font-face { font-family: 'CustomUserFont'; src: url('${base64Font}') format('truetype'); } body, h1, h2, h3, p, span, div, button, input, textarea, a { font-family: 'CustomUserFont', sans-serif !important; }`));
+        document.head.appendChild(newStyle);
+    };
+    const savedFont = localStorage.getItem('customUserFont');
+    if(savedFont) applyCustomFont(savedFont);
+
+    let chromaInterval;
+    const toggleChroma = (enable) => {
+        if(enable) {
+            let hue = 0;
+            clearInterval(chromaInterval);
+            chromaInterval = setInterval(() => {
+                hue = (hue + 2) % 360;
+                document.documentElement.style.setProperty('--neon-blue', `hsl(${hue}, 100%, 50%)`);
+            }, 50);
+        } else {
+            clearInterval(chromaInterval);
+            document.documentElement.style.setProperty('--neon-blue', localStorage.getItem('customThemeColor') || '#00eaff');
+        }
+    };
+
+    let particleInterval;
+    const toggleParticles = (enable) => {
+        const container = document.getElementById('particles-container');
+        if(!container) return;
+        if(enable) {
+            container.style.display = 'block';
+            particleInterval = setInterval(() => {
+                const p = document.createElement('div');
+                p.className = 'fnf-particle';
+                p.innerText = Math.random() > 0.5 ? '🎵' : '✦';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                p.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                container.appendChild(p);
+                setTimeout(() => p.remove(), 8000);
+            }, 400);
+        } else {
+            clearInterval(particleInterval);
+            container.style.display = 'none';
+            container.innerHTML = '';
+        }
+    };
+
+    const savedTheme = localStorage.getItem('activeTheme') || 'default';
+    const themeLink = document.getElementById('theme-stylesheet');
+    
+    if(savedTheme === 'pro') {
+        themeLink.href = 'css/style2.css';
+    }
+
+    window.toggleProMenu = () => {
+        document.body.classList.toggle('pro-menu-open');
+        window.triggerVibrate(15);
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.currentLang = localStorage.getItem('fnf_lang') || 'es';
+
+      window.triggerVibrate = (ms = 15) => { if (localStorage.getItem('hapticMode') === 'true' && navigator.vibrate) navigator.vibrate(ms); };
+      document.body.addEventListener('click', (e) => {
+          if(e.target.closest('.btn, .nav-item, .settings-btn, .lang-btn, .profile-btn, .filter-btn, .admin-led-btn, .admin-pin-btn')) window.triggerVibrate(15);
+      });
+
+      window.toggleLanguage = () => {
+        window.currentLang = window.currentLang === 'es' ? 'en' : 'es';
+        localStorage.setItem('fnf_lang', window.currentLang);
+        applyLanguage();
+      };
+      function applyLanguage() {
+        document.querySelectorAll('[data-es][data-en]').forEach(el => {
+          el.classList.add('lang-fade');
+          setTimeout(() => { el.innerHTML = el.getAttribute(`data-${window.currentLang}`); el.classList.remove('lang-fade'); }, 150);
+        });
+        const btn = document.getElementById('langBtn');
+        if (btn) btn.innerHTML = window.currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
+      }
+      applyLanguage();
+
+      setTimeout(() => {
+        const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+        if (profile) {
+          if(document.getElementById('editProfileName') && profile.name) document.getElementById('editProfileName').value = profile.name;
+          if(document.getElementById('editProfileAvatar') && profile.avatar) {
+            document.getElementById('editProfileAvatar').value = profile.avatar;
+            document.getElementById('profile-avatar-preview').src = profile.avatar;
+          }
+        }
+      }, 500);
+
+      const avInput = document.getElementById('editProfileAvatar');
+      if(avInput) avInput.addEventListener('input', (e) => { document.getElementById('profile-avatar-preview').src = e.target.value.trim() || "https://via.placeholder.com/80/555/fff?text=?"; });
+
+      window.saveProfileChanges = () => {
+        let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
+        const name = document.getElementById('editProfileName').value.trim();
+        if(name.length < 3) return alert(window.currentLang === 'es' ? "Nombre muy corto." : "Name too short.");
+        profile.name = name; profile.avatar = document.getElementById('editProfileAvatar').value.trim();
+        localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
+        document.getElementById('profile-popup').classList.remove('show');
+        alert(window.currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
+      };
+
+      // --- AJUSTES V5.2.0 (EVENTOS DE LOS BOTONES) ---
+      
+      const colorInput = document.getElementById('themeColor');
+      if(colorInput) {
+          colorInput.value = savedColor;
+          colorInput.addEventListener('input', (e) => {
+              document.documentElement.style.setProperty('--neon-blue', e.target.value);
+              localStorage.setItem('customThemeColor', e.target.value);
+              if(document.getElementById('chromaToggle').checked) {
+                  document.getElementById('chromaToggle').checked = false;
+                  toggleChroma(false);
+                  localStorage.setItem('chromaMode', 'false');
+              }
+          });
+      }
+
+      const chromaToggle = document.getElementById('chromaToggle');
+      if(chromaToggle) {
+          chromaToggle.checked = localStorage.getItem('chromaMode') === 'true';
+          if(chromaToggle.checked) toggleChroma(true);
+          chromaToggle.addEventListener('change', (e) => {
+              localStorage.setItem('chromaMode', e.target.checked);
+              toggleChroma(e.target.checked);
+          });
+      }
+
+      const particlesToggle = document.getElementById('particlesToggle');
+      if(particlesToggle) {
+          particlesToggle.checked = localStorage.getItem('particlesMode') === 'true';
+          if(particlesToggle.checked && localStorage.getItem('lowEndMode') !== 'true') toggleParticles(true);
+          particlesToggle.addEventListener('change', (e) => {
+              localStorage.setItem('particlesMode', e.target.checked);
+              toggleParticles(e.target.checked);
+          });
+      }
+
+      const blurSlider = document.getElementById('blurSlider');
+      if(blurSlider) {
+          blurSlider.value = savedBlur;
+          blurSlider.addEventListener('input', (e) => {
+              document.documentElement.style.setProperty('--glass-blur', e.target.value + 'px');
+              localStorage.setItem('glassBlur', e.target.value);
+          });
+      }
+
+      const lowEndToggle = document.getElementById('lowEndToggle');
+      if(lowEndToggle) {
+          lowEndToggle.checked = localStorage.getItem('lowEndMode') === 'true';
+          lowEndToggle.addEventListener('change', (e) => {
+              localStorage.setItem('lowEndMode', e.target.checked);
+              if(e.target.checked) {
+                  document.body.classList.add('low-end-mode');
+                  toggleParticles(false); // Fuerza apagar partículas
+              } else {
+                  document.body.classList.remove('low-end-mode');
+                  if(document.getElementById('particlesToggle').checked) toggleParticles(true);
+              }
+              window.triggerVibrate(30);
+          });
+      }
+
+      const hapticToggle = document.getElementById('hapticToggle');
+      if(hapticToggle) {
+          hapticToggle.checked = localStorage.getItem('hapticMode') === 'true';
+          hapticToggle.addEventListener('change', (e) => {
+              localStorage.setItem('hapticMode', e.target.checked);
+              if(e.target.checked) navigator.vibrate(50); 
+          });
+      }
+
+      const pillSlider = document.getElementById('pillSizeSlider');
+      if(pillSlider) {
+          pillSlider.value = savedPillInset;
+          pillSlider.addEventListener('input', (e) => {
+              document.documentElement.style.setProperty('--pill-inset', e.target.value + 'px');
+              localStorage.setItem('pillInset', e.target.value);
+          });
+      }
+
+      const fontInput = document.getElementById('customFontUpload');
+      if(fontInput) {
+          fontInput.addEventListener('change', (e) => {
+              const file = e.target.files[0];
+              if(file && file.name.toLowerCase().endsWith('.ttf')) {
+                  const reader = new FileReader();
+                  reader.onload = function(evt) {
+                      try { localStorage.setItem('customUserFont', evt.target.result); applyCustomFont(evt.target.result); } 
+                      catch(err) { applyCustomFont(evt.target.result); alert("Archivo muy pesado para guardarse permanente, pero se aplicará ahora."); }
+                  };
+                  reader.readAsDataURL(file);
+              }
+          });
+      }
+
+      window.resetSettings = () => {
+          if(confirm("¿Restablecer diseño predeterminado?")) {
+              localStorage.clear();
+              location.reload();
+          }
+      };
+
+      // --- PÍLDORA iOS MAESTRA ---
+      const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
+      const isIOS = isTrueIOS || forceIOS;
+
+      window.toggleForceIOS = () => {
+          const current = localStorage.getItem('force_ios_ui') === 'true';
+          localStorage.setItem('force_ios_ui', !current);
+          location.reload();
+      };
+
+      const initAdminBtn = setInterval(() => {
+          const btn = document.getElementById('btnForceIOS');
+          if (btn) { btn.innerHTML = forceIOS ? '🍏 Quitar Interfaz iOS' : '🍏 Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
+      }, 500);
+
+      setTimeout(() => {
+          const nav = document.querySelector('.bottom-nav');
+          const pill = document.getElementById('ios-pill');
+          const navItems = document.querySelectorAll('.nav-item');
+
+          if (isIOS && nav && pill) {
+            nav.classList.add('is-ios');
+            if(navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
+            
+            const snapPill = (index) => {
+              pill.classList.remove('is-dragging'); 
+              const target = navItems[index];
+              if(target) {
+                  pill.style.width = `${target.offsetWidth}px`;
+                  pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`; 
+                  window.triggerVibrate(25);
+              }
+            };
+
+            const originalSelectSection = window.selectSection;
+            window.selectSection = (sec, el) => {
+              if(originalSelectSection) originalSelectSection(sec, el);
+              const index = Array.from(navItems).indexOf(el);
+              if (index !== -1) snapPill(index);
+            };
+
+            let isDraggingPill = false;
+
+            const moveDrag = (e) => {
+              if (!e.touches && !isDraggingPill) return;
+              if (e.touches) e.preventDefault();
+              isDraggingPill = true;
+              pill.classList.add('is-dragging'); 
+
+              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+              const navRect = nav.getBoundingClientRect();
+              let xPos = Math.max(0, Math.min(clientX - navRect.left, navRect.width));
+              
+              const itemWidth = navRect.width / navItems.length;
+              let visualX = Math.max(0, Math.min(xPos - (itemWidth / 2), navRect.width - itemWidth));
+              pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
+              
+              const hoveredIndex = Math.floor(xPos / itemWidth);
+              const targetItem = navItems[hoveredIndex];
+              
+              if (targetItem && !targetItem.classList.contains('active')) {
+                 const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
+                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                 document.getElementById(sectionId).classList.add('active');
+                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                 targetItem.classList.add('active');
+                 window.scrollTo({top:0, behavior:'smooth'});
+                 window.triggerVibrate(15);
+              }
+            };
+
+            const endDrag = () => {
+              if (isDraggingPill) {
+                isDraggingPill = false;
+                const activeItem = document.querySelector('.nav-item.active');
+                const index = Array.from(navItems).indexOf(activeItem);
+                if (index !== -1) snapPill(index);
+              }
+            };
+
+            nav.addEventListener('touchmove', moveDrag, { passive: false });
+            nav.addEventListener('touchend', endDrag);
+            nav.addEventListener('mousedown', () => isDraggingPill = true);
+            nav.addEventListener('mousemove', moveDrag);
+            nav.addEventListener('mouseup', endDrag);
+            nav.addEventListener('mouseleave', endDrag);
+
+            window.addEventListener('resize', () => {
+                const activeItem = document.querySelector('.nav-item.active');
+                const index = Array.from(navItems).indexOf(activeItem);
+                if (index !== -1) snapPill(index);
+            });
+          }
+      }, 1000);
+    });
