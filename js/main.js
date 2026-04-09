@@ -13,10 +13,33 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v5.0.0";
+const APP_VERSION = "v5.1.0";
+const MI_UID_ADMIN = "user_a655u37rr"; 
 
-let isSuperUser = localStorage.getItem('superUser') === 'true';
-if(isSuperUser) { document.body.classList.add('is-admin'); }
+let isSuperUser = false;
+const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+
+if(userProfile && userProfile.key === MI_UID_ADMIN) {
+  isSuperUser = true;
+  document.body.classList.add('is-admin');
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const secretUid = urlParams.get('set_admin');
+
+if (secretUid) {
+  const newProfile = { 
+    key: secretUid, 
+    name: "Admin LaloCF", 
+    verified: true 
+  };
+  localStorage.setItem('fnf_user_profile', JSON.stringify(newProfile));
+
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  alert("🛠️ ¡Privilegios de Administrador Activados en este dispositivo a travez de un enlace compartido!");
+  window.location.reload();
+}
 
 let verifiedUsers = {};
 let downloadCounts = {};
@@ -37,35 +60,6 @@ window.trackDownload = (id) => {
   runTransaction(ref(db, `downloads/${id}`), (current) => (current || 0) + 1);
 };
 
-window.reportError = async (id) => {
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if (!user) {
-    document.getElementById('register-popup').classList.add('show');
-    return;
-  }
-  if (confirm('⚠️ ¿Estás seguro de reportar que esta descarga está caída o tiene un error grave?')) {
-    await set(ref(db, `reports/${id}/${user.key}`), Date.now());
-    alert('Reporte enviado a LaloCF. ¡Gracias por ayudar a la comunidad!');
-  }
-};
-
-window.clearReports = async (id) => {
-  if(confirm("🛠️ ¿Limpiar todos los reportes de este archivo?")) {
-    await set(ref(db, `reports/${id}`), null);
-    alert("Reportes solucionados y limpiados.");
-  }
-};
-
-onValue(ref(db, 'reports'), (snap) => {
-  const reports = snap.val() || {};
-  document.querySelectorAll('.led-red').forEach(el => el.style.display = 'none');
-  if(isSuperUser) {
-    Object.keys(reports).forEach(id => {
-      const el = document.getElementById(`led-red-${id}`);
-      if (el) el.style.display = 'inline-block';
-    });
-  }
-});
 // -------------------------------------------
 
 window.toggleGreenLed = async (id, event) => {
@@ -612,12 +606,12 @@ window.prevScriptImage = () => {
 
 const MOD_DATA = {
    mod98_8: {
-    img: "assets/images/mods/fan.webp",
+    img: "assets/images/webp/logopsychengine.webp",
     title: "Naomi FanCharts",
-    desc: "Friday Night Funkin' FNF' Naomi FanCharts Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 44.10MB",
+    desc: "Friday Night Funkin' FNF' Naomi FanCharts Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 79.87MB",
     version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
     downloads: [
-      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1uXJLV_0LdxY7JrEc4_E3Q2N8af1030XX/view?usp=drive_link" },
+      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1D5DI8TTZk83XX4l2KW0QDtWl3ZGwYgxe/view?usp=drive_link" },
     ]
   },
   mod98_9: {
@@ -874,6 +868,15 @@ const APK_DATA = {
 };
 
 window.openModInfo = (id) => { 
+  if (window.brokenLinksData && window.brokenLinksData[id] && !isSuperUser) {
+    // Sacamos el nombre del mod directo de la tarjeta para ponerlo en el letrero
+    const modName = document.querySelector('#card-' + id + ' h3').textContent;
+    document.getElementById('maintenance-mod-name').innerText = modName;
+    
+    // Mostramos el popup de mantenimiento en vez del normal
+    document.getElementById('maintenance-popup').classList.add('show');
+    return; // Este return corta la función para que NO se abra el popup de descargas
+  }
   const d = MOD_DATA[id]; 
   document.getElementById("popup-img").src = d.img; 
   document.getElementById("popup-title").innerText = d.title; 
@@ -1049,7 +1052,51 @@ setTimeout(() => {
     }
 }, 1000);
 
-window.rateItem = (type, stars) => {
+// ==========================================
+
+let globalRatings = {};
+window.currentItemRatingId = null;
+window.currentItemType = null;
+
+onValue(ref(db, 'ratings'), (snap) => {
+  globalRatings = snap.val() || {};
+
+  if (window.currentItemRatingId && window.currentItemType) {
+     window.loadItemRating(window.currentItemRatingId, window.currentItemType); 
+  }
+});
+
+setTimeout(() => {
+  if(window.openModInfo) {
+      const origModInfo = window.openModInfo;
+      window.openModInfo = (id) => { 
+        window.currentItemRatingId = id; 
+        window.currentItemType = 'mod';
+        origModInfo(id); 
+        window.loadItemRating(id, 'mod'); 
+      };
+  }
+  if(window.openApkInfo) {
+      const origApkInfo = window.openApkInfo;
+      window.openApkInfo = (id) => { 
+        window.currentItemRatingId = id; 
+        window.currentItemType = 'apk';
+        origApkInfo(id); 
+        window.loadItemRating(id, 'apk'); 
+      };
+  }
+  if(window.openScriptInfo) {
+      const origScriptInfo = window.openScriptInfo;
+      window.openScriptInfo = (id) => { 
+        window.currentItemRatingId = id; 
+        window.currentItemType = 'script';
+        origScriptInfo(id); 
+        window.loadItemRating(id, 'script'); 
+      };
+  }
+}, 1500);
+
+window.rateAppItem = async (type, stars) => {
   if (!window.currentItemRatingId) return;
   const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
   
@@ -1059,6 +1106,7 @@ window.rateItem = (type, stars) => {
   }
   
   const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
+
   if (myRates[window.currentItemRatingId]) {
       alert(currentLang === 'es' ? "Ya calificaste esto. ¡Gracias!" : "You already rated this. Thanks!");
       return;
@@ -1066,6 +1114,8 @@ window.rateItem = (type, stars) => {
   
   myRates[window.currentItemRatingId] = stars;
   localStorage.setItem('my_ratings', JSON.stringify(myRates));
+
+  await set(ref(db, `ratings/${window.currentItemRatingId}/${profile.key}`), stars);
   
   window.updateStarsUI(type, stars);
   const txt = document.getElementById(`${type}-rating-text`);
@@ -1076,16 +1126,33 @@ window.loadItemRating = (id, type) => {
     const container = document.getElementById(`rating-container-${type}`);
     if(!container) return;
     
-    const spans = container.querySelectorAll('span');
     const txt = document.getElementById(`${type}-rating-text`);
-    if(txt) txt.innerText = currentLang === 'es' ? "Califica este contenido" : "Rate this content";
-
     const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
+
+    const modRatings = globalRatings[id] || {};
+    const votosArray = Object.values(modRatings);
+    const totalVotos = votosArray.length;
+    let promedio = 0;
+    
+    if (totalVotos > 0) {
+      const suma = votosArray.reduce((acc, val) => acc + val, 0);
+      promedio = (suma / totalVotos).toFixed(1);
+    }
+
+    const spans = container.querySelectorAll('span');
+
     if (myRates[id]) {
         window.updateStarsUI(type, myRates[id]);
-        if(txt) txt.innerText = currentLang === 'es' ? "Tu calificación" : "Your rating";
+        if(txt) {
+          const baseText = currentLang === 'es' ? "Tu calificación" : "Your rating";
+          txt.innerText = totalVotos > 0 ? `${baseText} • Promedio: ${promedio} ⭐ (${totalVotos})` : baseText;
+        }
     } else {
-        spans.forEach(s => { s.style.color = 'gold'; s.style.textShadow = 'none'; });
+        spans.forEach(s => { s.style.color = '#555'; s.style.textShadow = 'none'; });
+        if(txt) {
+          const baseText = currentLang === 'es' ? "Califica este contenido" : "Rate this content";
+          txt.innerText = totalVotos > 0 ? `Promedio: ${promedio} ⭐ (${totalVotos}) • ${baseText}` : baseText;
+        }
     }
 };
 
@@ -1103,6 +1170,7 @@ window.updateStarsUI = (type, stars) => {
         }
     });
 };
+// ==========================================
 
 
     const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
@@ -1220,8 +1288,6 @@ window.updateStarsUI = (type, stars) => {
         document.getElementById('profile-popup').classList.remove('show');
         alert(window.currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
       };
-
-      // --- AJUSTES V5.2.0 (EVENTOS DE LOS BOTONES) ---
       
       const colorInput = document.getElementById('themeColor');
       if(colorInput) {
@@ -1322,7 +1388,6 @@ window.updateStarsUI = (type, stars) => {
           }
       };
 
-      // --- PÍLDORA iOS MAESTRA ---
       const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
       const isIOS = isTrueIOS || forceIOS;
@@ -1335,7 +1400,7 @@ window.updateStarsUI = (type, stars) => {
 
       const initAdminBtn = setInterval(() => {
           const btn = document.getElementById('btnForceIOS');
-          if (btn) { btn.innerHTML = forceIOS ? '🍏 Quitar Interfaz iOS' : '🍏 Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
+          if (btn) { btn.innerHTML = forceIOS ? 'Quitar Interfaz iOS' : 'Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
       }, 500);
 
       setTimeout(() => {
@@ -1418,3 +1483,268 @@ window.updateStarsUI = (type, stars) => {
           }
       }, 1000);
     });
+
+let newModsData = {};
+
+onValue(ref(db, 'new_mods_status'), (snap) => {
+  newModsData = snap.val() || {};
+
+  document.querySelectorAll('.mod-card').forEach(card => {
+    card.classList.remove('is-new-mod');
+  });
+
+  Object.keys(newModsData).forEach(cardId => {
+    if (newModsData[cardId] === true) {
+      const cardElement = document.getElementById(cardId); 
+      if (cardElement) {
+        cardElement.classList.add('is-new-mod');
+      }
+    }
+  });
+});
+
+window.toggleNewMod = async (cardId) => {
+  if (!isSuperUser) {
+    alert("No tienes permisos de administrador.");
+    return;
+  }
+  
+  const isCurrentlyNew = newModsData[cardId] === true;
+
+  if (confirm(isCurrentlyNew ? "¿Quitar la etiqueta de NUEVO a este mod?" : "¿Marcar este mod como NUEVO?")) {
+
+    await set(ref(db, `new_mods_status/${cardId}`), isCurrentlyNew ? null : true);
+    
+  }
+};
+
+// ==========================================
+window.brokenLinksData = {};
+
+onValue(ref(db, 'broken_links'), (snap) => {
+  window.brokenLinksData = snap.val() || {};
+  
+  document.querySelectorAll('.mod-card').forEach(card => {
+    const exactModId = card.id.replace('card-', ''); 
+    if (window.brokenLinksData[exactModId]) {
+      card.classList.add('is-broken-mod'); 
+    } else {
+      card.classList.remove('is-broken-mod'); 
+    }
+  });
+});
+
+window.reportError = async (modId) => {
+  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
+  
+  if (!user) {
+    document.getElementById('register-popup').classList.add('show');
+    return;
+  }
+  
+  if (confirm('🚨 ¿ESTÁS SEGURO? Esto apagará la descarga para todos y alertará al administrador.')) {
+    
+    await set(ref(db, `broken_links/${modId}`), {
+      reportedBy: user.name,
+      timestamp: Date.now()
+    });
+
+    alert('🛑 ¡MOD BLOQUEADO! El Administrador ha sido notificado.');
+
+    let modName = "Nombre Desconocido";
+    const modTitleElement = document.querySelector('#card-' + modId + ' h3');
+    if (modTitleElement) {
+      modName = modTitleElement.textContent.trim();
+    }
+
+    const botToken = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI"; 
+    const chatId = "5429172831"; 
+
+    const mensaje = `🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${user.name}* reportó el problema de un enlace caido:\n\n📦 Mod: *${modName}*\n🆔 ID: \`${modId}\`\n\n🛑El Mod a sido puesto en cuarentena automáticamente.\n\n🛠️ ¡Entra a repararlo!`;
+    
+    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    
+    fetch(telegramUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: mensaje, parse_mode: "Markdown" })
+    }).catch(error => console.error("Error Telegram:", error));
+  }
+};
+
+window.fixBrokenLink = async (modId) => {
+  if (!isSuperUser) return; 
+  if (confirm('🛠️ ¿Ya solucionaste el link de este mod?')) {
+    await set(ref(db, `broken_links/${modId}`), null);
+  }
+};
+// ==========================================
+
+onValue(ref(db, 'ratings'), (snap) => {
+  const ratingsData = snap.val() || {};
+  const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+  const miLlave = userProfile ? userProfile.key : null;
+
+  document.querySelectorAll('.mod-card').forEach(card => {
+    const exactModId = card.id.replace('card-', ''); 
+    const modRatings = ratingsData[exactModId] || {};
+
+    const votosArray = Object.values(modRatings);
+    const totalVotos = votosArray.length;
+    let promedio = 0;
+    
+    if (totalVotos > 0) {
+      const suma = votosArray.reduce((acc, val) => acc + val, 0);
+      promedio = (suma / totalVotos).toFixed(1);
+    }
+
+    const textoPromedio = document.getElementById(`rating-text-${exactModId}`);
+    if (textoPromedio) {
+      textoPromedio.innerText = `${promedio} ⭐ (${totalVotos})`;
+    }
+
+    const starsContainer = document.getElementById(`stars-${exactModId}`);
+    if (starsContainer) {
+      const miVotoAnterior = miLlave ? modRatings[miLlave] : 0;
+      const spans = starsContainer.querySelectorAll('span');
+      
+      spans.forEach(span => {
+        const valorEstrella = parseInt(span.getAttribute('data-val'));
+        if (miVotoAnterior >= valorEstrella) {
+          span.innerText = '★';
+          span.style.color = '#ffd700';
+          span.style.textShadow = '0 0 8px #ffd700';
+        } else {
+          span.innerText = '☆';
+          span.style.color = '#555';
+          span.style.textShadow = 'none';
+        }
+      });
+    }
+  });
+});
+
+window.rateMod = async (modId, calificacion) => {
+  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
+  
+  if (!user) {
+    document.getElementById('register-popup').classList.add('show');
+    return;
+  }
+
+  await set(ref(db, `ratings/${modId}/${user.key}`), calificacion);
+
+  if(window.triggerVibrate) window.triggerVibrate(15);
+};
+// ==========================================
+
+window.toggleFaq = function(button) {
+  button.classList.toggle('active');
+
+  const content = button.nextElementSibling;
+  
+  if (content.classList.contains('open')) {
+    content.classList.remove('open');
+  } else {
+    content.classList.add('open');
+  }
+
+  if(window.triggerVibrate) window.triggerVibrate(10);
+};
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const modToUnlock = urlParams.get('unlock');
+
+  if (modToUnlock) {
+    let misSecretos = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
+    if (!misSecretos.includes(modToUnlock)) {
+      misSecretos.push(modToUnlock);
+      localStorage.setItem('unlocked_mods', JSON.stringify(misSecretos));
+      
+      setTimeout(() => {
+        document.getElementById('secret-unlocked-popup').classList.add('show');
+        if(window.triggerVibrate) window.triggerVibrate([30, 50, 30]);
+      }, 1000);
+    }
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  const misSecretosGuardados = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
+  
+  const esAdmin = localStorage.getItem('superUser') === 'true';
+
+  document.querySelectorAll('.secret-mod').forEach(card => {
+
+    const exactId = card.id.replace('card-', ''); 
+
+    if (misSecretosGuardados.includes(exactId) || esAdmin) {
+      card.classList.remove('hidden');
+    }
+  });
+});
+// ==========================================
+
+let linkParaCompartir = "";
+let textoParaCompartir = "";
+
+window.abrirMenuCompartir = (id, nombreMod) => {
+  const baseUrl = window.location.origin + window.location.pathname;
+  linkParaCompartir = `${baseUrl}?share=${id}`;
+  textoParaCompartir = `¡Mira esto: *${nombreMod}*! Descárgalo aquí:\n`;
+
+  document.getElementById('share-modal').classList.add('show');
+};
+
+window.enviarWhatsApp = () => {
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoParaCompartir + linkParaCompartir)}`;
+  window.open(url, '_blank');
+};
+
+window.enviarTelegram = () => {
+  const url = `https://t.me/share/url?url=${encodeURIComponent(linkParaCompartir)}&text=${encodeURIComponent(textoParaCompartir)}`;
+  window.open(url, '_blank');
+};
+
+window.copiarEnlace = () => {
+  navigator.clipboard.writeText(textoParaCompartir + linkParaCompartir).then(() => {
+    const msg = document.getElementById('mensaje-copiado');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+  });
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const idCompartido = urlParams.get('share');
+
+  if (idCompartido) {
+    
+
+    setTimeout(() => {
+
+      if (idCompartido.includes('mod') && window.openModInfo) {
+        window.openModInfo(idCompartido);
+      } else if (idCompartido.includes('apk') && window.openApkInfo) {
+        window.openApkInfo(idCompartido);
+      } else if (idCompartido.includes('script') && window.openScriptInfo) {
+        window.openScriptInfo(idCompartido);
+      }
+
+      const contenidoPopup = document.querySelector('#mod-info-popup .popup-content') || document.querySelector('.popup.show .popup-content');
+      
+      if (contenidoPopup) {
+        contenidoPopup.classList.add('brillo-epico');
+
+        setTimeout(() => {
+          contenidoPopup.classList.remove('brillo-epico');
+        }, 6000);
+      }
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+    }, 1000);
+  }
+});
