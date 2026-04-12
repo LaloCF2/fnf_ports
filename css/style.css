@@ -832,7 +832,7 @@ body.is-admin .admin-fix-btn {
 .notif-container {
   position: fixed;
   top: 70px;
-  right: 200px;
+  right: 420px;
   z-index: 9999;
 }
 
