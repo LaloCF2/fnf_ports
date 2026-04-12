@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v5.1.0";
+const APP_VERSION = "v5.1.1";
 const MI_UID_ADMIN = "user_a655u37rr"; 
 
 let isSuperUser = false;
@@ -558,7 +558,18 @@ const SCRIPTS_DATA = {
         downloads: [
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
         ]
-      }
+      },
+    script3: {
+        title: "Controller Engine",
+        desc: "Este script agrega un mando virtual a tu juego psych engine dandole una apariencia igual al de Gombo Cat.\nTotalmente funcional para Pc, Android y iOS.",
+        version: "v1.0",
+        images: [
+          "assets/images/scripts/mc1.webp"
+        ],
+        downloads: [
+          { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/Controller-Engine" },
+        ]
+      },
     };
 
 let scriptImagesArray = [];
@@ -605,6 +616,16 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+  mod98_7: {
+    img: "assets/images/webp/FromTheTop.webp",
+    title: "From The Top!",
+    desc: "Friday Night Funkin' FNF' From The Top! Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 303.00MB",
+    version: "Compatible solo con la base Optimizada de Psych Engine v1.0.4",
+    downloads: [
+      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1D5DI8TTZk83XX4l2KW0QDtWl3ZGwYgxe/view?usp=drive_link" },
+      { name: "Descarga Psych Engine Opt", link: "https://lalocf2.github.io/fnf_ports/?share=apk1" }
+    ]
+  },
    mod98_8: {
     img: "assets/images/webp/logopsychengine.webp",
     title: "Naomi FanCharts",
@@ -750,9 +771,9 @@ const APK_DATA = {
       { name: "Descarga Directa Windows32 (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
       { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
       { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
+      { name: "Descarga Directa Android Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
       { name: "Descarga Android No Optimizado (GitHub)", link: "https://github.com/LaloCF2/fnf_ports/releases/download/Psych-Engine-v1.0.4/Friday.Night.Funkin.Psych.Engine_0.2.8.apk" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
+      { name: "Descarga Directa iOS Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
     ]
   },
   apk2: {
@@ -869,13 +890,11 @@ const APK_DATA = {
 
 window.openModInfo = (id) => { 
   if (window.brokenLinksData && window.brokenLinksData[id] && !isSuperUser) {
-    // Sacamos el nombre del mod directo de la tarjeta para ponerlo en el letrero
     const modName = document.querySelector('#card-' + id + ' h3').textContent;
     document.getElementById('maintenance-mod-name').innerText = modName;
-    
-    // Mostramos el popup de mantenimiento en vez del normal
+
     document.getElementById('maintenance-popup').classList.add('show');
-    return; // Este return corta la función para que NO se abra el popup de descargas
+    return;
   }
   const d = MOD_DATA[id]; 
   document.getElementById("popup-img").src = d.img; 
