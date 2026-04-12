@@ -1704,35 +1704,19 @@
   let notificacionesBD = []; 
   let idNotificacionesLeidas = JSON.parse(localStorage.getItem('notifsLeidas')) || [];
 
-  // --- EL DETECTOR DE ADMIN DEFINITIVO ---
   function comprobarSiEsAdmin() {
-    const params = new URLSearchParams(window.location.search);
-    
-    // Si quieres cerrar sesión como admin, pon ?salir=true en tu enlace
-    if (params.has('salir')) {
-      localStorage.removeItem('modo_patron_activado');
-      return false;
-    }
-
-    // 1. Si entraste con tu enlace secreto, te guardamos la llave maestra
-    if (params.has('set_admin')) {
-      localStorage.setItem('modo_patron_activado', 'true');
+    if (window.location.href.includes('set_admin')) {
+      localStorage.setItem('llave_maestra_notif', 'true');
       return true;
     }
-
-    // 2. Si ya tienes la llave maestra guardada
-    if (localStorage.getItem('modo_patron_activado') === 'true') return true;
-
-    // 3. Revisamos variables antiguas por si acaso
-    const posiblesVariables = ['isAdmin', 'admin', 'adminMode', 'admin_mode', 'is_admin', 'admin_logged'];
-    for (let v of posiblesVariables) {
-      if (localStorage.getItem(v) === 'true' || sessionStorage.getItem(v) === 'true') {
-        localStorage.setItem('modo_patron_activado', 'true'); // Te actualiza a la llave nueva
-        return true;
-      }
+    if (window.location.href.includes('salir_admin')) {
+      localStorage.removeItem('llave_maestra_notif');
+      return false;
     }
-
-    return false; // Mortal detectado
+    if (localStorage.getItem('llave_maestra_notif') === 'true') {
+      return true;
+    }
+    return false;
   }
 
   window.toggleNotificaciones = function() {
@@ -1743,12 +1727,8 @@
 
     if (!panel.classList.contains('hidden')) {
       window.marcarComoLeidas();
-      
-      if (comprobarSiEsAdmin()) {
-        adminArea.style.display = 'block'; 
-      } else {
-        adminArea.style.display = 'none';
-      }
+      const esAdmin = comprobarSiEsAdmin();
+      adminArea.style.display = esAdmin ? 'block' : 'none';
     }
   }
 
@@ -1823,10 +1803,12 @@
     const txtArea = document.getElementById('txt-nueva-notif');
     const texto = txtArea.value.trim();
     if (texto === '') return;
+    
     const fechaActual = new Date().toLocaleString('es-MX', { 
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit' 
     });
+    
     const idUnico = 'notif_' + Date.now();
     set(ref(db, 'notificaciones/' + idUnico), {
       id: idUnico, texto: texto, fecha: fechaActual
@@ -1857,6 +1839,47 @@
       notificacionesBD.push(childSnapshot.val());
     });
     window.renderizarNotificaciones();
+  });
+
+  // ========================================================
+  // 🚀 LA PUERTA TRASERA (TRUCO SECRETO PARA EL PATRÓN)
+  // ========================================================
+  document.addEventListener('DOMContentLoaded', () => {
+    const headerNotif = document.querySelector('.notif-header');
+    let clicksSecretos = 0;
+    let timerSecreto;
+
+    if(headerNotif) {
+      // Usamos mousedown y touchstart para que registre bien el click aunque lo arrastres
+      headerNotif.addEventListener('mousedown', contarClick);
+      headerNotif.addEventListener('touchstart', contarClick, {passive: true});
+
+      function contarClick(e) {
+        // Ignorar si tocaste el botón de cerrar
+        if(e.target.classList.contains('close-notif')) return;
+        
+        clicksSecretos++;
+        clearTimeout(timerSecreto);
+        
+        if(clicksSecretos === 5) {
+          const pass = prompt('Clave del Patrón para Notificaciones:');
+          if(pass === '2122') {
+            localStorage.setItem('llave_maestra_notif', 'true');
+            alert('¡Listo jefe! Controles de administrador desbloqueados.');
+            
+            // Aparecer las cosas mágicamente
+            document.getElementById('admin-notif-area').style.display = 'block';
+            window.renderizarNotificaciones();
+          } else if (pass !== null) {
+            alert('Clave incorrecta.');
+          }
+          clicksSecretos = 0;
+        }
+        
+        // Si no completas los 5 toques en 1.5 segundos, se reinicia
+        timerSecreto = setTimeout(() => { clicksSecretos = 0; }, 1500);
+      }
+    }
   });
 </script>
 
