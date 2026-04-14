@@ -617,7 +617,7 @@ window.prevScriptImage = () => {
 
 const MOD_DATA = {
   mod98_7: {
-    img: "assets/images/webp/FromTheTop.webp",
+    img: "assets/images/mods/FromTheTop.webp",
     title: "From The Top!",
     desc: "Friday Night Funkin' FNF' From The Top! Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 303.00MB",
     version: "Compatible solo con la base Optimizada de Psych Engine v1.0.4",
