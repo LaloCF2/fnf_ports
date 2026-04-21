@@ -616,6 +616,17 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+    },
+  mod98_6: {
+    img: "assets/images/mods/II.webp",
+    title: "TKOII FanChart",
+    desc: "Friday Night Funkin' FNF' TKOII FanChart Port Opt Psych Engine Optimizado Para (Pc/Android).",
+    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+    downloads: [
+      { name: "Descarga Opt (Drive Directo)", link: "https://drive.usercontent.google.com/u/0/uc?id=1-yHWdTsXn4trZeuO2MhJAV1ZnVrlhPfG&export=download" },
+      { name: "Descarga ReOpt (Drive Directo)", link: "https://drive.usercontent.google.com/u/0/uc?id=1V0wOiJws3Z0xgnMJ2PiHfa3zd4w3OklO&export=download" }
+    ]
+  },
   mod98_7: {
     img: "assets/images/mods/FromTheTop.webp",
     title: "From The Top!",
