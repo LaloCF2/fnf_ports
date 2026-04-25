@@ -481,7 +481,7 @@ body.ios-theme .like-container, body.ios-theme .dl-counter, body.ios-theme .serv
 
     @keyframes spinSettings { 100% { transform: rotate(360deg); } }
     .settings-btn { 
-        display: block; position: fixed; top: 80px; right: 30px; z-index: 9999; 
+        display: block; position: fixed; top: 80px; right: 20px; z-index: 9999; 
         font-size: 24px; cursor: pointer; transition: transform 0.3s ease; user-select: none; text-shadow: 0 0 10px var(--neon-blue);
     }
     .settings-btn:hover, .settings-btn:active { animation: spinSettings 2s linear infinite; }
@@ -829,150 +829,205 @@ body.is-admin .admin-fix-btn {
 .btn-telegram { background: #0088cc; color: white; }
 .btn-copiar { background: #333; color: white; border: 1px solid #fff; }
 
+/* =========================================
+   🔔 SISTEMA DE NOTIFICACIONES (CAPA SUPERIOR)
+   ========================================= */
+
+/* 1. EL BOTÓN (Fijo y Responsivo) */
 .notif-container {
   position: fixed;
-  top: 70px;
-  right: 420px;
-  z-index: 9999;
+  top: 75px;      
+  right: 50px;   /* Ajustado para no chocar con Ajustes/Perfil */
+  z-index: 99999; /* Valor muy alto para estar encima de todo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .notif-bell-btn {
-  background-color: transparent !important;
-  background: transparent;
+  background: transparent !important; /* Fuerza la transparencia total */
   border: none !important;
   outline: none !important;
   cursor: pointer;
-  position: relative;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .notif-bell-btn img {
-  width: 35px;
-  height: 35px;
-  filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5));
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(0, 234, 255, 0.5));
   transition: transform 0.2s;
 }
 
-.notif-bell-btn:hover img {
-  transform: scale(1.1) rotate(5deg);
-}
-
+/* El punto rojo */
 .notif-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  background: linear-gradient(135deg, #ff4444, #cc0000);
-  color: white;
-  font-size: 11px;
+  top: -2px;
+  right: -2px;
+  background: #ff003c;
+  color: #fff;
+  font-size: 10px;
   font-weight: bold;
-  padding: 3px 6px;
+  min-width: 16px;
+  height: 16px;
   border-radius: 50%;
-  border: 2px solid #111;
-  box-shadow: 0 2px 5px rgba(255,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #000;
+  box-shadow: 0 0 8px rgba(255, 0, 60, 0.6);
+  pointer-events: none;
 }
 
+/* 2. LA VENTANA (Estética Cristal y Capa Máxima) */
 .notif-panel {
-  position: absolute;
-  top: 50px;
-  right: 0;
+  position: fixed;
+  top: 65px;
+  right: 15px;
   width: 340px;
-  max-height: 480px;
-
-  background: rgba(20, 20, 20, 0.85);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  
-  border: 1px solid rgba(0, 234, 255, 0.2);
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  
+  max-width: 92vw; /* Se adapta a cualquier celular */
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 234, 255, 0.4);
+  border-radius: 18px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
-  z-index: 10000;
+  z-index: 100000; /* Un nivel más arriba que el botón */
   overflow: hidden;
-
   transition: opacity 0.3s ease, transform 0.3s ease;
-  transform: translateY(0);
-  opacity: 1;
 }
 
 .notif-panel.hidden {
   display: none;
+  opacity: 0;
+  transform: translateY(-15px);
 }
 
 .notif-header {
-  background: rgba(0, 0, 0, 0.4);
-  padding: 16px 20px;
+  padding: 14px 18px;
+  background: rgba(0, 234, 255, 0.12);
+  border-bottom: 1px solid rgba(0, 234, 255, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 234, 255, 0.15);
 }
 
 .notif-header h3 {
   margin: 0;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-size: 15px;
+  color: #00eaff;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  text-shadow: 0 0 8px rgba(0, 234, 255, 0.5);
 }
 
 .close-notif {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   cursor: pointer;
-  font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
-}
-.close-notif:hover {
-  background: #ff4444;
+  font-size: 12px;
 }
 
+/* 3. MENSAJES Y TEXTO (Alineación Corregida) */
+.notif-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+/* Scrollbar personalizada para que no se vea vieja */
+.notif-list::-webkit-scrollbar { width: 5px; }
+.notif-list::-webkit-scrollbar-thumb { background: rgba(0, 234, 255, 0.4); border-radius: 10px; }
+
+.notif-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 12px; 
+  margin-bottom: 12px;
+  border-left: 4px solid #00eaff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.notif-text {
+  color: #f0f0f0;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 6px 0;
+  text-align: left; /* Alineado correctamente a la izquierda */
+  word-wrap: break-word;
+}
+
+.notif-date {
+  display: block;
+  font-size: 10px;
+  color: #888;
+  text-align: right;
+}
+
+/* Área de escritura del Admin */
 .admin-area {
   padding: 15px;
-  background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(0, 234, 255, 0.1);
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(0, 234, 255, 0.2);
 }
+
 .admin-area textarea {
   width: 100%;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  height: 75px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 234, 255, 0.3);
+  border-radius: 10px;
+  color: #fff;
   padding: 10px;
+  font-size: 13px;
   resize: none;
-  font-family: inherit;
-  font-size: 14px;
   box-sizing: border-box;
-}
-.admin-area textarea:focus {
   outline: none;
-  border-color: #00eaff;
-  background: rgba(0, 234, 255, 0.05);
 }
+
+.admin-area textarea:focus {
+  border-color: #00eaff;
+  box-shadow: 0 0 10px rgba(0, 234, 255, 0.2);
+}
+
 .btn-enviar-notif {
   width: 100%;
   margin-top: 10px;
   background: linear-gradient(135deg, #00ff41, #00cc33);
-  color: black;
+  color: #000;
   border: none;
   padding: 10px;
   border-radius: 8px;
-  font-weight: 800;
+  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 255, 65, 0.2);
-  transition: transform 0.2s;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
 }
-.btn-enviar-notif:hover {
-  transform: translateY(-2px);
+
+/* AJUSTE PARA CELULARES */
+@media screen and (max-width: 600px) {
+  .notif-container {
+    right: 65px; /* Se acomoda mejor en pantallas pequeñas */
+  }
+  .notif-panel {
+    width: 300px;
+    right: 10px;
+    top: 60px;
+  }
 }
 
 .notif-list {
