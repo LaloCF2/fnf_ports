@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v5.1.1";
+const APP_VERSION = "v5.1.2";
 const MI_UID_ADMIN = "user_a655u37rr"; 
 
 let isSuperUser = false;
@@ -616,24 +616,32 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
-    },
-  mod98_6: {
-    img: "assets/images/mods/II.webp",
-    title: "TKOII FanChart",
-    desc: "Friday Night Funkin' FNF' TKOII FanChart Port Opt Psych Engine Optimizado Para (Pc/Android).",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
-    downloads: [
+     mod98_5: {
+   img: "assets/images/mods/fruit.webp",
+   title: "FruitNinja V1.5",
+   desc: "Friday Night Funkin' FNF' FruitNinja V1.5 Port Opt Psych Engine Optimizado Para (Pc/Android).",
+   version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+   downloads: [
+      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Fruit/FruitNinja.v1.5.zip" }
+    ]
+  },
+   mod98_6: {
+   img: "assets/images/mods/II.webp",
+   title: "TKOII FanChart",
+   desc: "Friday Night Funkin' FNF' TKOII FanChart Port Opt Psych Engine Optimizado Para (Pc/Android).",
+   version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+   downloads: [
       { name: "Descarga Opt (Drive Directo)", link: "https://drive.usercontent.google.com/u/0/uc?id=1-yHWdTsXn4trZeuO2MhJAV1ZnVrlhPfG&export=download" },
       { name: "Descarga ReOpt (Drive Directo)", link: "https://drive.usercontent.google.com/u/0/uc?id=1V0wOiJws3Z0xgnMJ2PiHfa3zd4w3OklO&export=download" }
     ]
   },
   mod98_7: {
-    img: "assets/images/mods/FromTheTop.webp",
+    img: "assets/images/webp/FromTheTop.webp",
     title: "From The Top!",
     desc: "Friday Night Funkin' FNF' From The Top! Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 303.00MB",
     version: "Compatible solo con la base Optimizada de Psych Engine v1.0.4",
     downloads: [
-      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/fft/From.the.Top.Port.zip" },
+      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1D5DI8TTZk83XX4l2KW0QDtWl3ZGwYgxe/view?usp=drive_link" },
       { name: "Descarga Psych Engine Opt", link: "https://lalocf2.github.io/fnf_ports/?share=apk1" }
     ]
   },
