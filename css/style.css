@@ -3,6 +3,7 @@
   src: url("../assets/fonts/funkin.ttf") format("opentype");
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 body {
@@ -830,22 +831,21 @@ body.is-admin .admin-fix-btn {
 .btn-copiar { background: #333; color: white; border: 1px solid #fff; }
 
 /* =========================================
-   🔔 SISTEMA DE NOTIFICACIONES (CAPA SUPERIOR)
+   SISTEMA DE NOTIFICACIONES
    ========================================= */
 
-/* 1. EL BOTÓN (Fijo y Responsivo) */
 .notif-container {
   position: fixed;
   top: 75px;      
-  right: 50px;   /* Ajustado para no chocar con Ajustes/Perfil */
-  z-index: 99999; /* Valor muy alto para estar encima de todo */
+  right: 50px;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .notif-bell-btn {
-  background: transparent !important; /* Fuerza la transparencia total */
+  background: transparent !important;
   border: none !important;
   outline: none !important;
   cursor: pointer;
@@ -864,7 +864,6 @@ body.is-admin .admin-fix-btn {
   transition: transform 0.2s;
 }
 
-/* El punto rojo */
 .notif-badge {
   position: absolute;
   top: -2px;
@@ -884,13 +883,12 @@ body.is-admin .admin-fix-btn {
   pointer-events: none;
 }
 
-/* 2. LA VENTANA (Estética Cristal y Capa Máxima) */
 .notif-panel {
   position: fixed;
   top: 65px;
   right: 15px;
   width: 340px;
-  max-width: 92vw; /* Se adapta a cualquier celular */
+  max-width: 92vw;
   background: rgba(10, 10, 10, 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -899,7 +897,7 @@ body.is-admin .admin-fix-btn {
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
-  z-index: 100000; /* Un nivel más arriba que el botón */
+  z-index: 100000;
   overflow: hidden;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -942,14 +940,12 @@ body.is-admin .admin-fix-btn {
   font-size: 12px;
 }
 
-/* 3. MENSAJES Y TEXTO (Alineación Corregida) */
 .notif-list {
   max-height: 400px;
   overflow-y: auto;
   padding: 15px;
 }
 
-/* Scrollbar personalizada para que no se vea vieja */
 .notif-list::-webkit-scrollbar { width: 5px; }
 .notif-list::-webkit-scrollbar-thumb { background: rgba(0, 234, 255, 0.4); border-radius: 10px; }
 
@@ -967,7 +963,7 @@ body.is-admin .admin-fix-btn {
   font-size: 14px;
   line-height: 1.5;
   margin: 0 0 6px 0;
-  text-align: left; /* Alineado correctamente a la izquierda */
+  text-align: left;
   word-wrap: break-word;
 }
 
@@ -978,7 +974,6 @@ body.is-admin .admin-fix-btn {
   text-align: right;
 }
 
-/* Área de escritura del Admin */
 .admin-area {
   padding: 15px;
   background: rgba(0, 0, 0, 0.5);
@@ -1018,10 +1013,9 @@ body.is-admin .admin-fix-btn {
   box-shadow: 0 4px 15px rgba(0, 255, 65, 0.3);
 }
 
-/* AJUSTE PARA CELULARES */
 @media screen and (max-width: 600px) {
   .notif-container {
-    right: 65px; /* Se acomoda mejor en pantallas pequeñas */
+    right: 65px;
   }
   .notif-panel {
     width: 300px;
@@ -1087,3 +1081,56 @@ body.is-admin .admin-fix-btn {
 .status-dot.green { background-color: #00ff41; box-shadow: 0 0 8px #00ff41; }
 .status-dot.yellow { background-color: #ffcc00; box-shadow: 0 0 8px #ffcc00; }
 .status-dot.red { background-color: #ff3366; box-shadow: 0 0 8px #ff3366; }
+
+
+/* =========================================
+   🚀 SISTEMA DE RENDIMIENTO Y CARGA (LAZY)
+   ========================================= */
+.card-media, .mod-img-container, .apk-img-container {
+  position: relative;
+  min-height: 120px; /* Espacio para que gire la ruedita */
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* La ruedita de carga neón */
+.ruedita-cargando {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(0, 234, 255, 0.1);
+  border-top: 3px solid #00eaff;
+  border-radius: 50%;
+  animation: girar 0.8s linear infinite;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+@keyframes girar {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Las imágenes de los mods */
+.img-lazy-cargada {
+  position: relative;
+  z-index: 2; /* Se pone por encima de la ruedita cuando ya cargó */
+  animation: aparecer 0.5s ease-in;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* =========================================
+   🚀 RENDERIZADO INTELIGENTE (CPU HACK)
+   ========================================= */
+/* Aplica esto a las cajas que contienen tus mods, bases y scripts */
+section, .mod-grid, .apk-grid, .script-grid {
+  content-visibility: auto;
+  contain-intrinsic-size: 500px; /* Le dice al navegador un tamaño aproximado para que no brinque la pantalla */
+}
