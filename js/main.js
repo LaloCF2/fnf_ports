@@ -13,7 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v5.1.2";
+const APP_VERSION = "v5.2.0";
 const MI_UID_ADMIN = "user_a655u37rr"; 
 
 let isSuperUser = false;
@@ -570,6 +570,22 @@ const SCRIPTS_DATA = {
           { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/Controller-Engine" },
         ]
       },
+     script4: {
+        title: "MobileFPSOverlay",
+        desc: "Este script agrega un contador de fotogramas por segundo a FNF Mobile V-Slice.\nTotalmente funcional para Android y iOS.",
+        version: "v1.0.0",
+        images: [
+          "assets/images/scripts/MFO/mfo.webp",
+          "assets/images/scripts/MFO/mfo2.webp",
+          "assets/images/scripts/MFO/mfo3.webp",
+          "assets/images/scripts/MFO/mfo4.webp",
+          "assets/images/scripts/MFO/mfo5.webp",
+          "assets/images/scripts/MFO/mfo6.webp"
+        ],
+        downloads: [
+          { name: "Descarga Script Directo (GitHub)", link: "https://drive.google.com/file/d/1iII6AmCmmckdtpNR0NX7K4ZbN1FvaQfF/view?usp=drive_link" }
+        ]
+      },
     };
 
 let scriptImagesArray = [];
@@ -622,7 +638,8 @@ const MOD_DATA = {
    desc: "Friday Night Funkin' FNF' FruitNinja V1.5 Port Opt Psych Engine Optimizado Para (Pc/Android).",
    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
    downloads: [
-      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Fruit/FruitNinja.v1.5.zip" }
+      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Fruit/FruitNinja.v1.5.zip" },
+      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1y239op0zuYMUJiaSK5oDrUQnhKr9E1mG/view?usp=drive_link" }
     ]
   },
    mod98_6: {
@@ -1208,6 +1225,7 @@ window.updateStarsUI = (type, stars) => {
         }
     });
 };
+
 // ==========================================
 
 
@@ -1557,6 +1575,7 @@ window.toggleNewMod = async (cardId) => {
 };
 
 // ==========================================
+
 window.brokenLinksData = {};
 
 onValue(ref(db, 'broken_links'), (snap) => {
@@ -1616,6 +1635,7 @@ window.fixBrokenLink = async (modId) => {
     await set(ref(db, `broken_links/${modId}`), null);
   }
 };
+
 // ==========================================
 
 onValue(ref(db, 'ratings'), (snap) => {
@@ -1674,6 +1694,7 @@ window.rateMod = async (modId, calificacion) => {
 
   if(window.triggerVibrate) window.triggerVibrate(15);
 };
+
 // ==========================================
 
 window.toggleFaq = function(button) {
@@ -1689,6 +1710,7 @@ window.toggleFaq = function(button) {
 
   if(window.triggerVibrate) window.triggerVibrate(10);
 };
+
 // ==========================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1723,6 +1745,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
 // ==========================================
 
 let linkParaCompartir = "";
@@ -1786,3 +1809,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 });
+
+// ==========================================
+//  OPTIMIZACIÓN GLOBAL
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+  const todasLasImagenes = document.querySelectorAll('img');
+
+  todasLasImagenes.forEach(img => {
+    if(img.src.includes('assets/images/mods') || img.src.includes('webp')) {
+
+      img.setAttribute('loading', 'lazy');
+      
+      const contenedor = img.parentElement;
+      if(contenedor) {
+        contenedor.style.position = 'relative';
+        
+        const ruedita = document.createElement('div');
+        ruedita.className = 'ruedita-cargando';
+        contenedor.insertBefore(ruedita, img);
+
+        img.onload = () => {
+          ruedita.style.display = 'none';
+          img.classList.add('img-lazy-cargada');
+        };
+      }
+    }
+  });
+});
+
+// ==========================================
+//  MODO OFFLINE (SERVICE WORKER)
+// ==========================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(registro => {
+        console.log('¡Modo Offline activado! Alcance:', registro.scope);
+      })
+      .catch(error => {
+        console.log('Falló el Service Worker:', error);
+      });
+  });
+}
