@@ -393,24 +393,39 @@ window.setFilter = (filter, btn) => {
   filterContent();
 };
 
-window.filterContent = () => {
-  const search = document.getElementById('globalSearch').value.toLowerCase();
-  const items = document.querySelectorAll('.mod-card');
-  const apks = document.querySelectorAll('.apk-card');
-  
-  items.forEach(item => {
-    if(item.classList.contains('coming-soon-card')) return;
-    const title = item.querySelector('h3').innerText.toLowerCase();
-    const itemGama = item.getAttribute('data-gama') || 'mid';
-    const matchesSearch = title.includes(search);
-    const matchesFilter = currentFilter === 'all' || itemGama === currentFilter;
-    item.style.display = (matchesSearch && matchesFilter) ? "block" : "none";
-  });
+// ==========================================
+// 🚀 BUSCADOR OPTIMIZADO (DEBOUNCE)
+// ==========================================
+let tiempoEsperaBusqueda;
 
-  apks.forEach(apk => {
-    const title = apk.querySelector('h3').innerText.toLowerCase();
-    apk.style.display = title.includes(search) ? "block" : "none";
-  });
+window.filterContent = () => {
+  // 1. Cancelamos la búsqueda si el usuario sigue escribiendo rápido
+  clearTimeout(tiempoEsperaBusqueda);
+  
+  // 2. Esperamos un mini-segundo (300ms) antes de buscar
+  tiempoEsperaBusqueda = setTimeout(() => {
+    
+    // 👇 ESTE ES TU CÓDIGO ORIGINAL (INTACTO) 👇
+    const search = document.getElementById('globalSearch').value.toLowerCase();
+    const items = document.querySelectorAll('.mod-card');
+    const apks = document.querySelectorAll('.apk-card');
+    
+    items.forEach(item => {
+      if(item.classList.contains('coming-soon-card')) return;
+      const title = item.querySelector('h3').innerText.toLowerCase();
+      const itemGama = item.getAttribute('data-gama') || 'mid';
+      const matchesSearch = title.includes(search);
+      const matchesFilter = typeof currentFilter !== 'undefined' ? (currentFilter === 'all' || itemGama === currentFilter) : true; 
+      item.style.display = (matchesSearch && matchesFilter) ? "block" : "none";
+    });
+
+    apks.forEach(apk => {
+      const title = apk.querySelector('h3').innerText.toLowerCase();
+      apk.style.display = title.includes(search) ? "block" : "none";
+    });
+    // 👆 FIN DE TU CÓDIGO ORIGINAL 👆
+
+  }, 300); // 300 milisegundos de respiro para el celular
 };
 
 async function checkBanStatus() {
@@ -573,7 +588,7 @@ const SCRIPTS_DATA = {
      script4: {
         title: "MobileFPSOverlay",
         desc: "Este script agrega un contador de fotogramas por segundo a FNF Mobile V-Slice.\nTotalmente funcional para Android y iOS.",
-        version: "v1.0.0",
+        version: "v1.1.0",
         images: [
           "assets/images/scripts/MFO/mfo.webp",
           "assets/images/scripts/MFO/mfo2.webp",
@@ -583,7 +598,7 @@ const SCRIPTS_DATA = {
           "assets/images/scripts/MFO/mfo6.webp"
         ],
         downloads: [
-          { name: "Descarga Script Directo (GitHub)", link: "https://drive.google.com/file/d/1iII6AmCmmckdtpNR0NX7K4ZbN1FvaQfF/view?usp=drive_link" }
+          { name: "Descarga Script Directo (GitHub)", link: "https://drive.google.com/file/d/1l2FaGqINbPzOp6-SgiFGwwUr1v8IjTKZ/view?usp=drive_link" }
         ]
       },
     };
@@ -618,6 +633,8 @@ window.openScriptInfo = (id) => {
 
   document.getElementById("script-popup").classList.add("show");
 };
+
+
 
 window.closeScriptInfo = () => document.getElementById("script-popup").classList.remove("show");
 
@@ -1811,28 +1828,49 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-//  OPTIMIZACIÓN GLOBAL
+// 🚀 OPTIMIZACIÓN GLOBAL (CORREGIDA)
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   const todasLasImagenes = document.querySelectorAll('img');
 
   todasLasImagenes.forEach(img => {
+    // Filtramos para que solo aplique a los catálogos
     if(img.src.includes('assets/images/mods') || img.src.includes('webp')) {
 
+      // 1. Aseguramos que no se descarguen de golpe al abrir la página
       img.setAttribute('loading', 'lazy');
       
       const contenedor = img.parentElement;
       if(contenedor) {
         contenedor.style.position = 'relative';
         
-        const ruedita = document.createElement('div');
-        ruedita.className = 'ruedita-cargando';
-        contenedor.insertBefore(ruedita, img);
+        // Evitamos crear rueditas duplicadas si el código se ejecuta dos veces
+        let ruedita = contenedor.querySelector('.ruedita-cargando');
+        if(!ruedita) {
+          ruedita = document.createElement('div');
+          ruedita.className = 'ruedita-cargando';
+          contenedor.insertBefore(ruedita, img);
+        }
 
-        img.onload = () => {
-          ruedita.style.display = 'none';
+        // Función maestra para quitar la ruedita
+        const finalizarCarga = () => {
+          if(ruedita) ruedita.style.display = 'none';
           img.classList.add('img-lazy-cargada');
         };
+
+        // 2. EL TRUCO MÁGICO: ¿La imagen ya cargó desde la raíz/caché?
+        if (img.complete && img.naturalHeight !== 0) {
+          // Si ya está cargada, quitamos la ruedita inmediatamente
+          finalizarCarga();
+        } else {
+          // 3. Si depende del internet, esperamos a que cargue
+          img.onload = finalizarCarga;
+          
+          // Por si alguna imagen se cae o da error de link, que no se quede la ruedita infinita
+          img.onerror = () => {
+            if(ruedita) ruedita.style.display = 'none';
+          };
+        }
       }
     }
   });
