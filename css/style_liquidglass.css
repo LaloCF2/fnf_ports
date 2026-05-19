@@ -1,46 +1,93 @@
 /* =========================================
-   🍏 ESTILOS EXCLUSIVOS PARA iOS (LIQUID GLASS)
+   💧 EFECTO "GOTAS DE AGUA" (LIQUID GLASS iOS)
    ========================================= */
 
-/* 1. Ocultar el botón de temas (No es necesario en el diseño Apple) */
+/* Ocultar botones que no sirven en iOS */
 body.ios-theme .theme-btn {
   display: none !important;
 }
 
-/* 2. El Efecto Liquid Glass Premium para iPhone/iPad */
-/* Aplicamos el cristal a todos los contenedores principales de un solo golpe */
-body.ios-theme .bottom-nav,
-body.ios-theme .container,
+/* =========================================
+   1. EL CRISTAL DE AGUA (Textura Visual)
+   ========================================= */
 body.ios-theme .notif-panel,
-body.ios-theme .info-card,
 body.ios-theme .popup-content,
+body.ios-theme .mod-card,
 body.ios-theme .apk-card,
-body.ios-theme .mod-card {
+body.ios-theme .script-card {
   
-  /* Fondo transparente elegante */
-  background: rgba(15, 15, 20, 0.4) !important;
+  /* Fondo súper transparente (Agua pura) */
+  background: rgba(20, 20, 25, 0.15) !important;
   
-  /* El desenfoque y saturación que hace la magia de Apple */
-  backdrop-filter: blur(25px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(25px) saturate(200%) !important;
+  /* Desenfoque fuerte pero saturación medida para no saturar la GPU */
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
   
-  /* Borde de cristal iluminado */
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  /* Reflejos de luz: El secreto de la gota de agua */
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.25) !important; /* Luz pegando arriba */
+  border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+  
+  /* Sombra externa suave y un brillo interno (inset) para dar volumen 3D */
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.25), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* =========================================
+   2. FÍSICA Y REBOTE (Interacción del Usuario)
+   ========================================= */
+/* Le damos la curvatura de velocidad exacta que usa Apple */
+body.ios-theme .mod-card,
+body.ios-theme .apk-card,
+body.ios-theme .script-card,
+body.ios-theme button,
+body.ios-theme .nav-item {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+              background 0.3s ease !important;
+  will-change: transform; /* Optimización extrema para la GPU */
+}
+
+/* Cuando el usuario presiona la tarjeta (Efecto Táctil) */
+body.ios-theme .mod-card:active,
+body.ios-theme .apk-card:active,
+body.ios-theme .script-card:active,
+body.ios-theme button:active {
+  transform: scale(0.95) translateZ(0) !important; /* Se hunde suavemente */
+  background: rgba(255, 255, 255, 0.1) !important; /* Destella ligeramente al toque */
+}
+
+/* =========================================
+   3. LA PÍLDORA INFERIOR (Menú Bottom Nav)
+   ========================================= */
+body.ios-theme .bottom-nav {
+  /* Separamos el menú del borde para que "flote" como en los nuevos iOS */
+  bottom: 15px !important;
+  width: calc(100% - 30px) !important;
+  margin: 0 auto !important;
+  left: 0; right: 0;
+  
+  /* Forma de píldora perfecta */
+  border-radius: 50px !important; 
+  padding: 8px 15px !important;
+  
+  /* Un cristal un pelín más oscuro para que contrasten los iconos */
+  background: rgba(10, 10, 15, 0.3) !important;
+  backdrop-filter: blur(25px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+  
+  /* Luz en el borde superior de la píldora */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
   
-  /* Sombra suave para separar los elementos del fondo */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 
-              inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+  /* Sombra pesada abajo para que resalte mucho del fondo */
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
 }
 
-/* 3. Ajustes sutiles de texto en modo iOS para que resalte más en el cristal */
-body.ios-theme .glow {
-  text-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-purple) !important;
-}
-
-body.ios-theme h1, 
-body.ios-theme h2, 
-body.ios-theme h3 {
-  letter-spacing: 0.5px;
+/* Iconos de la píldora rebotando al tocarlos */
+body.ios-theme .bottom-nav .nav-item:active {
+  transform: scale(0.8) translateZ(0) !important;
+  opacity: 0.6 !important;
 }
