@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>FNF' - Mobile</title>
 
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fnf-mobile-lalocf-default-rtdb.firebaseio.com" crossorigin>
   <link rel="apple-touch-icon" href="assets/icons/logo192.png">
   <link rel="icon" type="image/png" href="assets/icons/logo192.png">
   <link rel="shortcut icon" href="assets/icons/logo192.png">
@@ -1186,14 +1188,19 @@
       <h2 class="glow" data-es="Scripts y Utilidades" data-en="Scripts & Utilities">Scripts y Utilidades</h2>
       <p style="color: #ccc; text-align: center; font-size: 14px; margin-bottom: 25px;" data-es="Agrega código personalizado a tus propios mods y motores." data-en="Add custom code to your own mods and engines.">Agrega código personalizado a tus propios mods y motores.</p>
       
-      <div class="apk-card" id="card-script1">
+      <div class="apk-card script-card" id="card-script1" data-id="script1" style="position: relative;">
+  
+  <span class="badge-recomendado" style="display: none;">🔥 TOP</span>
+
   <button class="admin-led-btn" id="btn-led-script1" onclick="toggleGreenLed('script1', event)" style="display: flex; align-items: center; gap: 4px;">
     <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
   </button>
+  
   <div class="like-container" id="like-script1" onclick="handleLike('script1', this)" style="display: flex; align-items: center; gap: 4px;">
     <span class="like-icon" style="display: flex; align-items: center;"><img src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like" style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span> 
     <span class="like-count" id="count-script1">0</span>
   </div>
+  
   <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
     <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas" style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span id="dl-script1">0</span>
   </div>
@@ -1205,6 +1212,7 @@
   </div>
 
   <h3><span class="led-dot led-green" id="led-green-script1" style="display:none;"></span>Menu Pause</h3>
+  
   <div class="card-buttons">
     <button class="btn" onclick="openScriptInfo('script1')" data-es="Más Info" data-en="More Info">Más Info</button>
     <button class="btn btn-chat" onclick="openModComments('script1', 'Menu Pause')" style="display: flex; align-items: center; justify-content: center; gap: 5px;">
