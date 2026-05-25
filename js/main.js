@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update, runTransaction, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, get, set, update, remove, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
@@ -13,8 +14,176 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v5.2.0";
-const MI_UID_ADMIN = "user_a655u37rr"; 
+const APP_VERSION = "v6.0.0";
+const MI_UID_ADMIN = "user_a655u37rr";
+
+// ==========================================
+// MOTOR DE AUTENTICACIÓN GOOGLE
+// ==========================================
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+let usuarioActualFirebase = null;
+
+// Evita que quede atascado
+getRedirectResult(auth).then((result) => {
+  if (result) {
+    console.log("¡Regreso exitoso desde Google!");
+  }
+}).catch((error) => {
+  console.error("Error al regresar de Google:", error);
+  alert("Hubo un problema de seguridad. Por favor abre la página en Chrome o Safari.");
+});
+
+onAuthStateChanged(auth, async (user) => {
+  const overlayAuth = document.getElementById('auth-overlay');
+
+  if (user) {
+    usuarioActualFirebase = user;
+    if(overlayAuth) overlayAuth.style.display = 'none';
+
+    const nombreSeguro = user.displayName || "Usuario FNF";
+    const fotoSegura = user.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
+
+    const userRef = ref(db, 'usuarios/' + user.uid);
+    const snap = await get(userRef);
+
+    if (!snap.exists()) {
+      await set(userRef, {
+        nombre: nombreSeguro,
+        foto: fotoSegura,
+        correo: user.email,
+        usernameModificado: false, 
+        fechaRegistro: new Date().toISOString()
+      });
+    }
+
+    const datosBD = snap.exists() ? snap.val() : { nombre: nombreSeguro, foto: fotoSegura };
+    localStorage.setItem('fnf_user_profile', JSON.stringify({
+      nombre: datosBD.nombre,
+      foto: datosBD.foto,
+      key: user.uid
+    }));
+
+  } else {
+
+    if (localStorage.getItem('fnf_guest_mode') === 'true') {
+      if(overlayAuth) overlayAuth.style.display = 'none';
+    } else {
+      if(overlayAuth) overlayAuth.style.display = 'flex';
+    }
+  }
+});
+
+window.iniciarSesionConGoogle = function() {
+  const btn = document.getElementById('btn-google-login');
+
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const esNavegadorInterno = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Instagram") > -1) || (ua.indexOf("Telegram") > -1);
+
+  if (esNavegadorInterno) {
+      alert("⚠️ Estás usando el navegador interno de una app.\n\nPara iniciar sesión, toca los 3 puntitos de arriba (o abajo) y selecciona 'Abrir en el navegador' (Chrome o Safari).");
+      if(btn) btn.innerHTML = "❌ Abre en Chrome/Safari";
+      return;
+  }
+
+  if(btn) {
+    btn.innerHTML = "⏳ Conectando con Google...";
+    btn.style.background = "#ffea00"; 
+  }
+  signInWithRedirect(auth, googleProvider);
+};
+
+window.entrarComoInvitado = function() {
+  localStorage.setItem('fnf_guest_mode', 'true');
+  const overlayAuth = document.getElementById('auth-overlay');
+  if(overlayAuth) overlayAuth.style.display = 'none';
+};
+
+window.cerrarSesion = function() {
+  signOut(auth).then(() => {
+    localStorage.removeItem('fnf_guest_mode');
+    localStorage.removeItem('fnf_user_profile');
+    location.reload();
+  });
+};
+
+// VENTANA DE PERFIL DINÁMICA
+window.abrirPerfil = async function() {
+  const contenedor = document.getElementById('perfil-dinamico-contenido');
+  document.getElementById('profile-popup').classList.add('show');
+
+  // CASO 1: ES UN INVITADO
+  if (!usuarioActualFirebase) {
+    contenedor.innerHTML = `
+      <img src="https://cdn-icons-png.flaticon.com/128/149/149071.png" style="width: 80px; filter: grayscale(1); margin-bottom: 10px;">
+      <p style="color: #ccc; margin-bottom: 20px;">Estás en modo invitado. Inicia sesión para guardar likes, comentar y descargar.</p>
+      <button onclick="iniciarSesionConGoogle()" class="btn" style="width: 100%; background: white; color: black; font-weight: bold;">
+        <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" style="width: 18px; vertical-align: middle; margin-right: 5px;">
+        Conectar con Google
+      </button>
+    `;
+    return;
+  }
+
+  // CASO 2: ES USUARIO GOOGLE
+  const snap = await get(ref(db, 'usuarios/' + usuarioActualFirebase.uid));
+  const datos = snap.val() || {};
+  
+  const bloqueado = datos.usernameModificado ? "disabled" : "";
+  const textoBoton = datos.usernameModificado ? "❌ Nombre Ya Cambiado" : "✨ Guardar Apodo Único";
+  const btnDeshabilitado = datos.usernameModificado ? "display:none;" : "";
+
+  // Ponemos una foto por defecto por si hubo error con Google
+  const imagenPerfil = datos.foto || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
+
+  contenedor.innerHTML = `
+    <img src="${imagenPerfil}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 10px;">
+    <h3 style="color: white; margin-bottom: 5px;">${datos.nombre}</h3>
+    <p style="color: #888; font-size: 11px; margin-bottom: 2px;">ID: ${usuarioActualFirebase.uid}</p>
+    <p style="color: #888; font-size: 11px; margin-bottom: 20px;">${datos.correo}</p>
+    
+    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: left;">
+      <label style="color: var(--neon-blue); font-size: 12px; font-weight: bold;">Cambiar Apodo (Una sola vez)</label>
+      <input type="text" id="input-nuevo-apodo" value="${datos.nombre}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 8px; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 8px;">
+      <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 10px; background: var(--neon-green); color: black; ${btnDeshabilitado}">${textoBoton}</button>
+    </div>
+
+    <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white;">🚪 Cerrar Sesión</button>
+  `;
+};
+
+// ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE SOLO UNA VEZ
+window.guardarNuevoApodo = async function() {
+  const nuevoNombre = document.getElementById('input-nuevo-apodo').value.trim();
+  if (nuevoNombre.length < 3) return alert("El apodo debe tener mínimo 3 letras.");
+  
+  if(confirm("¿Seguro que quieres este apodo? Solo puedes cambiarlo UNA vez.")){
+    
+    await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), {
+      nombre: nuevoNombre,
+      usernameModificado: true
+    });
+
+    const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
+    perfilActual.nombre = nuevoNombre;
+    localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
+
+    alert("¡Apodo actualizado exitosamente!");
+    abrirPerfil(); // Recargamos la ventanita
+  }
+};
+
+//=======================================
+window.exigirRegistro = function() {
+  if (!usuarioActualFirebase) {
+    alert("🔒 Debes iniciar sesión con Google para usar esta función.");
+    document.getElementById('auth-overlay').style.display = 'flex';
+    return true;
+  }
+  return false;
+};
+
+//=======================================
 
 let isSuperUser = false;
 const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
@@ -186,6 +355,7 @@ let currentModCommentsId = null;
 let modCommentsListener = null;
 
 window.openModComments = (id, title) => {
+  if(exigirRegistro()) return;
   currentModCommentsId = id;
   document.getElementById("mc-title").innerText = "Comentarios: " + title;
   
@@ -315,13 +485,19 @@ window.addModComment = async () => {
 
 window.likeModComment = async (commentId) => {
   if (await checkBanStatus()) return;
-  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if(!profile) return checkUserStatus();
-  const userKey = profile.key;
-  const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
+
+  if (!usuarioActualFirebase) {
+    alert("🔒 Debes iniciar sesión con Google para dar Like a los comentarios.");
+    document.getElementById('auth-overlay').style.display = 'flex';
+    return;
+  }
+
+  const userKey = usuarioActualFirebase.uid; 
   
+  const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
   const likeRef = ref(db, `mod_comments/${currentModCommentsId}/${commentId}/userLikes/${userKey}`);
   const snap = await get(likeRef);
+  
   if (snap.exists()) {
     await set(likeRef, null); 
     runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 1) - 1);
@@ -399,13 +575,10 @@ window.setFilter = (filter, btn) => {
 let tiempoEsperaBusqueda;
 
 window.filterContent = () => {
-  // 1. Cancelamos la búsqueda si el usuario sigue escribiendo rápido
   clearTimeout(tiempoEsperaBusqueda);
   
-  // 2. Esperamos un mini-segundo (300ms) antes de buscar
   tiempoEsperaBusqueda = setTimeout(() => {
     
-    // 👇 ESTE ES TU CÓDIGO ORIGINAL (INTACTO) 👇
     const search = document.getElementById('globalSearch').value.toLowerCase();
     const items = document.querySelectorAll('.mod-card');
     const apks = document.querySelectorAll('.apk-card');
@@ -423,9 +596,8 @@ window.filterContent = () => {
       const title = apk.querySelector('h3').innerText.toLowerCase();
       apk.style.display = title.includes(search) ? "block" : "none";
     });
-    // 👆 FIN DE TU CÓDIGO ORIGINAL 👆
 
-  }, 300); // 300 milisegundos de respiro para el celular
+  }, 300);
 };
 
 async function checkBanStatus() {
@@ -524,20 +696,29 @@ function stringToColor(str) {
 }
 
 window.handleLike = async (id, el) => {
+
   if (await checkBanStatus()) return;
-  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if(!profile) return checkUserStatus();
-  const userKey = profile.key;
+
+  if (exigirRegistro()) return;
+
+  const userKey = usuarioActualFirebase.uid;
+  
   const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
   const itemLikeRef = ref(db, `likes_registry/${id}/${userKey}`);
   const snap = await get(itemLikeRef);
+  
   if (snap.exists()) {
-    await set(itemLikeRef, null); runTransaction(ref(db, `likes/${id}`), (c) => (c || 1) - 1);
-    delete myLikedItems[id]; el.classList.remove('active');
+    await set(itemLikeRef, null); 
+    runTransaction(ref(db, `likes/${id}`), (c) => (c || 1) - 1);
+    delete myLikedItems[id]; 
+    el.classList.remove('active');
   } else {
-    await set(itemLikeRef, true); runTransaction(ref(db, `likes/${id}`), (c) => (c || 0) + 1);
-    myLikedItems[id] = true; el.classList.add('active');
+    await set(itemLikeRef, true); 
+    runTransaction(ref(db, `likes/${id}`), (c) => (c || 0) + 1);
+    myLikedItems[id] = true; 
+    el.classList.add('active');
   }
+  
   localStorage.setItem('my_liked_items', JSON.stringify(myLikedItems));
 };
 
@@ -550,7 +731,35 @@ function syncLikeButtons() {
 }
 
 const SCRIPTS_DATA = {
-  script1: {
+       script1: {
+        title: "MobileFPSOverlay",
+        desc: "Este script agrega un contador de fotogramas por segundo a FNF Mobile V-Slice.\nTotalmente funcional para Android y iOS./n/nCuenta con actulizaciones constantes, mantengase al tanto para mantener la versión mas reciente.",
+        version: "v1.2.0",
+        images: [
+          "assets/images/scripts/MFO/mfo.webp",
+          "assets/images/scripts/MFO/mfo2.webp",
+          "assets/images/scripts/MFO/mfo3.webp",
+          "assets/images/scripts/MFO/mfo4.webp",
+          "assets/images/scripts/MFO/mfo5.webp",
+          "assets/images/scripts/MFO/mfo6.webp"
+        ],
+        downloads: [
+          { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/MobileFPSOverlay" },
+          { name: "Descarga Script Directo (Drive)", link: "https://drive.google.com/file/d/1l2FaGqINbPzOp6-SgiFGwwUr1v8IjTKZ/view?usp=drive_link" }
+        ]
+      },
+       script2: {
+        title: "Controller Engine",
+        desc: "Este script agrega un mando virtual a tu juego psych engine dandole una apariencia igual al de Gombo Cat.\nTotalmente funcional para Pc, Android y iOS.",
+        version: "v1.0",
+        images: [
+          "assets/images/scripts/mc1.webp"
+        ],
+        downloads: [
+          { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/Controller-Engine" },
+        ]
+      },
+  script3: {
         title: "Menu Pause",
         desc: "Este script agrega un menú de pausa funcional a tu juego.\nTotalmente funcional para Pc, Android y iOS.",
         version: "v1.0",
@@ -563,7 +772,7 @@ const SCRIPTS_DATA = {
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/Custom Pause.zip" }
         ]
       },
-   script2: {
+   script4: {
         title: "FPS Counter",
         desc: "Este script agrega un contador de fotogramas por segundo a tu juego.\nTotalmente funcional para Pc, Android y iOS.",
         version: "v1.0",
@@ -574,39 +783,55 @@ const SCRIPTS_DATA = {
           { name: "Descarga Script Directo (GitHub)", link: "assets/zip/FPS_Counter.zip" }
         ]
       },
-    script3: {
-        title: "Controller Engine",
-        desc: "Este script agrega un mando virtual a tu juego psych engine dandole una apariencia igual al de Gombo Cat.\nTotalmente funcional para Pc, Android y iOS.",
-        version: "v1.0",
-        images: [
-          "assets/images/scripts/mc1.webp"
-        ],
-        downloads: [
-          { name: "Descarga en mi Repositorio (GitHub)", link: "https://github.com/LaloCF2/Controller-Engine" },
-        ]
-      },
-     script4: {
-        title: "MobileFPSOverlay",
-        desc: "Este script agrega un contador de fotogramas por segundo a FNF Mobile V-Slice.\nTotalmente funcional para Android y iOS.",
-        version: "v1.1.0",
-        images: [
-          "assets/images/scripts/MFO/mfo.webp",
-          "assets/images/scripts/MFO/mfo2.webp",
-          "assets/images/scripts/MFO/mfo3.webp",
-          "assets/images/scripts/MFO/mfo4.webp",
-          "assets/images/scripts/MFO/mfo5.webp",
-          "assets/images/scripts/MFO/mfo6.webp"
-        ],
-        downloads: [
-          { name: "Descarga Script Directo (GitHub)", link: "https://drive.google.com/file/d/1l2FaGqINbPzOp6-SgiFGwwUr1v8IjTKZ/view?usp=drive_link" }
-        ]
-      },
     };
 
 let scriptImagesArray = [];
 let currentScriptImgIndex = 0;
 
+//==================================
+
+// ==========================================
+// 📄 LECTOR AUTOMÁTICO DE NOVEDADES (MODAL iOS)
+// ==========================================
+window.cargarNovedadesTXT = function(id, tipo) {
+  const modal = document.getElementById('modal-novedades-ios');
+  const cajaTexto = document.getElementById('texto-novedades-ios');
+  
+  // 1. Mostramos la ventana de cristal con mensaje de carga
+  cajaTexto.innerHTML = `<div style="text-align: center; padding: 20px 0;"><span style="font-size: 24px;">⏳</span><br><br>Cargando información...</div>`;
+  modal.classList.add('show'); // Despierta el popup
+
+  // 2. Definimos la ruta inteligente
+  const rutaTXT = tipo === 'script' ? `assets/scripts/update/${id}.txt` : `assets/bases/update/${id}.txt`;
+
+  // 3. Vamos por el archivo
+  fetch(rutaTXT)
+    .then(response => {
+      if (!response.ok) throw new Error("Archivo no encontrado");
+      return response.text();
+    })
+    .then(textoLimpio => {
+      // Inyectamos el texto del archivo
+      cajaTexto.innerText = textoLimpio;
+    })
+    .catch(error => {
+      console.error(error);
+      const idioma = localStorage.getItem('idioma_guardado') || 'es';
+      const msjError = idioma === 'en' ? "No update logs found." : "No hay novedades registradas para esta versión aún.";
+      
+      cajaTexto.innerHTML = `<div style="text-align: center; color: #ff453a; padding: 10px 0;">${msjError}</div>`;
+    });
+};
+
+// Función para cerrar la ventana
+window.cerrarModalNovedades = function() {
+  document.getElementById('modal-novedades-ios').classList.remove('show');
+};
+
+//===================================
+
 window.openScriptInfo = (id) => {
+  if(exigirRegistro()) return;
   const d = SCRIPTS_DATA[id];
   scriptImagesArray = d.images;
   currentScriptImgIndex = 0;
@@ -649,6 +874,17 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+     mod98_4: {
+   img: "assets/images/mods/pibby.webp",
+   title: "Pibby Rescript",
+   desc: "Friday Night Funkin' FNF' Pibby Rescript Port Opt Psych Engine Optimizado Para (Pc/Android).",
+   version: "Compatible: P-Slice v3.4.2, Psych Engine v1.0.4",
+   downloads: [
+      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Pibby/Pibby.Rescript.Opt.zip" },
+      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1tCaOh5lCvMVHZND3HAP4FDQHcawBl_CI/view?usp=drive_link" },
+      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/hmoynph507squdt/Pibby_Rescript_Opt.zip/file" }
+    ]
+  },
      mod98_5: {
    img: "assets/images/mods/fruit.webp",
    title: "FruitNinja V1.5",
@@ -820,13 +1056,13 @@ const APK_DATA = {
     downloads: [
       { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases" },
       { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/309789" },
+      { name: "Descarga Directa Android Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
+      { name: "Descarga Android No Optimizado (GitHub)", link: "https://github.com/LaloCF2/fnf_ports/releases/download/Psych-Engine-v1.0.4/Friday.Night.Funkin.Psych.Engine_0.2.8.apk" },
+      { name: "Descarga Directa iOS Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" },
       { name: "Descarga Directa Windows64 (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows64.zip" },
       { name: "Descarga Directa Windows32 (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Windows32.zip" },
       { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-Linux.zip"},
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"},
-      { name: "Descarga Directa Android Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/Psych.Engine.v1.0.4.Android.apk" },
-      { name: "Descarga Android No Optimizado (GitHub)", link: "https://github.com/LaloCF2/fnf_ports/releases/download/Psych-Engine-v1.0.4/Friday.Night.Funkin.Psych.Engine_0.2.8.apk" },
-      { name: "Descarga Directa iOS Optimizado (GitHub)", link: "https://github.com/LaloCF2/LaloCF/releases/download/Psych-Engine-v1.0.4/PsychEngine.v1.0.4.iOS.ipa" }
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.4/PsychEngine-MacOS.zip"}
     ]
   },
   apk2: {
@@ -837,11 +1073,11 @@ const APK_DATA = {
     downloads: [
       { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases" },
       { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/479714" },
+            { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-iOS.ipa" },
       { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/windowsBuild.zip" },
       { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/linuxBuild.zip" },
       { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/Snirozu/Funkin-Psych-Online/releases/download/0.14.6/macBuild.zip"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-Android.apk" },
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Prohack202020/Funkin-Psych-Online/releases/download/0.13.2-bugfix-mobile/PsychOnline-iOS.ipa" }
     ]
   },
   apk3: {
@@ -852,11 +1088,11 @@ const APK_DATA = {
     downloads: [
       { name: "Descarga en el repositorio del desarrollador (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases" },
       { name: "Descarga en GameBanana", link: "https://gamebanana.com/mods/598553" },
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-Android.apk"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-iOS.ipa" },
       { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Windows.zip" },
       { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Linux.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-Android.apk"},
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/HomuHomu833-haxe-stuff/CodenameEngine-Mobile/releases/download/v1.0.1/Codename.Engine-iOS.ipa" }
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/CodenameCrew/CodenameEngine/releases/download/v1.0.1/Codename.Engine-Mac.zip"}
     ]
   },  
   apk4: {
@@ -867,13 +1103,13 @@ const APK_DATA = {
     downloads: [
       { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases" },
       { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/602743" },
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.7/PlusEngine-Android-x64-v7a.zip"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-iOS.zip" },
       { name: "Descarga Directa Windows 32 (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Windows-x32.zip" },
       { name: "Descarga Directa Windows 64 Actualizado (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.7/PlusEngine-Windows-x64.zip" },
       { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Linux-x64.zip" },
       { name: "Descarga Directa Mac ARM (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-ARM.zip"},
-      { name: "Descarga Directa Mac Intel (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-Intel.zip"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.7/PlusEngine-Android-x64-v7a.zip"},
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-iOS.zip" }
+      { name: "Descarga Directa Mac Intel (GitHub)", link: "https://github.com/Psych-Plus-Team/FNF-PlusEngine/releases/download/1.2.6/PlusEngine-Mac-Intel.zip"}
     ]
   },
   apk5: {
@@ -884,26 +1120,27 @@ const APK_DATA = {
     downloads: [
       { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases" },
       { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/535203" },
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" },
       { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.windows.zip" },
       { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.linux.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.android.zip"},
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.ios.zip" }
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/Psych-Slice/P-Slice/releases/download/3.4.2/P-Slice.1.0.macos.zip"}
     ]
   },
   apk6: {
     img: "assets/images/webp/logonova.webp",
     title: "NovaFleare Engine",
     desc: "NovaFlare-Engine es una rama de FNF Psych Engine , dedicada a proporcionar excelentes efectos visuales y funciones intuitivas. Nuestro objetivo es ofrecer una experiencia de desarrollo y juego potente y divertida tanto para creadores como para jugadores.",
-    version: "v1.1.7 Versión Estable",
+    version: "v1.2.0 Versión Estable",
     downloads: [
       { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases" },
       { name: "Descargas en GameBanana", link: "https://gamebanana.com/mods/505473" },
-      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/windows.zip" },
-      { name: "Descarga Directa Mac14 (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/macOS14.tar" },
-      { name: "Descarga Directa Mac15 (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/macOS15.tar"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/android.apk"},
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.1.7/iOSBuild.zip" }
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/android.zip"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/ios.zip" },
+      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/linux.zip" },
+      { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/windows.zip" },
+      { name: "Descarga Directa Mac14 (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/macOS-14.zip" },
+      { name: "Descarga Directa Mac15 (GitHub)", link: "https://github.com/NovaFlare-Engine-Concentration/FNF-NovaFlare-Engine/releases/download/V1.2.0/macOS-15.zip"}
     ]
   },
   apk7: {
@@ -913,35 +1150,36 @@ const APK_DATA = {
     version: "v0.4.6",
     downloads: [
       { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases" },
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-android-apk-32d1f1e.zip"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-iOS-ipa-32d1f1e.zip" },
       { name: "Descarga Directa Windows (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-windowsBuild-56acc57.zip" },
       { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-linuxBuild-56acc57.zip" },
-      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-macBuild-56acc57.zip"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-android-apk-32d1f1e.zip"},
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-iOS-ipa-32d1f1e.zip" }
+      { name: "Descarga Directa Linux (GitHub)", link: "https://github.com/FunkinExtraKeys/FNF-PsychEngine-EK/releases/download/0.4.6/ek-macBuild-56acc57.zip"}
     ]
   },
   apk8: {
     img: "assets/images/webp/logose.webp",
     title: "Shadow Engine",
     desc: "Soy Sombra, el Erizo. Y ahora, soy la forma de tenedor definitiva. - Sombra, el Erizo\n\nUn motor Psych Engine 0.7.3 altamente modificado.\n\nListo para ser modificado en origen.",
-    version: "v0.7.0",
+    version: "v0.9.0",
     downloads: [
       { name: "Descargas en el repositorio del desarrollador (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases" },
-      { name: "Descarga Directa Windows ARM64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-arm64.zip" },
-      { name: "Descarga Directa Windows i686 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-i686.zip" },
-      { name: "Descarga Directa Windows x86_64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-windows-x86_64.zip" },
-      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-macOS-Universal.tar" },
-      { name: "Descarga Directa Linux ARM64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-linux-arm64.tar"},
-      { name: "Descarga Directa Linux ARMV7 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-linux-armv7.tar"},
-      { name: "Descarga Directa Linux i686 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-linux-i686.tar"},
-      { name: "Descarga Directa Linux x86_64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-BC-linux-x86_64.tar"},
-      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-Android.apk"},
-      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.7.0/ShadowEngine-ASTC-iOS.ipa" }
+      { name: "Descarga Directa Android (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-ASTC-Android.apk"},
+      { name: "Descarga Directa iOS (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-ASTC-iOS.ipa" },
+      { name: "Descarga Directa Windows ARM64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-windows-arm64.zip" },
+      { name: "Descarga Directa Windows i686 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-windows-i686.zip" },
+      { name: "Descarga Directa Windows x86_64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-windows-x86_64.zip" },
+      { name: "Descarga Directa Mac (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-macOS-Universal.tar" },
+      { name: "Descarga Directa Linux ARM64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-ASTC-linux-arm64.tar"},
+      { name: "Descarga Directa Linux ARMV7 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-ASTC-linux-armv7.tar"},
+      { name: "Descarga Directa Linux i686 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-linux-i686.tar"},
+      { name: "Descarga Directa Linux x86_64 (GitHub)", link: "https://github.com/ShadowEngineTeam/FNF-Shadow-Engine/releases/download/0.9.0/ShadowEngine-BC-linux-x86_64.tar"}
     ]
   }
 };
 
 window.openModInfo = (id) => { 
+  if(exigirRegistro()) return;
   if (window.brokenLinksData && window.brokenLinksData[id] && !isSuperUser) {
     const modName = document.querySelector('#card-' + id + ' h3').textContent;
     document.getElementById('maintenance-mod-name').innerText = modName;
@@ -966,6 +1204,7 @@ window.openModInfo = (id) => {
 window.closeModInfo = () => document.getElementById("mod-popup").classList.remove("show");
 
 window.openApkInfo = (id) => { 
+  if(exigirRegistro()) return;
   const d = APK_DATA[id]; 
   document.getElementById("apk-img").src = d.img; 
   document.getElementById("apk-title").innerText = d.title; 
@@ -1769,6 +2008,7 @@ let linkParaCompartir = "";
 let textoParaCompartir = "";
 
 window.abrirMenuCompartir = (id, nombreMod) => {
+  if(exigirRegistro()) return;
   const baseUrl = window.location.origin + window.location.pathname;
   linkParaCompartir = `${baseUrl}?share=${id}`;
   textoParaCompartir = `¡Mira esto: *${nombreMod}*! Descárgalo aquí:\n`;
@@ -1890,3 +2130,96 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// ==========================================
+// OPTIMIZACIÓN EXTREMA DE SCROLL (PASSIVE LISTENERS)
+// ==========================================
+document.addEventListener('touchstart', function() {}, {passive: true});
+document.addEventListener('touchmove', function() {}, {passive: true});
+document.addEventListener('wheel', function() {}, {passive: true});
+
+// ==========================================
+// 🚀 CONEXIÓN DIRECTA CON BOT DE TELEGRAM (OPTIMIZADA)
+// ==========================================
+window.enviarMensajeAlBot = async function() {
+  const cajaTexto = document.getElementById('txt-mensaje-telegram');
+  const boton = document.getElementById('btn-enviar-telegram');
+  const mensaje = cajaTexto.value.trim();
+
+  // Validamos que no envíen mensajes vacíos
+  if(mensaje === "") {
+    alert("¡Escribe un mensaje primero!");
+    return;
+  }
+
+  // 1. OBTENER EL NOMBRE DEL USUARIO (Mejorado)
+  let nombreUsuario = "👤 Usuario Invitado";
+  try {
+    const perfil = JSON.parse(localStorage.getItem('fnf_user_profile'));
+    // Hacemos que busque el nombre sin importar cómo lo hayas guardado en tu base
+    if(perfil) {
+      nombreUsuario = perfil.nombre || perfil.name || perfil.username || perfil.usuario || perfil.key || "👤 Usuario Registrado";
+    }
+  } catch(error) {
+    console.log("No se encontró un perfil guardado.");
+  }
+
+  // 2. CONFIGURACIÓN DE TU BOT
+  const TELEGRAM_BOT_TOKEN = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI"; 
+  const TELEGRAM_CHAT_ID = "5429172831";
+
+  // 3. ARMAMOS EL MENSAJE CON FORMATO LIMPIO Y ESPACIADO (TICKET PREMIUM)
+  const textoFormateado = 
+`🚨 *NUEVO TICKET DE SOPORTE* 🚨
+
+👤 *De:* ${nombreUsuario}
+━━━━━━━━━━━━━━━━━━━
+💬 *Mensaje:*
+${mensaje}
+━━━━━━━━━━━━━━━━━━━
+🌐 _Enviado desde lalocf.2.gitgub/fnf-ports/`;
+
+  // 4. LO ENVIAMOS A TELEGRAM
+  const urlApi = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+  
+  // Efecto visual de carga
+  boton.innerText = "⏳ Enviando...";
+  boton.style.background = "#ffea00"; 
+
+  try {
+    const respuesta = await fetch(urlApi, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: textoFormateado,
+        parse_mode: 'Markdown'
+      })
+    });
+
+    if(respuesta.ok) {
+      // Éxito
+      cajaTexto.value = "";
+      boton.innerText = "¡Enviado con éxito! ✨";
+      boton.style.background = "#00ff41";
+      
+      setTimeout(() => {
+        boton.innerText = "🚀 Enviar Mensaje";
+        boton.style.background = "var(--neon-blue)";
+      }, 3000);
+    } else {
+      throw new Error("Error en la API");
+    }
+
+  } catch (error) {
+    // Error
+    boton.innerText = "❌ Error al enviar";
+    boton.style.background = "#ff003c";
+    setTimeout(() => {
+      boton.innerText = "🚀 Intentar de nuevo";
+      boton.style.background = "var(--neon-blue)";
+    }, 3000);
+  }
+};
+
+//===============================================//
