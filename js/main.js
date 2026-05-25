@@ -52,7 +52,6 @@ onAuthStateChanged(auth, async (user) => {
       });
     }
 
-    // 3. 🎯 Guardar en memoria local (Para los likes, chats y Telegram)
     const datosBD = snap.exists() ? snap.val() : { nombre: nombreSeguro, foto: fotoSegura };
     localStorage.setItem('fnf_user_profile', JSON.stringify({
       nombre: datosBD.nombre,
@@ -61,7 +60,6 @@ onAuthStateChanged(auth, async (user) => {
     }));
 
   } else {
-    // Si no está logueado, vemos si eligió "Invitado"
     if (localStorage.getItem('fnf_guest_mode') === 'true') {
       if(overlayAuth) overlayAuth.style.display = 'none';
     } else {
@@ -70,11 +68,9 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// 🚀 FUNCIONES DE ACCESO EXCLUSIVAS
 window.iniciarSesionConGoogle = async function() {
   const btn = document.getElementById('btn-google-login');
 
-  // 🔥 DETECTOR DE NAVEGADORES FANTASMA (Telegram, Facebook, Instagram)
   const ua = navigator.userAgent || navigator.vendor || window.opera;
   const esNavegadorInterno = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Instagram") > -1) || (ua.indexOf("Telegram") > -1);
 
@@ -91,9 +87,7 @@ window.iniciarSesionConGoogle = async function() {
   }
 
   try {
-    // USAMOS POPUP: Al estar el dominio autorizado, esto abrirá la ventana limpiamente sin bloqueos
     await signInWithPopup(auth, googleProvider);
-    // ¡Magia! Si es exitoso, la ventanita de Google se cierra sola y onAuthStateChanged oculta el menú automáticamente.
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
     if(btn) {
@@ -101,8 +95,7 @@ window.iniciarSesionConGoogle = async function() {
       btn.style.background = "#ff003c";
       btn.style.color = "#fff";
     }
-    
-    // Si el usuario cierra la ventana a medias, no lo asustamos con errores raros
+
     if (error.code === 'auth/popup-closed-by-user') {
       console.log("Inicio de sesión cancelado por el usuario.");
     } else {
@@ -120,22 +113,33 @@ window.entrarComoInvitado = function() {
 window.cerrarSesion = function() {
   signOut(auth).then(() => {
     localStorage.removeItem('fnf_guest_mode');
-    localStorage.removeItem('fnf_user_profile'); // Limpiamos la memoria local
-    location.reload(); // Recargamos para limpiar la pantalla
+    localStorage.removeItem('fnf_user_profile');
+    location.reload();
   });
 };
 
-// 👤 VENTANA DE PERFIL DINÁMICA
+// ==========================================
+// 👤 VENTANA DE PERFIL DINÁMICA (VERSIÓN INDESTRUCTIBLE)
+// ==========================================
 window.abrirPerfil = async function() {
   const contenedor = document.getElementById('perfil-dinamico-contenido');
+  
+  // Si por algo no encuentra el contenedor, te avisará en la consola de la compu
+  if (!contenedor) {
+    console.error("🚨 Error: No se encontró la etiqueta 'perfil-dinamico-contenido' en el HTML.");
+    alert("Error de diseño: Falta el contenedor de perfil en el HTML.");
+    return;
+  }
+
+  // Desplegamos la ventana flotante
   document.getElementById('profile-popup').classList.add('show');
 
-  // CASO 1: ES UN INVITADO
+  // CASO 1: EL USUARIO ES UN INVITADO
   if (!usuarioActualFirebase) {
     contenedor.innerHTML = `
       <img src="https://cdn-icons-png.flaticon.com/128/149/149071.png" style="width: 80px; filter: grayscale(1); margin-bottom: 10px;">
-      <p style="color: #ccc; margin-bottom: 20px;">Estás en modo invitado. Inicia sesión para guardar likes, comentar y descargar.</p>
-      <button onclick="iniciarSesionConGoogle()" class="btn" style="width: 100%; background: white; color: black; font-weight: bold;">
+      <p style="color: #ccc; margin-bottom: 20px; font-size: 13px;">Estás en modo invitado. Inicia sesión para guardar likes, comentar y descargar.</p>
+      <button onclick="iniciarSesionConGoogle()" class="btn" style="width: 100%; background: white; color: black; font-weight: bold; padding: 12px; border-radius: 12px; border: none; cursor: pointer;">
         <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" style="width: 18px; vertical-align: middle; margin-right: 5px;">
         Conectar con Google
       </button>
@@ -143,32 +147,44 @@ window.abrirPerfil = async function() {
     return;
   }
 
-  // CASO 2: ES USUARIO GOOGLE
-  const snap = await get(ref(db, 'usuarios/' + usuarioActualFirebase.uid));
-  const datos = snap.val() || {};
-  
-  // Si ya lo modificó, el input se bloquea
-  const bloqueado = datos.usernameModificado ? "disabled" : "";
-  const textoBoton = datos.usernameModificado ? "❌ Nombre Ya Cambiado" : "✨ Guardar Apodo Único";
-  const btnDeshabilitado = datos.usernameModificado ? "display:none;" : "";
+  // Mensaje temporal mientras lee la base de datos
+  contenedor.innerHTML = `<p style="color: #aaa; font-size: 14px;">⏳ Cargando datos de perfil...</p>`;
 
-  // Ponemos una foto por defecto por si hubo error con Google
-  const imagenPerfil = datos.foto || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
-
-  contenedor.innerHTML = `
-    <img src="${imagenPerfil}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 10px;">
-    <h3 style="color: white; margin-bottom: 5px;">${datos.nombre}</h3>
-    <p style="color: #888; font-size: 11px; margin-bottom: 2px;">ID: ${usuarioActualFirebase.uid}</p>
-    <p style="color: #888; font-size: 11px; margin-bottom: 20px;">${datos.correo}</p>
+  try {
+    // CASO 2: EL USUARIO INICIÓ SESIÓN CON GOOGLE
+    const snap = await get(ref(db, 'usuarios/' + usuarioActualFirebase.uid));
+    const datos = snap.val() || {};
     
-    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: left;">
-      <label style="color: var(--neon-blue); font-size: 12px; font-weight: bold;">Cambiar Apodo (Una sola vez)</label>
-      <input type="text" id="input-nuevo-apodo" value="${datos.nombre}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 8px; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 8px;">
-      <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 10px; background: var(--neon-green); color: black; ${btnDeshabilitado}">${textoBoton}</button>
-    </div>
+    // 🎯 RESPALDO MAESTRO: Si Firebase Database tarda o viene vacío, 
+    // extraemos la información en tiempo real de la cuenta activa de Google Auth.
+    const nombreUsuario = datos.nombre || usuarioActualFirebase.displayName || "Usuario FNF";
+    const fotoUsuario = datos.foto || usuarioActualFirebase.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
+    const correoUsuario = datos.correo || usuarioActualFirebase.email || "Sin correo";
+    
+    // Reglas del candado para modificar el nombre una sola vez
+    const bloqueado = datos.usernameModificado ? "disabled" : "";
+    const textoBoton = datos.usernameModificado ? "❌ Nombre Ya Cambiado" : "✨ Guardar Apodo Único";
+    const btnDeshabilitado = datos.usernameModificado ? "display:none;" : "";
 
-    <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white;">🚪 Cerrar Sesión</button>
-  `;
+    // Inyectamos la interfaz limpia con diseño premium
+    contenedor.innerHTML = `
+      <img src="${fotoUsuario}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 12px; object-fit: cover;">
+      <h3 style="color: white; margin: 0 0 5px 0; font-size: 18px;">${nombreUsuario}</h3>
+      <p style="color: #666; font-size: 10px; margin: 0 0 2px 0; word-break: break-all;">ID: ${usuarioActualFirebase.uid}</p>
+      <p style="color: #aa99ff; font-size: 12px; margin: 0 0 20px 0;">${correoUsuario}</p>
+      
+      <div style="background: rgba(255,255,255,0.04); padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.05);">
+        <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Cambiar Apodo (Una sola vez)</label>
+        <input type="text" id="input-nuevo-apodo" value="${nombreUsuario}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 8px; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
+        <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 10px; background: var(--neon-green); color: black; font-weight: bold; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; ${btnDeshabilitado}">${textoBoton}</button>
+      </div>
+
+      <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white; border: none; padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px;">🚪 Cerrar Sesión</button>
+    `;
+  } catch (error) {
+    console.error("Error al cargar el perfil:", error);
+    contenedor.innerHTML = `<p style="color: #ff003c; font-size: 13px;">🚨 Error al conectar con el servidor de datos.</p>`;
+  }
 };
 
 // ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE SOLO UNA VEZ
