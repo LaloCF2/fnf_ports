@@ -1,0 +1,13 @@
+¡Versión v1.1.0!
+━━━━━━━━━━━━━━━━━━━━━━━━━
+• Ahora las ventanas de detección de impactos son más precisas al no redondearse hacia abajo.
+• Tamaño fijo de inicio de ventana en DPI más alto
+• Se corrigieron dos problemas de bloqueo con HScript (puntero a función nulo, campo no válido).
+• Se corrigió el problema de las notas dobles golpeadas por el oponente que desaparecían/la reproducción de la animación se retrasaba un fotograma.
+• Se solucionó un error que provocaba un fallo relacionado con los scripts de Midsong Videos.
+• Más seguridad de subprocesos en la pantalla de carga, ¡puaj!
+• Correcciones de errores menores
+
+La mayoría de estos cambios se realizaron mediante solicitudes de extracción (Pull Requests), y como siempre, creo que el esfuerzo de la comunidad para ayudar a este proyecto es invaluable.
+
+-- ¡Obtenido desde los repositorios de GitHub! --
