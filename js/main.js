@@ -18,35 +18,30 @@ const APP_VERSION = "v6.0.0";
 const MI_UID_ADMIN = "user_a655u37rr";
 
 // ==========================================
-// MOTOR DE AUTENTICACIÓN GOOGLE
+// 🛡️ MOTOR DE AUTENTICACIÓN GOOGLE (VERSIÓN POPUP DEFINITIVA)
 // ==========================================
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 let usuarioActualFirebase = null;
 
-// Evita que quede atascado
-getRedirectResult(auth).then((result) => {
-  if (result) {
-    console.log("¡Regreso exitoso desde Google!");
-  }
-}).catch((error) => {
-  console.error("Error al regresar de Google:", error);
-  alert("Hubo un problema de seguridad. Por favor abre la página en Chrome o Safari.");
-});
-
+// 👂 Escuchamos si entra alguien
 onAuthStateChanged(auth, async (user) => {
   const overlayAuth = document.getElementById('auth-overlay');
 
   if (user) {
+    // ¡Logueado exitosamente!
     usuarioActualFirebase = user;
     if(overlayAuth) overlayAuth.style.display = 'none';
 
+    // 1. Respaldos por si Google no manda foto o nombre
     const nombreSeguro = user.displayName || "Usuario FNF";
     const fotoSegura = user.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
 
+    // 2. Revisar la Base de Datos
     const userRef = ref(db, 'usuarios/' + user.uid);
     const snap = await get(userRef);
-
+    
+    // Si es la primera vez que entra, lo guardamos
     if (!snap.exists()) {
       await set(userRef, {
         nombre: nombreSeguro,
@@ -57,6 +52,7 @@ onAuthStateChanged(auth, async (user) => {
       });
     }
 
+    // 3. 🎯 Guardar en memoria local (Para los likes, chats y Telegram)
     const datosBD = snap.exists() ? snap.val() : { nombre: nombreSeguro, foto: fotoSegura };
     localStorage.setItem('fnf_user_profile', JSON.stringify({
       nombre: datosBD.nombre,
@@ -65,7 +61,7 @@ onAuthStateChanged(auth, async (user) => {
     }));
 
   } else {
-
+    // Si no está logueado, vemos si eligió "Invitado"
     if (localStorage.getItem('fnf_guest_mode') === 'true') {
       if(overlayAuth) overlayAuth.style.display = 'none';
     } else {
@@ -74,9 +70,11 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-window.iniciarSesionConGoogle = function() {
+// 🚀 FUNCIONES DE ACCESO EXCLUSIVAS
+window.iniciarSesionConGoogle = async function() {
   const btn = document.getElementById('btn-google-login');
 
+  // 🔥 DETECTOR DE NAVEGADORES FANTASMA (Telegram, Facebook, Instagram)
   const ua = navigator.userAgent || navigator.vendor || window.opera;
   const esNavegadorInterno = (ua.indexOf("FBAN") > -1) || (ua.indexOf("FBAV") > -1) || (ua.indexOf("Instagram") > -1) || (ua.indexOf("Telegram") > -1);
 
@@ -87,10 +85,30 @@ window.iniciarSesionConGoogle = function() {
   }
 
   if(btn) {
-    btn.innerHTML = "⏳ Conectando con Google...";
+    btn.innerHTML = "⏳ Abriendo Google...";
     btn.style.background = "#ffea00"; 
+    btn.style.color = "#000";
   }
-  signInWithRedirect(auth, googleProvider);
+
+  try {
+    // USAMOS POPUP: Al estar el dominio autorizado, esto abrirá la ventana limpiamente sin bloqueos
+    await signInWithPopup(auth, googleProvider);
+    // ¡Magia! Si es exitoso, la ventanita de Google se cierra sola y onAuthStateChanged oculta el menú automáticamente.
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error);
+    if(btn) {
+      btn.innerHTML = "❌ Falló, intenta de nuevo";
+      btn.style.background = "#ff003c";
+      btn.style.color = "#fff";
+    }
+    
+    // Si el usuario cierra la ventana a medias, no lo asustamos con errores raros
+    if (error.code === 'auth/popup-closed-by-user') {
+      console.log("Inicio de sesión cancelado por el usuario.");
+    } else {
+      alert("🚨 Error: " + error.message);
+    }
+  }
 };
 
 window.entrarComoInvitado = function() {
@@ -102,12 +120,12 @@ window.entrarComoInvitado = function() {
 window.cerrarSesion = function() {
   signOut(auth).then(() => {
     localStorage.removeItem('fnf_guest_mode');
-    localStorage.removeItem('fnf_user_profile');
-    location.reload();
+    localStorage.removeItem('fnf_user_profile'); // Limpiamos la memoria local
+    location.reload(); // Recargamos para limpiar la pantalla
   });
 };
 
-// VENTANA DE PERFIL DINÁMICA
+// 👤 VENTANA DE PERFIL DINÁMICA
 window.abrirPerfil = async function() {
   const contenedor = document.getElementById('perfil-dinamico-contenido');
   document.getElementById('profile-popup').classList.add('show');
@@ -129,6 +147,7 @@ window.abrirPerfil = async function() {
   const snap = await get(ref(db, 'usuarios/' + usuarioActualFirebase.uid));
   const datos = snap.val() || {};
   
+  // Si ya lo modificó, el input se bloquea
   const bloqueado = datos.usernameModificado ? "disabled" : "";
   const textoBoton = datos.usernameModificado ? "❌ Nombre Ya Cambiado" : "✨ Guardar Apodo Único";
   const btnDeshabilitado = datos.usernameModificado ? "display:none;" : "";
@@ -159,11 +178,13 @@ window.guardarNuevoApodo = async function() {
   
   if(confirm("¿Seguro que quieres este apodo? Solo puedes cambiarlo UNA vez.")){
     
+    // Guardamos en Firebase con el candado
     await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), {
       nombre: nuevoNombre,
-      usernameModificado: true
+      usernameModificado: true // 👈 Candado de por vida
     });
 
+    // Actualizamos la memoria local
     const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
     perfilActual.nombre = nuevoNombre;
     localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
@@ -355,6 +376,7 @@ let currentModCommentsId = null;
 let modCommentsListener = null;
 
 window.openModComments = (id, title) => {
+  if(exigirRegistro()) return;
   currentModCommentsId = id;
   document.getElementById("mc-title").innerText = "Comentarios: " + title;
   
@@ -829,7 +851,8 @@ window.cerrarModalNovedades = function() {
 
 //===================================
 
-window.openScriptInfo = (id) => {  
+window.openScriptInfo = (id) => {
+  if(exigirRegistro()) return;
   const d = SCRIPTS_DATA[id];
   scriptImagesArray = d.images;
   currentScriptImgIndex = 0;
@@ -1177,6 +1200,7 @@ const APK_DATA = {
 };
 
 window.openModInfo = (id) => { 
+  if(exigirRegistro()) return;
   if (window.brokenLinksData && window.brokenLinksData[id] && !isSuperUser) {
     const modName = document.querySelector('#card-' + id + ' h3').textContent;
     document.getElementById('maintenance-mod-name').innerText = modName;
@@ -1201,6 +1225,7 @@ window.openModInfo = (id) => {
 window.closeModInfo = () => document.getElementById("mod-popup").classList.remove("show");
 
 window.openApkInfo = (id) => { 
+  if(exigirRegistro()) return;
   const d = APK_DATA[id]; 
   document.getElementById("apk-img").src = d.img; 
   document.getElementById("apk-title").innerText = d.title; 
@@ -2004,6 +2029,7 @@ let linkParaCompartir = "";
 let textoParaCompartir = "";
 
 window.abrirMenuCompartir = (id, nombreMod) => {
+  if(exigirRegistro()) return;
   const baseUrl = window.location.origin + window.location.pathname;
   linkParaCompartir = `${baseUrl}?share=${id}`;
   textoParaCompartir = `¡Mira esto: *${nombreMod}*! Descárgalo aquí:\n`;
