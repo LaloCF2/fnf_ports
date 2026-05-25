@@ -124,12 +124,7 @@ window.cerrarSesion = function() {
 window.abrirPerfil = async function() {
   const contenedor = document.getElementById('perfil-dinamico-contenido');
   
-  // Si por algo no encuentra el contenedor, te avisará en la consola de la compu
-  if (!contenedor) {
-    console.error("🚨 Error: No se encontró la etiqueta 'perfil-dinamico-contenido' en el HTML.");
-    alert("Error de diseño: Falta el contenedor de perfil en el HTML.");
-    return;
-  }
+  if (!contenedor) return;
 
   // Desplegamos la ventana flotante
   document.getElementById('profile-popup').classList.add('show');
@@ -147,7 +142,7 @@ window.abrirPerfil = async function() {
     return;
   }
 
-  // Mensaje temporal mientras lee la base de datos
+  // Animación de carga mientras lee la base de datos
   contenedor.innerHTML = `<p style="color: #aaa; font-size: 14px;">⏳ Cargando datos de perfil...</p>`;
 
   try {
@@ -155,18 +150,17 @@ window.abrirPerfil = async function() {
     const snap = await get(ref(db, 'usuarios/' + usuarioActualFirebase.uid));
     const datos = snap.val() || {};
     
-    // 🎯 RESPALDO MAESTRO: Si Firebase Database tarda o viene vacío, 
-    // extraemos la información en tiempo real de la cuenta activa de Google Auth.
+    // 🎯 RESPALDO MAESTRO: Si la base de datos está vacía, jalamos la foto y nombre crudos de Google
     const nombreUsuario = datos.nombre || usuarioActualFirebase.displayName || "Usuario FNF";
     const fotoUsuario = datos.foto || usuarioActualFirebase.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
     const correoUsuario = datos.correo || usuarioActualFirebase.email || "Sin correo";
     
-    // Reglas del candado para modificar el nombre una sola vez
+    // Reglas del candado
     const bloqueado = datos.usernameModificado ? "disabled" : "";
     const textoBoton = datos.usernameModificado ? "❌ Nombre Ya Cambiado" : "✨ Guardar Apodo Único";
     const btnDeshabilitado = datos.usernameModificado ? "display:none;" : "";
 
-    // Inyectamos la interfaz limpia con diseño premium
+    // Inyectamos la información
     contenedor.innerHTML = `
       <img src="${fotoUsuario}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 12px; object-fit: cover;">
       <h3 style="color: white; margin: 0 0 5px 0; font-size: 18px;">${nombreUsuario}</h3>
@@ -183,7 +177,36 @@ window.abrirPerfil = async function() {
     `;
   } catch (error) {
     console.error("Error al cargar el perfil:", error);
-    contenedor.innerHTML = `<p style="color: #ff003c; font-size: 13px;">🚨 Error al conectar con el servidor de datos.</p>`;
+    // 🚨 EL SALVAVIDAS: Si la base de datos se rompe, mostramos esto en lugar de dejarlo en blanco
+    contenedor.innerHTML = `
+      <img src="${usuarioActualFirebase.photoURL || 'https://cdn-icons-png.flaticon.com/128/149/149071.png'}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid #ff003c; margin-bottom: 12px; object-fit: cover;">
+      <h3 style="color: white; margin: 0 0 5px 0;">${usuarioActualFirebase.displayName || 'Usuario'}</h3>
+      <p style="color: #ff003c; font-size: 12px; margin-bottom: 20px;">⚠️ Hubo un pequeño retraso de seguridad al conectar con Firebase. Cierra esta ventana y ábrela de nuevo.</p>
+      <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white; border: none; padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer;">🚪 Cerrar Sesión</button>
+    `;
+  }
+};
+
+// ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE SOLO UNA VEZ
+window.guardarNuevoApodo = async function() {
+  const nuevoNombre = document.getElementById('input-nuevo-apodo').value.trim();
+  if (nuevoNombre.length < 3) return alert("El apodo debe tener mínimo 3 letras.");
+  
+  if(confirm("¿Seguro que quieres este apodo? Solo puedes cambiarlo UNA vez.")){
+    
+    // Guardamos en Firebase con el candado
+    await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), {
+      nombre: nuevoNombre,
+      usernameModificado: true // 👈 Candado de por vida
+    });
+
+    // Actualizamos la memoria local
+    const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
+    perfilActual.nombre = nuevoNombre;
+    localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
+
+    alert("¡Apodo actualizado exitosamente!");
+    abrirPerfil(); // Recargamos la ventanita
   }
 };
 
