@@ -1287,3 +1287,148 @@ section, .mod-grid, .apk-grid, .script-grid {
   cursor: pointer;
   display: none; /* Oculto para mortales */
 }
+
+/* =========================================
+   🚀 COMPORTAMIENTO DE SCROLL NATIVO
+   ========================================= */
+html, body {
+  /* Evita el rebote de "Pull-to-refresh" del navegador para sentirse como App instalada */
+  overscroll-behavior-y: none; 
+  scroll-behavior: smooth;
+}
+
+/* Le devolvemos el scroll con aceleración perfecta a tus cuadrículas */
+.mod-grid, .apk-grid, .script-grid {
+  -webkit-overflow-scrolling: touch; 
+}
+
+/* ========================================= */
+
+/* =========================================
+   🔮 ESTILOS DE AUTENTICACIÓN Y CONFIGURACIÓN
+   ========================================= */
+.auth-screen {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(8, 8, 12, 0.9);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 10000 !important;
+}
+
+.auth-card {
+  background: rgba(20, 20, 30, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 35px 25px; border-radius: 24px;
+  width: 90%; max-width: 360px; text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Adaptación automática a Liquid Glass Puro en Apple */
+body.ios-theme .auth-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(30px) brightness(1.2) !important;
+  -webkit-backdrop-filter: blur(30px) brightness(1.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+}
+
+.auth-logo { width: 75px; height: 75px; margin-bottom: 15px; animation: flotarLog 3s ease-in-out infinite; }
+@keyframes flotarLog { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.auth-card h2 { color: var(--neon-blue); font-size: 20px; margin-bottom: 12px; font-weight: bold; }
+.auth-card p { color: #b5b5bd; font-size: 13px; line-height: 1.5; margin-bottom: 25px; }
+
+#btn-google-login {
+  width: 100%; padding: 12px; background: #ffffff; color: #1f1f23;
+  border: none; border-radius: 14px; font-weight: bold; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+}
+#btn-google-login img { width: 22px; height: 22px; }
+#btn-google-login:active { transform: scale(0.95); }
+
+/* Edición del Perfil */
+.avatar-selection { margin-bottom: 25px; }
+#avatar-preview { width: 75px; height: 75px; border-radius: 50%; border: 2px solid var(--neon-blue); padding: 4px; margin-bottom: 15px; background: rgba(255,255,255,0.05); }
+.avatar-options { display: flex; justify-content: center; gap: 12px; }
+.avatar-options img { width: 42px; height: 42px; border-radius: 50%; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); border: 2px solid transparent; }
+.avatar-options img:active { transform: scale(0.85); }
+
+#txt-nuevo-username {
+  width: 100%; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; text-align: center;
+  font-size: 15px; margin-bottom: 20px; outline: none; font-family: inherit;
+}
+#txt-nuevo-username:focus { border-color: var(--neon-purple); box-shadow: 0 0 12px rgba(180, 0, 255, 0.3); }
+
+#btn-guardar-perfil {
+  width: 100%; padding: 13px; background: var(--neon-green); color: #000000;
+  border: none; border-radius: 14px; font-weight: bold; font-size: 14px; cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 255, 65, 0.2); transition: transform 0.2s ease;
+}
+#btn-guardar-perfil:active { transform: scale(0.96); }
+
+/* Custom Scrollbar Premium para la caja de texto de novedades */
+#caja-novedades-txt::-webkit-scrollbar {
+  width: 5px;
+}
+#caja-novedades-txt::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+#caja-novedades-txt::-webkit-scrollbar-thumb {
+  background: var(--neon-purple);
+  border-radius: 10px;
+}
+/* Sutil animación al aparecer */
+#caja-novedades-txt {
+  animation: deslizarCaja 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes deslizarCaja {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/*----------------------------------------
+
+/* Contenedor del Modal Moderno */
+.glass-update-card {
+    background: rgba(15, 15, 20, 0.85); /* Fondo oscuro semitransparente */
+    backdrop-filter: blur(20px);         /* El efecto de vidrio */
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: popUpAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popUpAnim {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.update-header-art {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    padding: 30px;
+    text-align: center;
+    position: relative;
+}
+
+.update-list-modern li {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 10px;
+    transition: transform 0.2s;
+}
+
+.update-list-modern li:hover {
+    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.08);
+}
