@@ -355,7 +355,6 @@ let currentModCommentsId = null;
 let modCommentsListener = null;
 
 window.openModComments = (id, title) => {
-  if(exigirRegistro()) return;
   currentModCommentsId = id;
   document.getElementById("mc-title").innerText = "Comentarios: " + title;
   
@@ -830,8 +829,7 @@ window.cerrarModalNovedades = function() {
 
 //===================================
 
-window.openScriptInfo = (id) => {
-  if(exigirRegistro()) return;
+window.openScriptInfo = (id) => {  
   const d = SCRIPTS_DATA[id];
   scriptImagesArray = d.images;
   currentScriptImgIndex = 0;
@@ -1179,7 +1177,6 @@ const APK_DATA = {
 };
 
 window.openModInfo = (id) => { 
-  if(exigirRegistro()) return;
   if (window.brokenLinksData && window.brokenLinksData[id] && !isSuperUser) {
     const modName = document.querySelector('#card-' + id + ' h3').textContent;
     document.getElementById('maintenance-mod-name').innerText = modName;
@@ -1204,7 +1201,6 @@ window.openModInfo = (id) => {
 window.closeModInfo = () => document.getElementById("mod-popup").classList.remove("show");
 
 window.openApkInfo = (id) => { 
-  if(exigirRegistro()) return;
   const d = APK_DATA[id]; 
   document.getElementById("apk-img").src = d.img; 
   document.getElementById("apk-title").innerText = d.title; 
@@ -2008,7 +2004,6 @@ let linkParaCompartir = "";
 let textoParaCompartir = "";
 
 window.abrirMenuCompartir = (id, nombreMod) => {
-  if(exigirRegistro()) return;
   const baseUrl = window.location.origin + window.location.pathname;
   linkParaCompartir = `${baseUrl}?share=${id}`;
   textoParaCompartir = `¡Mira esto: *${nombreMod}*! Descárgalo aquí:\n`;
