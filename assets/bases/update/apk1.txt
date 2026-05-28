@@ -1,4 +1,4 @@
-¡Versión v1.1.0!
+¡Versión v1.0.4!
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 • Ahora las ventanas de detección de impactos son más precisas al no redondearse hacia abajo.
 • Tamaño fijo de inicio de ventana en DPI más alto
