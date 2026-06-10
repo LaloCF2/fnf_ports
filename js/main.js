@@ -934,7 +934,7 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
-     mod98_4: {
+     mod98_3: {
    img: "assets/images/mods/GG.webp",
    title: "GameOverse",
    desc: "Friday Night Funkin' FNF' GameOverse Port Opt Psych Engine Optimizado Para (Pc/Android).",
