@@ -935,6 +935,17 @@ window.prevScriptImage = () => {
 
 const MOD_DATA = {
      mod98_4: {
+   img: "assets/images/mods/GG.webp",
+   title: "GameOverse",
+   desc: "Friday Night Funkin' FNF' GameOverse Port Opt Psych Engine Optimizado Para (Pc/Android).",
+   version: "Compatible: P-Slice v3.4.2, Psych Engine v1.0.4 etc",
+   downloads: [
+      { name: "Descarga (GitHub Directo)", link: " },
+      { name: "Descarga (Drive)", link: "" },
+      { name: "Descarga (MediaFire)", link: "" }
+    ]
+  },
+     mod98_4: {
    img: "assets/images/mods/pibby.webp",
    title: "Pibby Rescript",
    desc: "Friday Night Funkin' FNF' Pibby Rescript Port Opt Psych Engine Optimizado Para (Pc/Android).",
