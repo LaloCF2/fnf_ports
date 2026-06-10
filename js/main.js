@@ -940,9 +940,9 @@ const MOD_DATA = {
    desc: "Friday Night Funkin' FNF' GameOverse Port Opt Psych Engine Optimizado Para (Pc/Android).",
    version: "Compatible: P-Slice v3.4.2, Psych Engine v1.0.4 etc",
    downloads: [
-      { name: "Descarga (GitHub Directo)", link: " },
-      { name: "Descarga (Drive)", link: "" },
-      { name: "Descarga (MediaFire)", link: "" }
+      { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/GG/GameOverse.zip" },
+      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1LgUOiahqiKEUscjX0NWUpsYeFMOLeEAy/view?usp=drivesdk" },
+      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/8a3ld8jo5g16ezz/GameOverse.zip/file" }
     ]
   },
      mod98_4: {
