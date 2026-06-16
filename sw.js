@@ -1,5 +1,5 @@
 // Actualizamos a tu versión más reciente (vi en tu main.js que ya vas en la v5.1.2)
-const CACHE_NAME = 'fnf-mobile-v5.2.0';
+const CACHE_NAME = 'fnf-mobile-v6.2.0';
 
 // 🚀 Lista de Archivos Esenciales para el Modo Offline
 const urlsToCache = [
