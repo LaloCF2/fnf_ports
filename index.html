@@ -113,7 +113,7 @@
     <div class="lang-btn" onclick="toggleLanguage()" id="langBtn"
       style="position:fixed; top:15px; left:15px; z-index:9999; background:var(--neon-blue, #00eaff); color:black; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px var(--neon-blue);">
       🇬🇧 EN</div>
-    <div class="profile-btn" onclick="document.getElementById('profile-popup').classList.add('show')" id="profileBtn"
+    <div class="profile-btn" onclick="abrirPerfil()" id="profileBtn"
       style="position:fixed; top:15px; left:95px; z-index:9999; background:var(--neon-pink, #ff00ff); color:white; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px #ff00ff;">
       👤 <span data-es="Perfil" data-en="Profile">Perfil</span></div>
 
@@ -255,22 +255,7 @@
       </div>
     </div>
 
-    <div id="profile-popup" class="popup">
-      <div class="popup-content" style="text-align: center; padding: 20px;">
-        <span class="popup-close" onclick="document.getElementById('profile-popup').classList.remove('show')">✖</span>
-        <h2 class="glow" data-es="Mi Perfil" data-en="My Profile">Mi Perfil</h2>
-        <img id="profile-avatar-preview" src="https://via.placeholder.com/80/555/fff?text=?"
-          style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; border: 2px solid var(--neon-blue); object-fit: cover;">
-        <p style="font-size: 13px; color: #ccc; margin-bottom: 15px;"
-          data-es="Actualiza tus datos y tu Avatar usando un enlace de internet."
-          data-en="Update your data and Avatar using an internet URL.">Actualiza tus datos y tu Avatar usando un enlace
-          de internet.</p>
-        <input type="text" id="editProfileName" class="reg-input" placeholder="Tu Apodo">
-        <input type="url" id="editProfileAvatar" class="reg-input" placeholder="URL de nueva imagen (Opcional)">
-        <button class="btn" onclick="saveProfileChanges()" style="width: 100%" data-es="Guardar Cambios"
-          data-en="Save Changes">Guardar Cambios</button>
-      </div>
-    </div>
+
 
     <div id="ban-popup" class="popup">
       <div class="popup-content" style="padding: 20px;">
@@ -340,27 +325,26 @@
               style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
               <img src="https://cdn-icons-png.flaticon.com/128/16595/16595006.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se añadio un nuevo mod <b>GameOverse</b>" data-en="Added new <b>GameOverse</b> mod"
-                style="font-size: 13.5px; line-height: 1.3;"> Se añadio un nuevo mod: <b>GameOverse </b></span>
+              <span data-es="Se añadio un nuevo mod <b>EliasFunki Revive!</b>"
+                data-en="Added new <b>EliasFunki Revive!</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se
+                añadio un nuevo mod: <b>EliasFunki Revive! </b></span>
             </li>
 
             <li
               style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/1017/1017466.png" alt=""
+              <img src="https://cdn-icons-png.flaticon.com/128/891/891448.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se añadieron identificarores en el apartado de Mods"
-                data-en="Added identifiers to the Mods section" style="font-size: 13.5px; line-height: 1.3;"> Se
-                añadieron
-                identificarores en el apartado de Mods</span>
+              <span data-es="Se añadio un nuevo apartado en la pagina de Inicio"
+                data-en="A new section was added to the Home page" style="font-size: 13.5px; line-height: 1.3;"> Se
+                añadio un nuevo apartado en la pagina de Inicio</span>
             </li>
 
             <li
-              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-yellow); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/5432/5432968.png" alt=""
+              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+              <img src="https://cdn-icons-png.flaticon.com/128/4149/4149678.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Mejoras de Rendimiento y Correciones de errores menores"
-                data-en="Performance Improvements and Minor Bug Fixes" style="font-size: 13.5px; line-height: 1.3;">
-                More Improvements and Bug Fixes</span>
+              <span data-es="Corrección de errores y mejoras" data-en="Bug fixes and improvements"
+                style="font-size: 13.5px; line-height: 1.3;">Corrección de errores y mejoras</span>
             </li>
 
           </ul>
@@ -402,8 +386,7 @@
           <div class="action-icon" onclick="toggleTheme()" title="Cambiar Tema">☼</div>
           <div class="action-icon" onclick="document.getElementById('search-popup').classList.add('show')"
             title="Buscar">🔍</div>
-          <div class="action-icon" onclick="document.getElementById('profile-popup').classList.add('show')"
-            title="Perfil">👤</div>
+          <div class="action-icon" onclick="abrirPerfil()" title="Perfil">👤</div>
         </div>
       </div>
 
@@ -517,6 +500,21 @@
                 ¡Animo!</span>
             </li>
           </ul>
+        </div>
+
+        <div class="info-card"
+          style="margin-top: 20px; border: 1px solid var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 255, 0.15);">
+          <h2 class="glow"
+            style="font-size: 20px; margin-top: 0; color: var(--neon-pink); text-shadow: 0 0 5px var(--neon-pink);"
+            data-es="Spritesheet Generator FNF" data-en="Spritesheet Generator FNF">Spritesheet Generator FNF</h2>
+          <p style="color: #ddd; font-size: 14.5px; line-height: 1.5; margin-bottom: 20px;"
+            data-es="¡Ahora ya está disponible una nueva página para hacer y editar <b>spritesheets</b> directamente en móviles!"
+            data-en="A new page is now available to make and edit <b>spritesheets</b> directly on mobile!">¡Ahora ya
+            está disponible una nueva página para hacer y editar <b>spritesheets</b> directamente en móviles!</p>
+          <button class="btn"
+            style="width: 100%; font-size: 15px; padding: 12px; background: rgba(255, 0, 255, 0.15); border: 1px solid var(--neon-pink); color: #fff; text-shadow: 0 0 5px var(--neon-pink); font-weight: bold; transition: all 0.3s ease;"
+            onclick="window.open('https://lalocf2.github.io/spritesheet-generator-fnf/', '_blank')"
+            data-es="Ir a la Página 🚀" data-en="Go to Page 🚀">Ir a la Página 🚀</button>
         </div>
 
       </section>
@@ -898,6 +896,64 @@
       <section id="mods" class="section">
         <h2 class="glow" data-es="MODs Disponibles" data-en="Available MODs">MODs Disponibles</h2>
         <div class="mods-grid" id="modsContainer">
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2-3GB RAM"
+            data-size="31.16 MB Opt<br>100.02 MB No Opt" id="card-mod98_2">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_2', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_2" onclick="toggleGreenLed('mod98_2', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_2')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_2')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_2" onclick="handleLike('mod98_2', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_2">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_2">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_2', 'GameOverse')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_2" style="display:none;"></span>EliasFunkin Revival
+            </h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_2')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_2', 'EliasFunkin Revival')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
 
           <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="6.66 MB"
             id="card-mod98_3">
@@ -2278,7 +2334,7 @@
         <a class="social-item" href="https://tiktok.com/@lalo_cf" target="_blank"><img
             src="assets/icons/tiktok.jpeg"><span class="btn" style="width: 100%;">TikTok</span></a>
         <a class="social-item" href="mailto:ec331325@gmail.com?subject=Soporte%20Técnico%20FNF" target="_blank"><img
-            src="assets/icons/gmail.jpeg"><span class="btn" style="width: 100%;">Gmail</span></a>
+            src="assets/icons/gmail.webp"><span class="btn" style="width: 100%;">Gmail</span></a>
       </div>
 
       </a>
@@ -2302,7 +2358,7 @@
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V6.1.0 <br>
+      © <span id="year"></span> LaloCF | V6.2.0 <br>
       <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span>
       </div>
     </footer>
