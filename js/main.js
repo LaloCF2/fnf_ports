@@ -14,7 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v6.1.0";
+const APP_VERSION = "v6.2.0";
 const MI_UID_ADMIN = "user_a655u37rr";
 
 // ==========================================
@@ -24,24 +24,19 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 let usuarioActualFirebase = null;
 
-// 👂 Escuchamos si entra alguien
 onAuthStateChanged(auth, async (user) => {
   const overlayAuth = document.getElementById('auth-overlay');
 
   if (user) {
-    // ¡Logueado exitosamente!
     usuarioActualFirebase = user;
     if (overlayAuth) overlayAuth.style.display = 'none';
 
-    // 1. Respaldos por si Google no manda foto o nombre
     const nombreSeguro = user.displayName || "Usuario FNF";
     const fotoSegura = user.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
 
-    // 2. Revisar la Base de Datos
     const userRef = ref(db, 'usuarios/' + user.uid);
     const snap = await get(userRef);
 
-    // Si es la primera vez que entra, lo guardamos
     if (!snap.exists()) {
       await set(userRef, {
         nombre: nombreSeguro,
@@ -155,10 +150,21 @@ window.abrirPerfil = async function () {
     const fotoUsuario = datos.foto || usuarioActualFirebase.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
     const correoUsuario = datos.correo || usuarioActualFirebase.email || "Sin correo";
 
-    // Reglas del candado
-    const bloqueado = datos.usernameModificado ? "disabled" : "";
-    const textoBoton = datos.usernameModificado ? "❌ Nombre Ya Cambiado" : "✨ Guardar Apodo Único";
-    const btnDeshabilitado = datos.usernameModificado ? "display:none;" : "";
+    // Reglas de 15 días
+    const ultimaFecha = datos.ultimaFechaCambio || 0;
+    const ahora = Date.now();
+    const diasPasados = Math.floor((ahora - ultimaFecha) / (1000 * 60 * 60 * 24));
+
+    let bloqueado = "";
+    let textoBoton = "✨ Guardar Perfil";
+
+    // Si tenía el candado antiguo (usernameModificado: true) pero no tiene fecha, lo dejamos cambiar de nuevo
+    // Si tiene fecha y no han pasado 15 días, lo bloqueamos
+    if (diasPasados < 15 && ultimaFecha !== 0) {
+      const diasFaltantes = 15 - diasPasados;
+      bloqueado = "disabled";
+      textoBoton = `✨ Guardar Avatar (Nombre bloqueado ${diasFaltantes} días)`;
+    }
 
     // Inyectamos la información
     contenedor.innerHTML = `
@@ -168,9 +174,14 @@ window.abrirPerfil = async function () {
       <p style="color: #aa99ff; font-size: 12px; margin: 0 0 20px 0;">${correoUsuario}</p>
       
       <div style="background: rgba(255,255,255,0.04); padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.05);">
-        <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Cambiar Apodo (Una sola vez)</label>
-        <input type="text" id="input-nuevo-apodo" value="${nombreUsuario}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 8px; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
-        <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 10px; background: var(--neon-green); color: black; font-weight: bold; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; ${btnDeshabilitado}">${textoBoton}</button>
+        
+        <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Tu Apodo (Cambiable cada 15 días)</label>
+        <input type="text" id="input-nuevo-apodo" value="${nombreUsuario}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 8px; margin-bottom: 12px; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
+        
+        <label style="color: var(--neon-blue); font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">URL de Avatar / Logo (Opcional)</label>
+        <input type="url" id="input-nuevo-avatar" placeholder="https://..." value="${datos.foto || ''}" class="reg-input" style="width: 100%; margin-top: 8px; box-sizing: border-box; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
+
+        <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 15px; background: var(--neon-green); color: black; font-weight: bold; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px;">${textoBoton}</button>
       </div>
 
       <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white; border: none; padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px;">🚪 Cerrar Sesión</button>
@@ -187,48 +198,45 @@ window.abrirPerfil = async function () {
   }
 };
 
-// ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE SOLO UNA VEZ
+// ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE Y AVATAR
 window.guardarNuevoApodo = async function () {
-  const nuevoNombre = document.getElementById('input-nuevo-apodo').value.trim();
+  const nuevoNombreInput = document.getElementById('input-nuevo-apodo');
+  const nuevoAvatarInput = document.getElementById('input-nuevo-avatar');
+
+  if (!nuevoNombreInput) return;
+
+  const nuevoNombre = nuevoNombreInput.value.trim();
+  const nuevoAvatar = nuevoAvatarInput.value.trim();
+
   if (nuevoNombre.length < 3) return alert("El apodo debe tener mínimo 3 letras.");
 
-  if (confirm("¿Seguro que quieres este apodo? Solo puedes cambiarlo UNA vez.")) {
-
-    // Guardamos en Firebase con el candado
-    await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), {
-      nombre: nuevoNombre,
-      usernameModificado: true // 👈 Candado de por vida
-    });
-
-    // Actualizamos la memoria local
-    const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
-    perfilActual.nombre = nuevoNombre;
-    localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
-
-    alert("¡Apodo actualizado exitosamente!");
-    abrirPerfil(); // Recargamos la ventanita
+  let mensajeConfirmacion = "¿Guardar cambios en tu perfil?";
+  if (!nuevoNombreInput.disabled) {
+    mensajeConfirmacion = "¿Seguro que quieres este apodo? Se bloqueará por 15 días.";
   }
-};
 
-// ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE SOLO UNA VEZ
-window.guardarNuevoApodo = async function () {
-  const nuevoNombre = document.getElementById('input-nuevo-apodo').value.trim();
-  if (nuevoNombre.length < 3) return alert("El apodo debe tener mínimo 3 letras.");
+  if (confirm(mensajeConfirmacion)) {
 
-  if (confirm("¿Seguro que quieres este apodo? Solo puedes cambiarlo UNA vez.")) {
+    // Si el input no está bloqueado, guardamos la nueva fecha
+    let updateData = {};
+    if (nuevoAvatar) updateData.foto = nuevoAvatar;
 
-    // Guardamos en Firebase con el candado
-    await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), {
-      nombre: nuevoNombre,
-      usernameModificado: true // 👈 Candado de por vida
-    });
+    if (!nuevoNombreInput.disabled) {
+      updateData.nombre = nuevoNombre;
+      updateData.ultimaFechaCambio = Date.now();
+      updateData.usernameModificado = false; // Quitamos el candado viejo si lo tenía
+    }
+
+    // Guardamos en Firebase
+    await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), updateData);
 
     // Actualizamos la memoria local
     const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
-    perfilActual.nombre = nuevoNombre;
+    if (!nuevoNombreInput.disabled) perfilActual.nombre = nuevoNombre;
+    if (nuevoAvatar) perfilActual.foto = nuevoAvatar;
     localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
 
-    alert("¡Apodo actualizado exitosamente!");
+    alert("¡Perfil actualizado exitosamente!");
     abrirPerfil(); // Recargamos la ventanita
   }
 };
@@ -634,8 +642,7 @@ window.setFilter = (filter, btn) => {
 };
 
 // ==========================================
-// 🚀 BUSCADOR OPTIMIZADO (DEBOUNCE)
-// ==========================================
+
 let tiempoEsperaBusqueda;
 
 window.filterContent = () => {
@@ -865,21 +872,17 @@ window.cargarNovedadesTXT = function (id, tipo) {
   const modal = document.getElementById('modal-novedades-ios');
   const cajaTexto = document.getElementById('texto-novedades-ios');
 
-  // 1. Mostramos la ventana de cristal con mensaje de carga
   cajaTexto.innerHTML = `<div style="text-align: center; padding: 20px 0;"><span style="font-size: 24px;">⏳</span><br><br>Cargando información...</div>`;
-  modal.classList.add('show'); // Despierta el popup
+  modal.classList.add('show');
 
-  // 2. Definimos la ruta inteligente
   const rutaTXT = tipo === 'script' ? `assets/scripts/update/${id}.txt` : `assets/bases/update/${id}.txt`;
 
-  // 3. Vamos por el archivo
   fetch(rutaTXT)
     .then(response => {
       if (!response.ok) throw new Error("Archivo no encontrado");
       return response.text();
     })
     .then(textoLimpio => {
-      // Inyectamos el texto del archivo
       cajaTexto.innerText = textoLimpio;
     })
     .catch(error => {
@@ -891,7 +894,6 @@ window.cargarNovedadesTXT = function (id, tipo) {
     });
 };
 
-// Función para cerrar la ventana
 window.cerrarModalNovedades = function () {
   document.getElementById('modal-novedades-ios').classList.remove('show');
 };
@@ -942,10 +944,24 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+  mod98_2: {
+    img: "assets/images/mods/Elias.webp",
+    title: "EliasFunkin Revival",
+    desc: "Friday Night Funkin' FNF' EliasFunkin Revival Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
+    version: "Compatible: Solo Psych Engine v1.0.4",
+    downloads: [
+      { name: "Descarga Opt (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/KK/EliasFunkinPortOpt.zip" },
+      { name: "Descarga Opt (Drive)", link: "https://drive.google.com/file/d/16yJyuzQ6TzbH7Kq3UCq23X3rXq9GWSxt/view?usp=drive_link" },
+      { name: "Descarga Opt (MediaFire)", link: "https://www.mediafire.com/file/9uc5iepr3t93ed1/EliasFunkinPortOpt.zip/file" },
+      { name: "Descarga No Opt (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/KK/EliasFunkinPort.zip" },
+      { name: "Descarga No Opt (Drive)", link: "https://drive.google.com/file/d/1IJ2_IuiBksKLgSym3Cn6Vf2qvt9wJ0Mz/view?usp=drive_link" },
+      { name: "Descarga No Opt (MediaFire)", link: "https://www.mediafire.com/file/uomjcg2ytof4m7l/EliasFunkinPort.zip/file" }
+    ]
+  },
   mod98_3: {
     img: "assets/images/mods/GG.webp",
     title: "GameOverse",
-    desc: "Friday Night Funkin' FNF' GameOverse Port Opt Psych Engine Optimizado Para (Pc/Android).",
+    desc: "Friday Night Funkin' FNF' GameOverse Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
     version: "Compatible: P-Slice v3.4.2, Psych Engine v1.0.4 etc",
     downloads: [
       { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/GG/GameOverse.zip" },
@@ -956,7 +972,7 @@ const MOD_DATA = {
   mod98_4: {
     img: "assets/images/mods/pibby.webp",
     title: "Pibby Rescript",
-    desc: "Friday Night Funkin' FNF' Pibby Rescript Port Opt Psych Engine Optimizado Para (Pc/Android).",
+    desc: "Friday Night Funkin' FNF' Pibby Rescript Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
     version: "Compatible: P-Slice v3.4.2, Psych Engine v1.0.4",
     downloads: [
       { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Pibby/Pibby.Rescript.Opt.zip" },
@@ -967,7 +983,7 @@ const MOD_DATA = {
   mod98_5: {
     img: "assets/images/mods/fruit.webp",
     title: "FruitNinja V1.5",
-    desc: "Friday Night Funkin' FNF' FruitNinja V1.5 Port Opt Psych Engine Optimizado Para (Pc/Android).",
+    desc: "Friday Night Funkin' FNF' FruitNinja V1.5 Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
     version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
     downloads: [
       { name: "Descarga (GitHub Directo)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Fruit/FruitNinja.v1.5.zip" },
@@ -990,7 +1006,8 @@ const MOD_DATA = {
     desc: "Friday Night Funkin' FNF' From The Top! Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 303.00MB",
     version: "Compatible solo con la base Optimizada de Psych Engine v1.0.4",
     downloads: [
-      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1D5DI8TTZk83XX4l2KW0QDtWl3ZGwYgxe/view?usp=drive_link" },
+      { name: "Descarga ZIP (Drive)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/fft/From.the.Top.Port.zip" },
+      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/b2hbahd0brbo52a/From_The_Top%2521_Port.zip/file" },
       { name: "Descarga Psych Engine Opt", link: "https://lalocf2.github.io/fnf_ports/?share=apk1" }
     ]
   },
