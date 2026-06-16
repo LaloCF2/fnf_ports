@@ -15,7 +15,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const APP_VERSION = "v6.2.0";
-const MI_UID_ADMIN = "user_a655u37rr";
+const MI_UID_ADMIN = "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2";
 
 // ==========================================
 // 🛡️ MOTOR DE AUTENTICACIÓN GOOGLE (VERSIÓN POPUP DEFINITIVA)
