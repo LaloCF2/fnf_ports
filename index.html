@@ -4,7 +4,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>FNF' - Mobile</title>
+  <title>FNF' - Ports
+    Mobile</title>
 
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fnf-mobile-lalocf-default-rtdb.firebaseio.com" crossorigin>
@@ -76,6 +77,47 @@
       </div>
     </div>
 
+    <!-- MIS FAVORITOS POPUP -->
+    <div id="favorites-popup" class="popup">
+      <div class="popup-content popup-scroll-body"
+        style="text-align: center; padding: 20px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; max-width: 340px; margin: auto; max-height: 80vh; overflow-y: auto;">
+        <span class="popup-close" onclick="document.getElementById('favorites-popup').classList.remove('show')"
+          style="position: absolute; top: 15px; right: 15px; color: #aaa; cursor: pointer; font-size: 18px;">✖</span>
+        <h2 class="glow" style="margin-bottom: 20px; color: white;">⭐ Mis Favoritos</h2>
+        <div id="favorites-list" style="display: flex; flex-direction: column; gap: 10px;">
+          <p style="color:#aaa; font-size:13px;">No has guardado ningún mod aún. ¡Toca el 🤍 en tus mods favoritos!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOLICITUDES POPUP -->
+    <div id="requests-popup" class="popup">
+      <div class="popup-content popup-scroll-body"
+        style="padding: 20px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; max-width: 360px; margin: auto; max-height: 85vh; overflow-y: auto;">
+        <span class="popup-close" onclick="document.getElementById('requests-popup').classList.remove('show')"
+          style="position: absolute; top: 15px; right: 15px; color: #aaa; cursor: pointer; font-size: 18px;">✖</span>
+        <h2 class="glow" style="margin-bottom: 10px; color: white; text-align: center;">📝 Pedir un Mod</h2>
+        <p style="color:#ccc; font-size:12px; text-align:center; margin-bottom: 15px;">¿Qué port te gustaría ver en la
+          página? ¡Vota o añade uno nuevo!</p>
+
+        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+          <input type="text" id="req-mod-name" placeholder="Nombre del Mod..." class="reg-input"
+            style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid #444; border-radius:8px;">
+          <input type="url" id="req-mod-link" placeholder="Enlace (Opcional GameBanana...)" class="reg-input"
+            style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid #444; border-radius:8px;">
+          <button id="btn-enviar-solicitud" onclick="enviarSolicitudMod()" class="btn"
+            style="width:100%; padding:10px; background:var(--neon-blue); color:black; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">Enviar
+            Solicitud</button>
+        </div>
+
+        <h3 style="color:white; font-size:15px; border-bottom:1px solid #444; padding-bottom:5px; margin-bottom:10px;">
+          Comunidad (Más votados)</h3>
+        <div id="requests-list" style="display: flex; flex-direction: column; gap: 10px;">
+          <p style="color:#aaa; font-size:13px; text-align:center;">Cargando solicitudes...</p>
+        </div>
+      </div>
+    </div>
+
     <div id="pro-menu-overlay" onclick="toggleProMenu()"></div>
 
     <div id="particles-container"></div>
@@ -101,6 +143,12 @@
       <div class="nav-item" onclick="selectSection('help', this)">
         <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/7978/7978351.png" alt="Ayuda"></span>
         <span class="nav-text" data-es="Ayuda" data-en="Help">Ayuda</span>
+      </div>
+      <div class="nav-item"
+        onclick="document.getElementById('requests-popup').classList.add('show'); if(window.loadModRequests) loadModRequests();">
+        <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/8367/8367272.png" alt="Pedidos"
+            style="filter: hue-rotate(180deg);"></span>
+        <span class="nav-text" data-es="Pedidos" data-en="Requests">Pedidos</span>
       </div>
       <div class="nav-item" onclick="selectSection('contact', this)">
         <span class="nav-icon"><img src="https://cdn-icons-png.flaticon.com/128/16955/16955208.png" alt="Redes"></span>
@@ -316,7 +364,7 @@
         </div>
         <div class="update-body">
           <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;"
-            data-es="¡Novedades v6.1.0!" data-en="What's New v6.0.0!">¡Novedades v6.1.0!</h2>
+            data-es="¡Novedades v6.3.0!" data-en="What's New v6.3.0!">¡Novedades v6.3.0!</h2>
           <p style="text-align: center; color: #a1a1aa; font-size: 14px; margin-bottom: 20px;">Los cambios más recientes
             en FNF Mobile:</p>
           <ul class="update-list-modern" style="margin-top:15px; list-style: none; padding-left: 0;">
@@ -325,18 +373,44 @@
               style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
               <img src="https://cdn-icons-png.flaticon.com/128/16595/16595006.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se añadio un nuevo mod <b>EliasFunki Revive!</b>"
-                data-en="Added new <b>EliasFunki Revive!</b> mod" style="font-size: 13.5px; line-height: 1.3;"> Se
-                añadio un nuevo mod: <b>EliasFunki Revive! </b></span>
+              <span data-es="Se
+                añadio un nuevo mod: <b>Milf Erect </b>" data-en="A new mod was added: <b>Milf Erect </b>"
+                style="font-size: 13.5px; line-height: 1.3;"> Se
+                añadio un nuevo mod: <b>Milf Erect </b></span>
             </li>
 
             <li
               style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/891/891448.png" alt=""
+              <img src="https://cdn-icons-png.flaticon.com/128/4412/4412771.png" alt=""
                 style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se añadio un nuevo apartado en la pagina de Inicio"
-                data-en="A new section was added to the Home page" style="font-size: 13.5px; line-height: 1.3;"> Se
-                añadio un nuevo apartado en la pagina de Inicio</span>
+              <span data-es=" Se
+                añadio una nueva opcion en la parte de menu, su funcionalidad es para pedir ports al
+                administrador,<br><b>¡Si la solicitud del mod que enviaron se desaparece o se elimina no es porque el
+                administrador no quiera portearlo,
+                es debido a la dificultad y falta de tiempo para poder realizar el port solo, espero no te sientas mal
+                si te llega a pasar!</b>" data-en=" A new section was added to the menu, its functionality is to request
+                ports to
+                the administrator,<br><b>If the mod request you sent disappears or is deleted, it's not because the
+                administrator doesn't want to port it,
+                it's because of the difficulty and lack of time to be able to do the port alone, I hope you don't feel
+                bad
+                if it happens to you!</b>" style="font-size: 13.5px; line-height: 1.3;"> Se
+                añadio una nueva opcion en la parte de menu, su funcionalidad es para pedir ports al
+                administrador,<br><b>¡Si la solicitud del mod que enviaron se desaparece o se elimina no es porque el
+                  administrador no quiera portearlo,
+                  es debido a la dificultad y falta de tiempo para poder realizar el port solo, espero no te sientas mal
+                  si te llega a pasar!</b></span>
+            </li>
+
+            <li
+              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-red); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828614.png" alt=""
+                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
+              <span data-es="Se
+                añadio una nueva opcion en los mods para guardarlos en favoritos" data-en="A new
+                option was added to the mods to save them in favorites" style="font-size: 13.5px; line-height: 1.3;">
+                Se
+                añadio una nueva opcion en los mods para guardarlos en favoritos</span>
             </li>
 
             <li
@@ -364,17 +438,6 @@
           <button class="btn" style="flex: 1;" onclick="installApp()" data-es="Sí, instalar" data-en="Install">Sí,
             instalar</button>
         </div>
-      </div>
-    </div>
-
-    <div id="register-popup" class="popup">
-      <div class="popup-content" style="text-align: center; padding: 20px;">
-        <h2 class="glow" data-es="Registro de Usuario" data-en="User Registration">Registro de Usuario</h2>
-        <input type="text" id="regName" class="reg-input" placeholder="Tu Apodo">
-        <input type="url" id="regLink" class="reg-input" placeholder="Link de tu canal de YouTube (Opcional)">
-        <input type="url" id="regAvatar" class="reg-input" placeholder="URL Foto (Opcional)">
-        <button class="btn" onclick="saveRegistration()" style="width: 100%" data-es="Aceptar"
-          data-en="Accept">Aceptar</button>
       </div>
     </div>
 
@@ -436,7 +499,7 @@
       <section id="home" class="section active">
         <div class="hero-banner">
           <h1 class="glow" style="font-size: 28px; margin-bottom: 15px; margin-top: 0;"
-            data-es="¡Bienvenido a FNF' Mobile!" data-en="Welcome to FNF' Mobile!">¡Bienvenido a FNF' Mobile!</h1>
+            data-es="¡Bienvenido a FNF' Mobile!" data-en="Welcome to FNF' Mobile!">¡Bienvenido a FNF' Ports Mobile!</h1>
           <p style="color: #ddd; margin-bottom: 25px; font-size: 15px; line-height: 1.4;"
             data-es="El mejor lugar para descargar tus mods optimizados."
             data-en="The best place to download optimized mods.">El mejor lugar para descargar tus mods optimizados.</p>
@@ -896,6 +959,64 @@
       <section id="mods" class="section">
         <h2 class="glow" data-es="MODs Disponibles" data-en="Available MODs">MODs Disponibles</h2>
         <div class="mods-grid" id="modsContainer">
+
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2-3GB RAM" data-size="17.11 MB"
+            id="card-mod98_1">
+            <span class="gama-badge gama-low">Baja</span>
+            <button class="admin-pin-btn" onclick="toggleModPin('mod98_1', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/12483/12483013.png" alt="Fijar"
+                style="width: 16px; height: 16px; object-fit: contain; transform: translateY(2px);"> Fijar
+            </button>
+            <button class="admin-led-btn" id="btn-led-mod98_1" onclick="toggleGreenLed('mod98_1', event)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/14035/14035769.png" alt="LED"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> Act. LED
+            </button>
+            <button class="admin-new-btn" onclick="toggleNewMod('card-mod98_1')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #ffea00; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/1828/1828884.png" alt="Star"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Nuevo
+            </button>
+            <button class="admin-fix-btn" onclick="fixBrokenLink('mod98_1')"
+              style="display: flex; align-items: center; gap: 4px; margin-top: 5px; background-color: #00ff41; color: black; border: none; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+              <img src="https://cdn-icons-png.flaticon.com/128/5278/5278663.png" alt="Fix"
+                style="width: 14px; height: 14px; object-fit: contain; transform: translateY(1px);"> Reparar
+            </button>
+
+            <div class="like-container" id="like-mod98_1" onclick="handleLike('mod98_1', this)"
+              style="display: flex; align-items: center; gap: 4px;">
+              <span class="like-icon" style="display: flex; align-items: center;"><img
+                  src="https://cdn-icons-png.flaticon.com/128/8028/8028304.png" alt="Like"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"></span>
+              <span class="like-count" id="count-mod98_1">0</span>
+            </div>
+            <div class="dl-counter" style="display: flex; align-items: center; gap: 4px;">
+              <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Descargas"
+                style="width: 18px; height: 18px; object-fit: contain; transform: translateY(4.5px);"> <span
+                id="dl-mod98_1">0</span>
+            </div>
+
+            <div style="width: 100%; display: block; clear: both; margin-top: 6px; margin-bottom: 6px;">
+              <button onclick="abrirMenuCompartir('mod98_1', 'Milf Erect')"
+                style="display: inline-flex; align-items: center; gap: 3px; background-color: rgba(0, 234, 255, 0.1); color: #00eaff; border: 1px solid #00eaff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; line-height: 1; vertical-align: middle;">
+                <img src="https://cdn-icons-png.flaticon.com/128/2099/2099085.png" alt="Share"
+                  style="width: 10px; height: 10px; object-fit: contain; filter: invert(1);"> Compartir
+              </button>
+            </div>
+
+            <h3><span class="led-dot led-green" id="led-green-mod98_1" style="display:none;"></span>Milf Erect
+            </h3>
+            <div class="card-buttons">
+              <button class="btn" onclick="openModInfo('mod98_1')" data-es="Más Info" data-en="More Info">Más
+                Info</button>
+              <button class="btn btn-chat" onclick="openModComments('mod98_1', 'Milf Erect')"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/128/1041/1041916.png" alt="Chat"
+                  style="width: 20px; height: 20px; object-fit: contain; transform: translateY(4.5px);"> Chat
+              </button>
+            </div>
+          </div>
 
           <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2-3GB RAM"
             data-size="31.16 MB Opt<br>100.02 MB No Opt" id="card-mod98_2">
@@ -1894,7 +2015,7 @@
             </div>
           </div>
 
-          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="300 MB"
+          <div class="mod-card" data-gama="low" data-engine="Psych Engine" data-ram="2GB RAM" data-size="? MB"
             id="card-mod100">
             <span class="gama-badge gama-low">Baja</span>
             <button class="admin-pin-btn" onclick="toggleModPin('mod100', event)"
@@ -2358,7 +2479,7 @@
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V6.2.0 <br>
+      © <span id="year"></span> LaloCF | V6.3.0 <br>
       <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span>
       </div>
     </footer>
@@ -2768,9 +2889,9 @@
 
       function comprobarSiEsAdmin() {
         try {
+          if (window.isSuperUser) return true;
           const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-          if (userProfile && userProfile.key === "user_a655u37rr") {
+          if (userProfile && (userProfile.key === "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2" || (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf'))) {
             return true;
           }
         } catch (error) {
