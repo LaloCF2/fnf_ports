@@ -14,12 +14,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v6.2.0";
+const APP_VERSION = "v6.3.0";
 const MI_UID_ADMIN = "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2";
 
 // ==========================================
-// 🛡️ MOTOR DE AUTENTICACIÓN GOOGLE (VERSIÓN POPUP DEFINITIVA)
-// ==========================================
+
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 let usuarioActualFirebase = null;
@@ -114,17 +113,14 @@ window.cerrarSesion = function () {
 };
 
 // ==========================================
-// 👤 VENTANA DE PERFIL DINÁMICA (VERSIÓN INDESTRUCTIBLE)
-// ==========================================
+
 window.abrirPerfil = async function () {
   const contenedor = document.getElementById('perfil-dinamico-contenido');
 
   if (!contenedor) return;
 
-  // Desplegamos la ventana flotante
   document.getElementById('profile-popup').classList.add('show');
 
-  // CASO 1: EL USUARIO ES UN INVITADO
   if (!usuarioActualFirebase) {
     contenedor.innerHTML = `
       <img src="https://cdn-icons-png.flaticon.com/128/149/149071.png" style="width: 80px; filter: grayscale(1); margin-bottom: 10px;">
@@ -137,20 +133,16 @@ window.abrirPerfil = async function () {
     return;
   }
 
-  // Animación de carga mientras lee la base de datos
   contenedor.innerHTML = `<p style="color: #aaa; font-size: 14px;">⏳ Cargando datos de perfil...</p>`;
 
   try {
-    // CASO 2: EL USUARIO INICIÓ SESIÓN CON GOOGLE
     const snap = await get(ref(db, 'usuarios/' + usuarioActualFirebase.uid));
     const datos = snap.val() || {};
 
-    // 🎯 RESPALDO MAESTRO: Si la base de datos está vacía, jalamos la foto y nombre crudos de Google
     const nombreUsuario = datos.nombre || usuarioActualFirebase.displayName || "Usuario FNF";
     const fotoUsuario = datos.foto || usuarioActualFirebase.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
     const correoUsuario = datos.correo || usuarioActualFirebase.email || "Sin correo";
 
-    // Reglas de 15 días
     const ultimaFecha = datos.ultimaFechaCambio || 0;
     const ahora = Date.now();
     const diasPasados = Math.floor((ahora - ultimaFecha) / (1000 * 60 * 60 * 24));
@@ -158,15 +150,12 @@ window.abrirPerfil = async function () {
     let bloqueado = "";
     let textoBoton = "✨ Guardar Perfil";
 
-    // Si tenía el candado antiguo (usernameModificado: true) pero no tiene fecha, lo dejamos cambiar de nuevo
-    // Si tiene fecha y no han pasado 15 días, lo bloqueamos
     if (diasPasados < 15 && ultimaFecha !== 0) {
       const diasFaltantes = 15 - diasPasados;
       bloqueado = "disabled";
       textoBoton = `✨ Guardar Avatar (Nombre bloqueado ${diasFaltantes} días)`;
     }
 
-    // Inyectamos la información
     contenedor.innerHTML = `
       <img src="${fotoUsuario}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0,234,255,0.4); margin-bottom: 12px; object-fit: cover;">
       <h3 style="color: white; margin: 0 0 5px 0; font-size: 18px;">${nombreUsuario}</h3>
@@ -184,11 +173,12 @@ window.abrirPerfil = async function () {
         <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 15px; background: var(--neon-green); color: black; font-weight: bold; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px;">${textoBoton}</button>
       </div>
 
+      <button onclick="document.getElementById('profile-popup').classList.remove('show'); abrirFavoritos();" class="btn" style="width: 100%; margin-bottom: 15px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px;">⭐ Mis Favoritos</button>
+
       <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white; border: none; padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 13px;">🚪 Cerrar Sesión</button>
     `;
   } catch (error) {
     console.error("Error al cargar el perfil:", error);
-    // 🚨 EL SALVAVIDAS: Si la base de datos se rompe, mostramos esto en lugar de dejarlo en blanco
     contenedor.innerHTML = `
       <img src="${usuarioActualFirebase.photoURL || 'https://cdn-icons-png.flaticon.com/128/149/149071.png'}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid #ff003c; margin-bottom: 12px; object-fit: cover;">
       <h3 style="color: white; margin: 0 0 5px 0;">${usuarioActualFirebase.displayName || 'Usuario'}</h3>
@@ -198,7 +188,6 @@ window.abrirPerfil = async function () {
   }
 };
 
-// ✏️ FUNCIÓN PARA GUARDAR EL NOMBRE Y AVATAR
 window.guardarNuevoApodo = async function () {
   const nuevoNombreInput = document.getElementById('input-nuevo-apodo');
   const nuevoAvatarInput = document.getElementById('input-nuevo-avatar');
@@ -217,27 +206,24 @@ window.guardarNuevoApodo = async function () {
 
   if (confirm(mensajeConfirmacion)) {
 
-    // Si el input no está bloqueado, guardamos la nueva fecha
     let updateData = {};
     if (nuevoAvatar) updateData.foto = nuevoAvatar;
 
     if (!nuevoNombreInput.disabled) {
       updateData.nombre = nuevoNombre;
       updateData.ultimaFechaCambio = Date.now();
-      updateData.usernameModificado = false; // Quitamos el candado viejo si lo tenía
+      updateData.usernameModificado = false;
     }
 
-    // Guardamos en Firebase
     await update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), updateData);
 
-    // Actualizamos la memoria local
     const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
     if (!nuevoNombreInput.disabled) perfilActual.nombre = nuevoNombre;
     if (nuevoAvatar) perfilActual.foto = nuevoAvatar;
     localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
 
     alert("¡Perfil actualizado exitosamente!");
-    abrirPerfil(); // Recargamos la ventanita
+    abrirPerfil();
   }
 };
 
@@ -256,8 +242,13 @@ window.exigirRegistro = function () {
 let isSuperUser = false;
 const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
 
-if (userProfile && userProfile.key === MI_UID_ADMIN) {
+if (userProfile && (
+  userProfile.key === MI_UID_ADMIN ||
+  userProfile.key === "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2" ||
+  (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf')
+)) {
   isSuperUser = true;
+  window.isSuperUser = true; // Export globally just in case
   document.body.classList.add('is-admin');
 }
 
@@ -582,7 +573,10 @@ window.likeModComment = async (commentId) => {
   localStorage.setItem('my_liked_mod_comments', JSON.stringify(myLikedComments));
 };
 
-window.deleteModComment = (id) => confirm("¿Borrar comentario?") && remove(ref(db, `mod_comments/${currentModCommentsId}/${id}`));
+window.deleteModComment = (id) => {
+  if (!usuarioActualFirebase) return alert("❌ Como Administrador, primero debes INICIAR SESIÓN con Google para tener permisos de base de datos y poder borrar.");
+  if (confirm("¿Borrar comentario?")) remove(ref(db, `mod_comments/${currentModCommentsId}/${id}`));
+};
 window.togglePinModComment = (cId, currentState) => update(ref(db, `mod_comments/${currentModCommentsId}/${cId}`), { isPinned: !currentState });
 window.replyModComment = (name) => { const txt = document.getElementById('mc-commentText'); txt.value = `@${name} `; txt.focus(); };
 
@@ -863,10 +857,6 @@ const SCRIPTS_DATA = {
 let scriptImagesArray = [];
 let currentScriptImgIndex = 0;
 
-//==================================
-
-// ==========================================
-// 📄 LECTOR AUTOMÁTICO DE NOVEDADES (MODAL iOS)
 // ==========================================
 window.cargarNovedadesTXT = function (id, tipo) {
   const modal = document.getElementById('modal-novedades-ios');
@@ -944,6 +934,26 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+  mod98_0: {
+    img: "assets/images/mods/Wish.webp",
+    title: "The Wish Super Funkin' Galaxy",
+    desc: "Friday Night Funkin' FNF' The Wish Super Funkin' Galaxy Port Opt Psych Engine Optimizado Para (Pc/Android).",
+    version: "Compatible: Psych Engine, P-Slice, etc",
+    downloads: [
+      { name: "Descarga (Drive)", link: "https://www.mediafire.com/file/tnrjx41ru3ufenh/%2528LCF%2529_M%2Alf_Erect.zip/file" },
+      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/yhphtbfq53sy3t4/%2528LCF%2529_The_Wish_Super_Funkin%2527_Galaxy.zip/file" }
+    ]
+  },
+  mod98_1: {
+    img: "assets/images/mods/M-E.webp",
+    title: "Milf Erect",
+    desc: "Friday Night Funkin' FNF' Milf Erect Port Opt Psych Engine Optimizado Para (Pc/Android).",
+    version: "Compatible: Psych Engine, P-Slice, etc",
+    downloads: [
+      { name: "Descarga (Drive)", link: "https://drive.google.com/file/d/1q46lm5ega0DPhsoBz39mm-XsgbwI8o0U/view?usp=drive_link" },
+      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/tnrjx41ru3ufenh/%2528LCF%2529_M%2Alf_Erect.zip/file" }
+    ]
+  },
   mod98_2: {
     img: "assets/images/mods/Elias.webp",
     title: "EliasFunkin Revival",
@@ -1501,6 +1511,253 @@ setTimeout(() => {
       window.loadItemRating(id, 'script');
     };
   }
+
+  // ==========================================
+
+  window.toggleFavorite = (modId, btn, card) => {
+    let favs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
+    if (favs[modId]) {
+      delete favs[modId];
+      btn.innerHTML = '🤍';
+      btn.style.background = 'rgba(255,255,255,0.1)';
+      btn.style.borderColor = 'rgba(255,255,255,0.2)';
+    } else {
+      const h3 = card.querySelector('h3');
+      const title = h3 ? h3.textContent.trim().replace(/^\s+/, '') : 'Mod FNF';
+      const imgEl = card.querySelector('img');
+      const img = imgEl ? imgEl.src : '';
+      favs[modId] = { title, img, modId, timestamp: Date.now() };
+      btn.innerHTML = '❤️';
+      btn.style.background = 'rgba(255, 0, 100, 0.2)';
+      btn.style.borderColor = '#ff0064';
+    }
+    localStorage.setItem('fnf_favorites', JSON.stringify(favs));
+    btn.style.transform = 'scale(1.3)';
+    setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
+  };
+
+  document.querySelectorAll('.apk-card, .mod-card, .script-card').forEach(card => {
+    const allBtns = card.querySelectorAll('button');
+    let modId = null;
+    let chatBtn = null;
+    allBtns.forEach(b => {
+      const oc = b.getAttribute('onclick') || '';
+      if (oc.includes('openModComments')) {
+        const m = oc.match(/openModComments\(['"](.*?)['"]/);
+        if (m) { modId = m[1]; chatBtn = b; }
+      }
+    });
+
+    if (modId && chatBtn) {
+      const favs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
+      const isFav = !!favs[modId];
+
+      const favBtn = document.createElement('button');
+      favBtn.className = 'btn btn-fav';
+      favBtn.innerHTML = isFav ? '❤️' : '🤍';
+      favBtn.title = isFav ? 'Quitar de favoritos' : 'Añadir a favoritos';
+      favBtn.style.cssText = `display:inline-flex; align-items:center; justify-content:center; padding: 8px 10px; font-size: 16px; margin-left: 5px; background: ${isFav ? 'rgba(255, 0, 100, 0.2)' : 'rgba(255,255,255,0.07)'}; border: 1px solid ${isFav ? '#ff0064' : 'rgba(255,255,255,0.2)'}; border-radius: 8px; cursor:pointer; transition: transform 0.2s, background 0.2s;`;
+      favBtn.onclick = (e) => {
+        e.stopPropagation();
+        window.toggleFavorite(modId, favBtn, card);
+      };
+      chatBtn.insertAdjacentElement('afterend', favBtn);
+    }
+  });
+
+  window.abrirFavoritos = () => {
+    document.getElementById('favorites-popup').classList.add('show');
+    const container = document.getElementById('favorites-list');
+    const favs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
+
+    container.innerHTML = '';
+    const keys = Object.keys(favs);
+
+    if (keys.length === 0) {
+      container.innerHTML = '<p style="color:#aaa; font-size:13px;">No has guardado ningún mod aún. ¡Toca el 🤍 en tus mods favoritos!</p>';
+      return;
+    }
+
+    keys.sort((a, b) => favs[b].timestamp - favs[a].timestamp).forEach(id => {
+      const data = favs[id];
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px; gap:10px; text-align:left; border: 1px solid rgba(255,255,255,0.1);';
+      div.innerHTML = `
+        <img src="${data.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">
+        <div style="flex: 1;">
+          <h4 style="margin:0; color:white; font-size:14px;">${data.title}</h4>
+        </div>
+        <button onclick="openModComments('${id}', '${data.title.replace(/'/g, "\\'")}')" style="background:var(--neon-blue); color:black; padding:8px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">💬</button>
+      `;
+      container.appendChild(div);
+    });
+  };
+
+  // ==========================================
+
+  let modRequestsListener = null;
+
+  window.loadModRequests = () => {
+    const reqRef = ref(db, 'mod_requests');
+    if (!modRequestsListener) {
+      modRequestsListener = onValue(reqRef, (snapshot) => {
+        const container = document.getElementById('requests-list');
+        container.innerHTML = '';
+        const data = snapshot.val();
+
+        if (!data) {
+          container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center;">No hay solicitudes aún. ¡Sé el primero!</p>';
+          return;
+        }
+
+        const requests = Object.keys(data).map(k => ({ id: k, ...data[k] }));
+        requests.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+        requests.forEach(req => {
+          const statusColors = {
+            'Pendiente': '#ffaa00',
+            'Aprobado': '#86ffffff',
+            'En Progreso': '#00eaff',
+            'Completado': '#0eff2eff'
+          };
+          const badgeColor = statusColors[req.status || 'Pendiente'] || '#ffaa00';
+
+          let adminBtns = '';
+          if (isSuperUser) {
+            adminBtns = `
+              <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #444; display:flex; gap:5px; flex-wrap:wrap;">
+                <button onclick="updateRequestStatus('${req.id}', 'Aprobado')" style="flex:1; background:#8888ff; color:white; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">Aprobar</button>
+                <button onclick="updateRequestStatus('${req.id}', 'En Progreso')" style="flex:1; background:#00eaff; color:black; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">En Progreso</button>
+                <button onclick="updateRequestStatus('${req.id}', 'Completado')" style="flex:1; background:#00ff88; color:black; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">Completado</button>
+                <button onclick="deleteRequest('${req.id}')" style="background:#ff003c; color:white; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">✖</button>
+              </div>
+            `;
+          }
+
+          const myVoted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
+          const isVoted = myVoted[req.id];
+
+          const div = document.createElement('div');
+          div.style.cssText = 'background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); text-align:left;';
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div style="flex:1; padding-right:10px;">
+                <span style="font-size:10px; color:${badgeColor}; border:1px solid ${badgeColor}; padding:2px 5px; border-radius:10px; text-transform:uppercase; font-weight:bold;">${req.status || 'Pendiente'}</span>
+                <h4 style="margin:5px 0; color:white; font-size:15px;">${req.modName}</h4>
+                ${req.link ? `<a href="${req.link}" target="_blank" style="color:var(--neon-pink); font-size:11px; text-decoration:underline;">Ver Link Original</a>` : ''}
+                <p style="color:#888; font-size:10px; margin-top:5px;">Pedido por: ${req.user || 'Anónimo'}</p>
+              </div>
+              <div style="text-align:center;">
+                <button onclick="voteRequest('${req.id}')" class="btn" style="background:${isVoted ? 'var(--neon-green)' : '#333'}; color:${isVoted ? 'black' : 'white'}; border:none; border-radius:8px; width:45px; height:40px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 4px 0 ${isVoted ? '#00cc00' : '#111'}; transform:${isVoted ? 'translateY(2px)' : 'none'}; transition:all 0.1s;">
+                  ▲
+                </button>
+                <div style="color:var(--neon-green); font-weight:bold; font-size:16px; margin-top:8px;">${req.votes || 0}</div>
+              </div>
+            </div>
+            ${adminBtns}
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+  };
+
+  window.enviarSolicitudMod = async () => {
+    // Verificar que tenga perfil configurado
+    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+    if (!profile || !profile.nombre) {
+      alert("🔒 Debes iniciar sesión con Google para pedir mods.");
+      if (document.getElementById('auth-overlay')) document.getElementById('auth-overlay').style.display = 'flex';
+      return;
+    }
+
+    const name = document.getElementById('req-mod-name').value.trim();
+    const link = document.getElementById('req-mod-link').value.trim();
+
+    if (!name) return alert("Escribe el nombre del mod que quieres pedir.");
+
+    const userKey = profile.key || 'guest';
+    const lastReqKey = 'fnf_last_req_' + userKey;
+    const lastReqTime = parseInt(localStorage.getItem(lastReqKey) || '0');
+    const daysPassed = (Date.now() - lastReqTime) / (1000 * 60 * 60 * 24);
+
+    if (lastReqTime > 0 && daysPassed < 10) {
+      const daysLeft = Math.ceil(10 - daysPassed);
+      return alert(`⏳ Solo puedes pedir un mod cada 10 días. Te faltan ${daysLeft} día(s) para tu próxima solicitud. Esto es para evitar una saturacion`);
+    }
+
+    const sendBtn = document.getElementById('btn-enviar-solicitud');
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Enviando...'; }
+
+    try {
+      const reqSnap = await get(ref(db, 'mod_requests'));
+      const reqData = reqSnap.val() || {};
+
+      let activeCount = 0;
+      Object.values(reqData).forEach(req => {
+        if (req.status !== 'Completado') activeCount++;
+      });
+
+      if (activeCount >= 5) {
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar Solicitud'; }
+        return alert("🛑 La lista de peticiones está llena (Máximo 5 activas). Por favor espera a que el Administrador termine los puertos pendientes.");
+      }
+
+      const snap = await push(ref(db, 'mod_requests'), {
+        modName: name,
+        link: link || '',
+        user: profile.nombre || "Usuario",
+        ownerKey: profile.key || 'guest',
+        votes: 1,
+        status: 'Pendiente',
+        timestamp: Date.now()
+      });
+
+      localStorage.setItem(lastReqKey, Date.now().toString());
+
+      if (usuarioActualFirebase) {
+        update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), { ultimaSolicitudPort: Date.now() }).catch(() => { });
+      }
+
+      let voted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
+      voted[snap.key] = true;
+      localStorage.setItem('fnf_voted_requests', JSON.stringify(voted));
+
+      document.getElementById('req-mod-name').value = '';
+      document.getElementById('req-mod-link').value = '';
+      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar Solicitud'; }
+      alert("¡Solicitud enviada! 🎉 Ahora los demás pueden votar por ella.");
+
+    } catch (err) {
+      console.error("Error al enviar solicitud:", err);
+      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar Solicitud'; }
+      alert("❌ Hubo un error al enviar la solicitud. Verifica tu conexión e intenta de nuevo.");
+    }
+  };
+
+  window.voteRequest = (id) => {
+    if (exigirRegistro()) return;
+    let voted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
+    if (voted[id]) {
+      delete voted[id];
+      runTransaction(ref(db, `mod_requests/${id}/votes`), (v) => (v || 1) - 1);
+    } else {
+      voted[id] = true;
+      runTransaction(ref(db, `mod_requests/${id}/votes`), (v) => (v || 0) + 1);
+    }
+    localStorage.setItem('fnf_voted_requests', JSON.stringify(voted));
+  };
+
+  window.updateRequestStatus = (id, status) => {
+    if (!isSuperUser) return;
+    update(ref(db, `mod_requests/${id}`), { status });
+  };
+
+  window.deleteRequest = (id) => {
+    if (!isSuperUser) return;
+    if (confirm("¿Eliminar esta solicitud?")) remove(ref(db, `mod_requests/${id}`));
+  };
+
 }, 1500);
 
 window.rateAppItem = async (type, stars) => {
@@ -1747,7 +2004,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('lowEndMode', e.target.checked);
       if (e.target.checked) {
         document.body.classList.add('low-end-mode');
-        toggleParticles(false); // Fuerza apagar partículas
+        toggleParticles(false);
       } else {
         document.body.classList.remove('low-end-mode');
         if (document.getElementById('particlesToggle').checked) toggleParticles(true);
@@ -2164,23 +2421,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 🚀 OPTIMIZACIÓN GLOBAL (CORREGIDA)
-// ==========================================
+
 document.addEventListener("DOMContentLoaded", () => {
   const todasLasImagenes = document.querySelectorAll('img');
 
   todasLasImagenes.forEach(img => {
-    // Filtramos para que solo aplique a los catálogos
     if (img.src.includes('assets/images/mods') || img.src.includes('webp')) {
 
-      // 1. Aseguramos que no se descarguen de golpe al abrir la página
       img.setAttribute('loading', 'lazy');
 
       const contenedor = img.parentElement;
       if (contenedor) {
         contenedor.style.position = 'relative';
 
-        // Evitamos crear rueditas duplicadas si el código se ejecuta dos veces
         let ruedita = contenedor.querySelector('.ruedita-cargando');
         if (!ruedita) {
           ruedita = document.createElement('div');
@@ -2188,21 +2441,17 @@ document.addEventListener("DOMContentLoaded", () => {
           contenedor.insertBefore(ruedita, img);
         }
 
-        // Función maestra para quitar la ruedita
         const finalizarCarga = () => {
           if (ruedita) ruedita.style.display = 'none';
           img.classList.add('img-lazy-cargada');
         };
 
-        // 2. EL TRUCO MÁGICO: ¿La imagen ya cargó desde la raíz/caché?
         if (img.complete && img.naturalHeight !== 0) {
-          // Si ya está cargada, quitamos la ruedita inmediatamente
           finalizarCarga();
         } else {
-          // 3. Si depende del internet, esperamos a que cargue
+
           img.onload = finalizarCarga;
 
-          // Por si alguna imagen se cae o da error de link, que no se quede la ruedita infinita
           img.onerror = () => {
             if (ruedita) ruedita.style.display = 'none';
           };
@@ -2213,8 +2462,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-//  MODO OFFLINE (SERVICE WORKER)
-// ==========================================
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -2228,31 +2476,26 @@ if ('serviceWorker' in navigator) {
 }
 
 // ==========================================
-// OPTIMIZACIÓN EXTREMA DE SCROLL (PASSIVE LISTENERS)
-// ==========================================
+
 document.addEventListener('touchstart', function () { }, { passive: true });
 document.addEventListener('touchmove', function () { }, { passive: true });
 document.addEventListener('wheel', function () { }, { passive: true });
 
 // ==========================================
-// 🚀 CONEXIÓN DIRECTA CON BOT DE TELEGRAM (OPTIMIZADA)
-// ==========================================
+
 window.enviarMensajeAlBot = async function () {
   const cajaTexto = document.getElementById('txt-mensaje-telegram');
   const boton = document.getElementById('btn-enviar-telegram');
   const mensaje = cajaTexto.value.trim();
 
-  // Validamos que no envíen mensajes vacíos
   if (mensaje === "") {
     alert("¡Escribe un mensaje primero!");
     return;
   }
 
-  // 1. OBTENER EL NOMBRE DEL USUARIO (Mejorado)
   let nombreUsuario = "👤 Usuario Invitado";
   try {
     const perfil = JSON.parse(localStorage.getItem('fnf_user_profile'));
-    // Hacemos que busque el nombre sin importar cómo lo hayas guardado en tu base
     if (perfil) {
       nombreUsuario = perfil.nombre || perfil.name || perfil.username || perfil.usuario || perfil.key || "👤 Usuario Registrado";
     }
@@ -2260,25 +2503,21 @@ window.enviarMensajeAlBot = async function () {
     console.log("No se encontró un perfil guardado.");
   }
 
-  // 2. CONFIGURACIÓN DE TU BOT
   const TELEGRAM_BOT_TOKEN = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI";
   const TELEGRAM_CHAT_ID = "5429172831";
 
-  // 3. ARMAMOS EL MENSAJE CON FORMATO LIMPIO Y ESPACIADO (TICKET PREMIUM)
   const textoFormateado =
     `🚨 *NUEVO TICKET DE SOPORTE* 🚨
 
 👤 *De:* ${nombreUsuario}
-━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━
 💬 *Mensaje:*
 ${mensaje}
-━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━
 🌐 _Enviado desde lalocf.2.gitgub/fnf-ports/_`;
 
-  // 4. LO ENVIAMOS A TELEGRAM
   const urlApi = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
-  // Efecto visual de carga
   boton.innerText = "⏳ Enviando...";
   boton.style.background = "#ffea00";
 
@@ -2294,7 +2533,6 @@ ${mensaje}
     });
 
     if (respuesta.ok) {
-      // Éxito
       cajaTexto.value = "";
       boton.innerText = "¡Enviado con éxito! ✨";
       boton.style.background = "#00ff41";
@@ -2308,7 +2546,6 @@ ${mensaje}
     }
 
   } catch (error) {
-    // Error
     boton.innerText = "❌ Error al enviar";
     boton.style.background = "#ff003c";
     setTimeout(() => {
@@ -2320,9 +2557,6 @@ ${mensaje}
 
 //===============================================//
 
-// ==========================================
-// 🚀 GENERADOR DINÁMICO DE ETIQUETAS (TAGS)
-// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   const modCards = document.querySelectorAll('.mod-card');
 
