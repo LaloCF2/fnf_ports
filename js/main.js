@@ -14,7 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const APP_VERSION = "v6.4.0";
+const APP_VERSION = "v6.5.0";
 const MI_UID_ADMIN = "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2";
 
 // ==========================================
@@ -52,6 +52,32 @@ onAuthStateChanged(auth, async (user) => {
       foto: datosBD.foto,
       key: user.uid
     }));
+
+    // Sincronizar favoritos de Firebase a LocalStorage
+    const favRef = ref(db, 'usuarios/' + user.uid + '/favoritos');
+    const favSnap = await get(favRef);
+    if (favSnap.exists()) {
+      const fbFavs = favSnap.val();
+      const localFavs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
+      const mergedFavs = { ...localFavs, ...fbFavs };
+      localStorage.setItem('fnf_favorites', JSON.stringify(mergedFavs));
+      await set(favRef, mergedFavs);
+    } else {
+      const localFavs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
+      if (Object.keys(localFavs).length > 0) {
+        await set(favRef, localFavs);
+      }
+    }
+    
+    // Actualizar iconos de favoritos en la UI si existen
+    if (window.refreshFavoritesUI) {
+      window.refreshFavoritesUI();
+    }
+
+    // Iniciar escucha de notificaciones personales
+    if (window.listenToPersonalNotifications) {
+      window.listenToPersonalNotifications(user.uid);
+    }
 
   } else {
     if (localStorage.getItem('fnf_guest_mode') === 'true') {
@@ -409,6 +435,24 @@ onValue(ref(db, 'notifications/latest'), (snap) => {
     localStorage.setItem('last_notif_id', data.id);
   }
 });
+
+let personalNotifListener = null;
+window.listenToPersonalNotifications = (uid) => {
+  if (personalNotifListener) return; // Ya estamos escuchando
+
+  const userNotifRef = ref(db, `user_notifications/${uid}`);
+  personalNotifListener = onValue(userNotifRef, (snap) => {
+    const data = snap.val();
+    if (!data) return;
+
+    const lastSeen = localStorage.getItem(`last_personal_notif_${uid}`);
+    if (lastSeen !== data.id) {
+      // Mostrar ventana de notificación personal
+      alert("🔔 Notificación sobre tu pedido:\n\n" + data.message);
+      localStorage.setItem(`last_personal_notif_${uid}`, data.id);
+    }
+  });
+};
 
 let currentModCommentsId = null;
 let modCommentsListener = null;
@@ -934,6 +978,15 @@ window.prevScriptImage = () => {
 };
 
 const MOD_DATA = {
+  mod97_9: {
+    img: "assets/images/mods/Duet.webp",
+    title: "Due Debts BF Mix",
+    desc: "Friday Night Funkin' FNF' Due Debts BF Mix Port Opt Psych Engine Optimizado Para (Pc/Android).",
+    version: "Compatible: Psych Engine, P-Slice, etc",
+    downloads: [
+      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/6ukff4xhiyqvjbi/%2528LCF%2529_Due_Debts_BF_Mix_Port.zip/file" },
+    ]
+  },
   mod98_0: {
     img: "assets/images/mods/Wish.webp",
     title: "The Wish Super Funkin' Galaxy",
@@ -1053,12 +1106,11 @@ const MOD_DATA = {
   mod99_1: {
     img: "assets/images/mods/wii.webp",
     title: "VS Matt V3",
-    desc: "Friday Night Funkin' FNF' Vs Matt V3 Port Psych Engine Optimizado Para (Pc/Android).\n\nEste puede tener errores en la base de Psych Online, todas las demas son compatibles correctamente.",
-    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Psych Online v0.13.2, Plus Engine v1.2.6",
+    desc: "Friday Night Funkin' FNF' Vs Matt V3 Port Psych Engine Optimizado Para (Pc/Android).\n\nEste puede tener errores en la base de Psych Online, todas las demas son compatibles correctamente.\n\nSe recomienda usar la base de Psych Engine optimizada para mejor jugabilidad.",
+    version: "Compatible: Psych v1.0.4, PSlice v3.4.2, Plus Engine v1.2.6",
     downloads: [
-      { name: "Descarga Directa ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Wii/MattV3.Port.zip" },
-      { name: "Descarga ZIP (Drive)", link: "https://drive.google.com/file/d/1GxlBf_tDX8qFJttqmb_DJH9s3xr4TeFZ/view?usp=drivesdk" },
-      { name: "Descarga ZIP (MediaFire)", link: "https://www.mediafire.com/file/dva94kid8frmrew/MattV3_%2528Port%2529.zip/file" }
+      { name: "Descarga ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/tag/Wii" },
+      { name: "Descarga Directa ZIP (GitHub)", link: "https://github.com/LaloCF2/Mods-Psych-Engine/releases/download/Wii/LCF.MattV3.Port.BUGFIX1.zip" }
     ]
   },
   mod99_2: {
@@ -1518,7 +1570,7 @@ setTimeout(() => {
     let favs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
     if (favs[modId]) {
       delete favs[modId];
-      btn.innerHTML = '🤍';
+      btn.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/128/1077/1077035.png" style="width:20px; height:20px; filter: invert(1);">';
       btn.style.background = 'rgba(255,255,255,0.1)';
       btn.style.borderColor = 'rgba(255,255,255,0.2)';
     } else {
@@ -1527,13 +1579,48 @@ setTimeout(() => {
       const imgEl = card.querySelector('img');
       const img = imgEl ? imgEl.src : '';
       favs[modId] = { title, img, modId, timestamp: Date.now() };
-      btn.innerHTML = '❤️';
+      btn.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/128/833/833472.png" style="width:20px; height:20px; filter: invert(27%) sepia(85%) saturate(3033%) hue-rotate(322deg) brightness(102%) contrast(102%);">';
       btn.style.background = 'rgba(255, 0, 100, 0.2)';
       btn.style.borderColor = '#ff0064';
     }
     localStorage.setItem('fnf_favorites', JSON.stringify(favs));
+    
+    // Guardar en Firebase si el usuario está logueado
+    if (usuarioActualFirebase) {
+      const favRef = ref(db, 'usuarios/' + usuarioActualFirebase.uid + '/favoritos');
+      set(favRef, favs).catch(e => console.error("Error guardando favoritos en FB:", e));
+    }
+
     btn.style.transform = 'scale(1.3)';
     setTimeout(() => { btn.style.transform = 'scale(1)'; }, 200);
+  };
+
+  window.refreshFavoritesUI = () => {
+    document.querySelectorAll('.apk-card, .mod-card, .script-card').forEach(card => {
+      const allBtns = card.querySelectorAll('button');
+      let modId = null;
+      let favBtn = null;
+      allBtns.forEach(b => {
+        const oc = b.getAttribute('onclick') || '';
+        if (oc.includes('openModComments')) {
+          const m = oc.match(/openModComments\(['"](.*?)['"]/);
+          if (m) modId = m[1];
+        }
+        if (b.classList.contains('btn-fav')) {
+          favBtn = b;
+        }
+      });
+      if (modId && favBtn) {
+        const favs = JSON.parse(localStorage.getItem('fnf_favorites') || '{}');
+        const isFav = !!favs[modId];
+        favBtn.innerHTML = isFav 
+          ? '<img src="https://cdn-icons-png.flaticon.com/128/833/833472.png" style="width:20px; height:20px; filter: invert(27%) sepia(85%) saturate(3033%) hue-rotate(322deg) brightness(102%) contrast(102%);">' 
+          : '<img src="https://cdn-icons-png.flaticon.com/128/1077/1077035.png" style="width:20px; height:20px; filter: invert(1);">';
+        favBtn.title = isFav ? 'Quitar de favoritos' : 'Añadir a favoritos';
+        favBtn.style.background = isFav ? 'rgba(255, 0, 100, 0.2)' : 'rgba(255,255,255,0.07)';
+        favBtn.style.borderColor = isFav ? '#ff0064' : 'rgba(255,255,255,0.2)';
+      }
+    });
   };
 
   document.querySelectorAll('.apk-card, .mod-card, .script-card').forEach(card => {
@@ -1554,7 +1641,9 @@ setTimeout(() => {
 
       const favBtn = document.createElement('button');
       favBtn.className = 'btn btn-fav';
-      favBtn.innerHTML = isFav ? '❤️' : '🤍';
+      favBtn.innerHTML = isFav 
+        ? '<img src="https://cdn-icons-png.flaticon.com/128/833/833472.png" style="width:20px; height:20px; filter: invert(27%) sepia(85%) saturate(3033%) hue-rotate(322deg) brightness(102%) contrast(102%);">' 
+        : '<img src="https://cdn-icons-png.flaticon.com/128/1077/1077035.png" style="width:20px; height:20px; filter: invert(1);">';
       favBtn.title = isFav ? 'Quitar de favoritos' : 'Añadir a favoritos';
       favBtn.style.cssText = `display:inline-flex; align-items:center; justify-content:center; padding: 8px 10px; font-size: 16px; margin-left: 5px; background: ${isFav ? 'rgba(255, 0, 100, 0.2)' : 'rgba(255,255,255,0.07)'}; border: 1px solid ${isFav ? '#ff0064' : 'rgba(255,255,255,0.2)'}; border-radius: 8px; cursor:pointer; transition: transform 0.2s, background 0.2s;`;
       favBtn.onclick = (e) => {
@@ -1574,20 +1663,37 @@ setTimeout(() => {
     const keys = Object.keys(favs);
 
     if (keys.length === 0) {
-      container.innerHTML = '<p style="color:#aaa; font-size:13px;">No has guardado ningún mod aún. ¡Toca el 🤍 en tus mods favoritos!</p>';
+      container.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <img src="https://cdn-icons-png.flaticon.com/128/1077/1077035.png" style="width: 50px; opacity: 0.5; filter: invert(1); margin-bottom: 10px;">
+          <p style="color:#aaa; font-size:13px; margin:0;">No has guardado ningún mod aún.<br>¡Toca el corazón en tus mods favoritos!</p>
+        </div>
+      `;
       return;
     }
 
     keys.sort((a, b) => favs[b].timestamp - favs[a].timestamp).forEach(id => {
       const data = favs[id];
       const div = document.createElement('div');
-      div.style.cssText = 'display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px; gap:10px; text-align:left; border: 1px solid rgba(255,255,255,0.1);';
+      div.style.cssText = 'display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px; gap:10px; text-align:left; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: background 0.2s, transform 0.2s;';
+      
+      div.onmouseover = () => { div.style.background = 'rgba(255,255,255,0.1)'; div.style.transform = 'scale(1.02)'; };
+      div.onmouseout = () => { div.style.background = 'rgba(255,255,255,0.05)'; div.style.transform = 'scale(1)'; };
+      
+      div.onclick = () => {
+        document.getElementById('favorites-popup').classList.remove('show');
+        document.getElementById('profile-popup').classList.remove('show');
+        window.openModInfo(id);
+      };
+
       div.innerHTML = `
-        <img src="${data.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;">
+        <img src="${data.img}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
         <div style="flex: 1;">
-          <h4 style="margin:0; color:white; font-size:14px;">${data.title}</h4>
+          <h4 style="margin:0; color:white; font-size:14px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">${data.title}</h4>
         </div>
-        <button onclick="openModComments('${id}', '${data.title.replace(/'/g, "\\'")}')" style="background:var(--neon-blue); color:black; padding:8px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">💬</button>
+        <div style="background:var(--neon-blue); width: 32px; height: 32px; border-radius:8px; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 10px rgba(0, 234, 255, 0.4);">
+          <img src="https://cdn-icons-png.flaticon.com/128/271/271228.png" style="width:16px; height:16px; filter: invert(1);">
+        </div>
       `;
       container.appendChild(div);
     });
@@ -1617,6 +1723,7 @@ setTimeout(() => {
           const statusColors = {
             'Pendiente': '#f2ff00ff',
             'Seleccionado': '#0091ffff',
+            'En Progreso': '#ff8800ff',
             'No Seleccionado': '#ff0000ee',
             'Completado': '#00ff22ff'
           };
@@ -1624,13 +1731,28 @@ setTimeout(() => {
 
           let adminBtns = '';
           if (isSuperUser) {
+            const isProgress = req.status === 'En Progreso';
             adminBtns = `
-              <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #444; display:flex; gap:5px; flex-wrap:wrap;">
-                <button onclick="updateRequestStatus('${req.id}', 'Seleccionado')" style="flex:1; background:#8888ff; color:white; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">Seleccionado</button>
-                <button onclick="updateRequestStatus('${req.id}', 'No Seleccionado')" style="flex:1; background:#00eaff; color:black; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">No Seleccionado</button>
-                <button onclick="updateRequestStatus('${req.id}', 'Completado')" style="flex:1; background:#00ff88; color:black; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">Completado</button>
-                <button onclick="deleteRequest('${req.id}')" style="background:#ff003c; color:white; border:none; border-radius:4px; font-size:10px; cursor:pointer; padding:5px;">✖</button>
+              <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #444; display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
+                <button onclick="updateRequestStatus('${req.id}', 'Seleccionado')" style="flex:1; background:#0091ff; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">Seleccionado</button>
+                <button onclick="updateRequestStatus('${req.id}', 'No Seleccionado')" style="flex:1; background:#ff0040; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">No Sel.</button>
+                <button onclick="updateRequestStatus('${req.id}', 'En Progreso')" style="flex:1; background:#ff8800; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">En Progreso</button>
+                <button onclick="updateRequestStatus('${req.id}', 'Completado')" style="flex:1; background:#00ff22; color:black; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">Completado</button>
+                <button onclick="deleteRequest('${req.id}')" style="background:#444; color:white; border:none; border-radius:6px; font-size:10px; cursor:pointer; padding:8px;">🗑️</button>
               </div>
+              ${isProgress ? `
+                <div style="margin-top:10px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid #ff880055;">
+                  <div style="display:flex; justify-content:space-between; font-size:11px; color:#ccc; margin-bottom:8px; font-weight:bold;">
+                    <span>Progreso del Port</span>
+                    <span id="prog-val-${req.id}" style="color:#ff8800;">${req.progress || 0}%</span>
+                  </div>
+                  <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="range" min="0" max="100" value="${req.progress || 0}" style="flex:1; cursor:pointer; accent-color:#ff8800;" 
+                      oninput="document.getElementById('prog-val-${req.id}').innerText = this.value + '%'"
+                      onchange="updateRequestProgress('${req.id}', this.value)">
+                  </div>
+                </div>
+              ` : ''}
             `;
           }
 
@@ -1643,9 +1765,15 @@ setTimeout(() => {
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div style="flex:1; padding-right:10px;">
                 <span style="font-size:10px; color:${badgeColor}; border:1px solid ${badgeColor}; padding:2px 5px; border-radius:10px; text-transform:uppercase; font-weight:bold;">${req.status || 'Pendiente'}</span>
-                <h4 style="margin:5px 0; color:white; font-size:15px;">${req.modName}</h4>
+                <h4 style="margin:8px 0 5px 0; color:white; font-size:15px;">${req.modName}</h4>
                 ${req.link ? `<a href="${req.link}" target="_blank" style="color:var(--neon-pink); font-size:11px; text-decoration:underline;">Ver Link Original</a>` : ''}
-                <p style="color:#888; font-size:10px; margin-top:5px;">Pedido por: ${req.user || 'Anónimo'}</p>
+                <p style="color:#888; font-size:10px; margin-top:5px;">Pedido por: <b style="color:#aaa;">${req.user || 'Anónimo'}</b></p>
+                ${req.status === 'En Progreso' ? `
+                  <div style="margin-top:10px; background:rgba(255,255,255,0.05); border-radius:10px; height:6px; overflow:hidden; position:relative;">
+                    <div style="position:absolute; top:0; left:0; height:100%; width:${req.progress || 0}%; background:linear-gradient(90deg, #ff8800, #ffaa00); box-shadow:0 0 5px #ff8800; transition:width 0.3s ease;"></div>
+                  </div>
+                  <div style="text-align:right; font-size:9px; color:#ff8800; margin-top:2px; font-weight:bold;">${req.progress || 0}%</div>
+                ` : ''}
               </div>
               <div style="text-align:center;">
                 <button onclick="voteRequest('${req.id}')" class="btn" style="background:${isVoted ? 'var(--neon-green)' : '#333'}; color:${isVoted ? 'black' : 'white'}; border:none; border-radius:8px; width:45px; height:40px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 4px 0 ${isVoted ? '#00cc00' : '#111'}; transform:${isVoted ? 'translateY(2px)' : 'none'}; transition:all 0.1s;">
@@ -1747,9 +1875,40 @@ setTimeout(() => {
     localStorage.setItem('fnf_voted_requests', JSON.stringify(voted));
   };
 
-  window.updateRequestStatus = (id, status) => {
+  window.updateRequestStatus = async (id, status) => {
     if (!isSuperUser) return;
-    update(ref(db, `mod_requests/${id}`), { status });
+
+    // -----------------------------------------------------------
+    const reqSnap = await get(ref(db, `mod_requests/${id}`));
+    const reqData = reqSnap.val();
+    if (!reqData) return;
+
+    await update(ref(db, `mod_requests/${id}`), { status });
+
+    // ------------------------------------------------------------
+    if (reqData.ownerKey && reqData.ownerKey !== 'guest') {
+      let message = '';
+      if (status === 'Seleccionado') {
+        message = `Hola ${reqData.user}, tu mod "${reqData.modName}" fue seleccionado con exito, puedes ver el progreso que lleva este port.`;
+      } else if (status === 'No Seleccionado') {
+        message = `Hola ${reqData.user}, lamentablemente tu mod "${reqData.modName}" no fue seleccionado por pocos votos, puedes intentar despues pedir el mod.`;
+      } else if (status === 'Completado') {
+        message = `Hola ${reqData.user}, tu mod "${reqData.modName}" que pediste fue completado con exito, puedes encontrarlo en el menú de mods.`;
+      }
+
+      if (message) {
+        await set(ref(db, `user_notifications/${reqData.ownerKey}`), {
+          message: message,
+          timestamp: Date.now(),
+          id: Math.random().toString(36).substr(2, 9)
+        });
+      }
+    }
+  };
+
+  window.updateRequestProgress = (id, progress) => {
+    if (!isSuperUser) return;
+    update(ref(db, `mod_requests/${id}`), { progress: parseInt(progress) });
   };
 
   window.deleteRequest = (id) => {
@@ -2322,7 +2481,7 @@ window.reportError = async (modId) => {
     const botToken = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI";
     const chatId = "5429172831";
 
-    const mensaje = `🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${user.name}* reportó el problema de un enlace caido:\n\n📦 Mod: *${modName}*\n🆔 ID: \`${modId}\`\n\n🛑El Mod se a cerrado.\n\n🛠️ ¡Entra a repararlo!`;
+    const mensaje = `🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${user.name}* reportó el problema de un enlace caido:\n\n📦 Mod: *${modName}*\n🆔 ID: \`${modId}\`\n\n🛑El Mod se a cerrado.\n\n🛠️ ¡Ve a solucionarlo!`;
 
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
@@ -2662,7 +2821,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const gama = card.getAttribute('data-gama') || 'low';
 
-    // RAM
     let ramValue = card.getAttribute('data-ram');
     if (!ramValue) {
       ramValue = '2GB RAM';
@@ -2670,7 +2828,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (gama === 'mid-high' || gama === 'high') ramValue = '4GB RAM';
     }
 
-    // Motor
     let engineValue = card.getAttribute('data-engine');
     if (!engineValue) {
       engineValue = 'Psych Engine';
@@ -2678,7 +2835,6 @@ document.addEventListener("DOMContentLoaded", () => {
       engineValue = engineValue.replace('⚙️', '').trim();
     }
 
-    // Peso
     let sizeValue = card.getAttribute('data-size');
     if (!sizeValue) {
       const cardId = card.id || 'default';
@@ -2717,4 +2873,74 @@ document.addEventListener("DOMContentLoaded", () => {
       card.insertBefore(tagsContainer, cardButtons);
     }
   });
+
+  let rafId = null;
+
+  document.addEventListener('mousemove', (e) => {
+    const card = e.target.closest('.apk-card, .mod-card');
+    if (card) {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -15;
+        const rotateY = ((x - centerX) / centerX) * 15;
+
+        const glareX = (x / rect.width) * 100;
+        const glareY = (y / rect.height) * 100;
+
+        card.style.setProperty('--rx', `${rotateX}deg`);
+        card.style.setProperty('--ry', `${rotateY}deg`);
+        card.style.setProperty('--gx', `${glareX}%`);
+        card.style.setProperty('--gy', `${glareY}%`);
+        card.style.setProperty('--g-opacity', '1');
+      });
+    }
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    const card = e.target.closest('.apk-card, .mod-card');
+    if (card && !card.contains(e.relatedTarget)) {
+      if (rafId) cancelAnimationFrame(rafId);
+      card.style.setProperty('--rx', `0deg`);
+      card.style.setProperty('--ry', `0deg`);
+      card.style.setProperty('--g-opacity', '0');
+    }
+  });
+
+  let deviceRafId = null;
+  window.addEventListener('deviceorientation', (e) => {
+    if (e.beta === null || e.gamma === null) return;
+
+    if (deviceRafId) cancelAnimationFrame(deviceRafId);
+    deviceRafId = requestAnimationFrame(() => {
+      let beta = e.beta;
+      let gamma = e.gamma;
+
+      if (beta > 30) beta = 30;
+      if (beta < -30) beta = -30;
+      if (gamma > 30) gamma = 30;
+      if (gamma < -30) gamma = -30;
+
+      const rotateX = (beta / 30) * 15;
+      const rotateY = (gamma / 30) * 15;
+
+      const glareX = ((gamma + 30) / 60) * 100;
+      const glareY = ((beta + 30) / 60) * 100;
+
+      const root = document.documentElement;
+      root.style.setProperty('--m-rx', `${-rotateX}deg`);
+      root.style.setProperty('--m-ry', `${rotateY}deg`);
+      root.style.setProperty('--m-gx', `${glareX}%`);
+      root.style.setProperty('--m-gy', `${glareY}%`);
+      root.style.setProperty('--m-g-opacity', '0.6');
+    });
+  });
+
 });
