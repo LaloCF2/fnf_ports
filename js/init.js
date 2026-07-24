@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if (isIOS) {
     document.body.classList.add('ios-theme');
-    console.log("🍏 iOS Detectado: Activando diseño Apple Premium.");
+    console.log("🍏 iOS Detectado: Activando diseño Apple.");
   } else {
-    console.log("🤖 Android/PC Detectado: Manteniendo diseño Neón.");
+    console.log("🤖 Android/PC Detectado: Manteniendo diseño.");
   }
 });
 
