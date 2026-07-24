@@ -1,0 +1,118 @@
+@font-face {
+  font-family: "MiFuente";
+  src: url("../assets/fonts/funkin.ttf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+body {
+  font-family: "MiFuente", system-ui, -apple-system, sans-serif;
+}
+
+body.ios-theme .theme-btn {
+  display: none !important;
+}
+
+:root {
+  /* =========================================
+     ⚙️ POSICIÓN DE LOS BOTONES DE LA INTERFAZ
+     ========================================= */
+  --pos-btn-theme-top: 15px;
+  --pos-btn-theme-right: 5px;
+
+  --pos-btn-settings-top: 65px;
+  --pos-btn-settings-right: 5px;
+
+  --pos-btn-admin-top: 20px;
+  --pos-btn-admin-right: 140px;
+
+  --pos-btn-lang-top: 15px;
+  --pos-btn-lang-left: 5px;
+
+  --pos-btn-profile-top: 17px;
+  --pos-btn-profile-left: 83px;
+
+  --pos-notif-top: 115px;
+  --pos-notif-right: 15px;
+
+  --pos-notif-top-mobile: 115px;
+  --pos-notif-right-mobile: 15px;
+
+  --neon-blue: #00eaff;
+  --neon-pink: #ff00c8;
+  --neon-purple: #b400ff;
+  --neon-green: #00ff41;
+  --neon-yellow: #ffea00 --neon-red: #ff003c;
+  --neon-gold: #ffd700;
+  --neon-orange: #ff8300;
+  --neon-grey: #8c8c8c;
+  --neon-blue_dark: #0008ff;
+  --neon-cyan: #00ffe1;
+  --neon-blue_light: #7dd1ff;
+}
+
+:root,
+[data-theme="dark"] {
+  --bg-gradient: #292d32;
+  --bg-solid: #292d32;
+  --card-bg: #292d32;
+  --container-bg: rgba(41, 45, 50, 0.65);
+  --card-border: transparent;
+  --neu-shadow: 8px 8px 16px #1e2125, -8px -8px 16px #343940;
+  --neu-shadow-inset: inset 8px 8px 16px #1e2125, inset -8px -8px 16px #343940;
+  --text: #e0e5ec;
+  --text-muted: #a0a0b0;
+  --accent: var(--neon-cyan);
+  --bg-shape-1: transparent;
+  --bg-shape-2: transparent;
+  --icon-invert: 1;
+}
+
+[data-theme="light"] {
+  --bg-gradient: #efefeff0;
+  --bg-solid: #dfe2ea;
+  --card-bg: #e2e2e2;
+  --container-bg: rgba(226, 226, 226, 0.65);
+  --card-border: transparent;
+  --neu-shadow: 8px 8px 16px #c4c8d1, -8px -8px 16px #ffffff;
+  --neu-shadow-inset: inset 8px 8px 16px #c4c8d1, inset -8px -8px 16px #ffffff;
+  --text: #3d404d;
+  --text-muted: #70758a;
+  --accent: #7b61ff;
+  --bg-shape-1: transparent;
+  --bg-shape-2: transparent;
+  --icon-invert: 0;
+}
+
+[data-theme="oled"] {
+  --bg-gradient: #000000;
+  --bg-solid: #000000;
+  --card-bg: #000000;
+  --container-bg: rgba(0, 0, 0, 0.65);
+  --card-border: #111;
+  --neu-shadow: 4px 4px 10px #0a0a0a, -4px -4px 10px #1a1a1a;
+  --neu-shadow-inset: inset 4px 4px 10px #0a0a0a, inset -4px -4px 10px #1a1a1a;
+  --text: #e0e0e0;
+  --text-muted: #666;
+  --accent: var(--neon-cyan);
+  --bg-shape-1: transparent;
+  --bg-shape-2: transparent;
+  --icon-invert: 1;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: var(--bg-gradient);
+  background-size: 400% 400%;
+  animation: moveBg 15s ease infinite;
+  padding-bottom: 120px;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  transition: background 0.5s ease, color 0.3s ease;
+}
+
+/* =========================================
