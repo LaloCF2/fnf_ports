@@ -88,10 +88,10 @@ window.abrirPerfil = async function () {
       <!-- Preferencias Card -->
       <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.05);">
         
-        <label style="color: #bbb; font-size: 11px; font-weight: bold; text-transform: uppercase;">Tu Apodo Gamer</label>
+        <label style="color: #bbb; font-size: 11px; font-weight: bold; text-transform: uppercase;">Tu Apodo:</label>
         <input type="text" id="input-nuevo-apodo" value="${nombreUsuario}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 6px; margin-bottom: 12px; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
         
-        <label style="color: #bbb; font-size: 11px; font-weight: bold; text-transform: uppercase;">Color de Marco Neón</label>
+        <label style="color: #bbb; font-size: 11px; font-weight: bold; text-transform: uppercase;">Color de Marco:</label>
         <select id="select-marco" class="reg-input" style="width: 100%; margin-top: 6px; margin-bottom: 12px; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px; outline: none; appearance: none;">
           <option value="var(--neon-blue)" style="background: #222;" ${marcoActivo==='var(--neon-blue)'?'selected':''}>🔵 Azul Neón Clásico</option>
           <option value="var(--neon-pink)" style="background: #222;" ${marcoActivo==='var(--neon-pink)'?'selected':''}>🌸 Rosa Neón</option>
