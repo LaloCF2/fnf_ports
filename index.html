@@ -19,9 +19,17 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/style.css">
-
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/notifications.css">
+  <link rel="stylesheet" href="css/popups.css">
   <link id="theme-style" rel="stylesheet" href="">
+
+  <script>
+    const currentTheme = localStorage.getItem('fnf_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+  </script>
 
   <script>
     const savedTheme = localStorage.getItem('activeTheme') || 'default';
@@ -31,14 +39,6 @@
       document.write('<link rel="stylesheet" href="css/style3.css">');
     }
 
-    const es_iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-    if (es_iOS) {
-      document.write('<link rel="stylesheet" href="css/style_liquidglass.css">');
-      document.addEventListener("DOMContentLoaded", () => {
-        document.body.classList.add('ios-theme');
-      });
-    }
   </script>
 </head>
 
@@ -79,10 +79,9 @@
     </div>
 
     <div id="favorites-popup" class="popup">
-      <div class="popup-content popup-scroll-body"
-        style="text-align: center; padding: 20px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; max-width: 340px; margin: auto; max-height: 80vh; overflow-y: auto;">
+      <div class="popup-content popup-scroll-body" style="text-align: center; padding: 20px;">
         <span class="popup-close" onclick="document.getElementById('favorites-popup').classList.remove('show')"
-          style="position: absolute; top: 15px; right: 15px; color: #aaa; cursor: pointer; font-size: 18px;">✖</span>
+          style="position: absolute; top: 15px; right: 15px; color: var(--text-muted); cursor: pointer; font-size: 18px;">✖</span>
         <h2 class="glow" style="margin-bottom: 20px; color: white;">⭐ Mis Favoritos</h2>
         <div id="favorites-list" style="display: flex; flex-direction: column; gap: 10px;">
           <p style="color:#aaa; font-size:13px;">No has guardado ningún mod aún. ¡Toca el 🤍 en tus mods favoritos!</p>
@@ -91,22 +90,21 @@
     </div>
 
     <div id="requests-popup" class="popup">
-      <div class="popup-content popup-scroll-body"
-        style="padding: 20px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; max-width: 360px; margin: auto; max-height: 85vh; overflow-y: auto;">
+      <div class="popup-content popup-scroll-body" style="padding: 20px;">
         <span class="popup-close" onclick="document.getElementById('requests-popup').classList.remove('show')"
-          style="position: absolute; top: 15px; right: 15px; color: #aaa; cursor: pointer; font-size: 18px;">✖</span>
-        <h2 class="glow" style="margin-bottom: 10px; color: white; text-align: center;">📝 Pedir un Mod</h2>
-        <p style="color:#ccc; font-size:12px; text-align:center; margin-bottom: 15px;">¿Qué port te gustaría ver en la
+          style="position: absolute; top: 15px; right: 15px; color: var(--text-muted); cursor: pointer; font-size: 18px;">✖</span>
+        <h2 class="glow" style="margin-bottom: 10px; color: var(--text); text-align: center;">📝 Pedir un Mod</h2>
+        <p style="color:var(--text-muted); font-size:12px; text-align:center; margin-bottom: 15px;">¿Qué port te
+          gustaría ver en la
           página? ¡Vota o añade uno nuevo!</p>
 
-        <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+        <div class="settings-card" style="margin-bottom: 15px;">
           <input type="text" id="req-mod-name" placeholder="Nombre del Mod..." class="reg-input"
-            style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid #444; border-radius:8px;">
+            style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:var(--card-bg); color:var(--text); border:none; box-shadow:var(--neu-shadow-inset); border-radius:12px; outline:none;">
           <input type="url" id="req-mod-link" placeholder="Enlace (Opcional GameBanana...)" class="reg-input"
-            style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:rgba(0,0,0,0.5); color:white; border:1px solid #444; border-radius:8px;">
+            style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:var(--card-bg); color:var(--text); border:none; box-shadow:var(--neu-shadow-inset); border-radius:12px; outline:none;">
           <button id="btn-enviar-solicitud" onclick="enviarSolicitudMod()" class="btn"
-            style="width:100%; padding:10px; background:var(--neon-blue); color:black; font-weight:bold; border-radius:8px; border:none; cursor:pointer;">Enviar
-            Solicitud</button>
+            style="width:100%; padding:10px;">Enviar Solicitud</button>
         </div>
 
         <h3 style="color:white; font-size:15px; border-bottom:1px solid #444; padding-bottom:5px; margin-bottom:10px;">
@@ -157,28 +155,38 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <div class="lang-btn" onclick="toggleLanguage()" title="Idioma" id="langBtn"
-      style="position:fixed; top:15px; left:15px; z-index:9999; background:var(--neon-blue, #00eaff); color:black; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px var(--neon-blue);">
-      🇬🇧 EN</div>
-    <div class="profile-btn" onclick="abrirPerfil()" id="profileBtn"
-      style="position:fixed; top:15px; left:95px; z-index:9999; background:var(--neon-pink, #ff00ff); color:white; padding:8px 12px; border-radius:20px; font-weight:bold; cursor:pointer; box-shadow: 0 0 10px #ff00ff;">
-      👤 <span data-es="Perfil" data-en="Profile">Perfil</span></div>
-
-    <div id="settingsBtn" class="settings-btn" onclick="document.getElementById('settings-popup').classList.add('show')"
-      title="Configuración" style="display: flex; align-items: center; justify-content: center;">
-      <img src="https://cdn-icons-png.flaticon.com/128/1040/1040221.png" alt="Configuración"
-        style="width: 24px; height: 24px; object-fit: contain;">
+    <div class="lang-btn float-ui-btn" onclick="toggleLanguage()" title="Idioma" id="langBtn"
+      style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/3898/3898082.png"
+        style="width: 20px; height: 20px; filter: invert(var(--icon-invert, 0));">
+      <span style="font-weight: bold; font-size: 12px;">EN</span>
     </div>
 
-    <div class="admin-float-btn" onclick="document.getElementById('admin-tools-popup').classList.add('show')"
+    <div class="profile-btn float-ui-btn" onclick="abrirPerfil()" id="profileBtn"
+      style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1077/1077114.png"
+        style="width: 18px; height: 18px; filter: invert(var(--icon-invert, 0));">
+      <span data-es="Perfil" data-en="Profile" style="font-weight: bold; font-size: 12px;">Perfil</span>
+    </div>
+
+    <div id="settingsBtn" class="settings-btn float-ui-btn"
+      onclick="document.getElementById('settings-popup').classList.add('show')" title="Configuración"
+      style="display: flex; align-items: center; justify-content: center;">
+      <img src="https://cdn-icons-png.flaticon.com/128/1040/1040221.png" alt="Configuración"
+        style="width: 24px; height: 24px; object-fit: contain; filter: invert(var(--icon-invert, 0));">
+    </div>
+
+    <div class="admin-float-btn float-ui-btn"
+      onclick="document.getElementById('admin-tools-popup').classList.add('show')"
       style="display: flex; align-items: center; justify-content: center;">
       <img src="https://cdn-icons-png.flaticon.com/128/1077/1077147.png" alt="Admin"
-        style="width: 24px; height: 24px; object-fit: contain;">
+        style="width: 24px; height: 24px; object-fit: contain; filter: invert(var(--icon-invert, 0));">
     </div>
-    <div class="theme-btn" onclick="toggleTheme()" title="Tema"
+
+    <div class="theme-btn float-ui-btn" onclick="toggleTheme()" title="Tema"
       style="display: flex; align-items: center; justify-content: center;">
-      <img src="https://cdn-icons-png.flaticon.com/128/12180/12180668.png" alt="Tema Claro/Oscuro"
-        style="width: 24px; height: 24px; object-fit: contain;">
+      <img id="theme-icon" src="https://cdn-icons-png.flaticon.com/128/1828/1828231.png" alt="Tema Claro/Oscuro"
+        style="width: 24px; height: 24px; object-fit: contain; filter: invert(var(--icon-invert, 0)); transition: transform 0.2s;">
     </div>
 
     <div class="notif-container">
@@ -213,28 +221,26 @@
             del Tema</span>
         </div>
 
-        <div
-          style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid #333; text-align: left; box-sizing: border-box; width: 100%;">
-          <span style="font-weight: bold; color: #fff; display: block; margin-bottom: 10px;" data-es="Skin de la Página"
+        <div class="settings-card">
+          <span style="font-weight: bold; display: block; margin-bottom: 10px;" data-es="Skin de la Página"
             data-en="Page Skin">Skin de la Página</span>
 
           <select id="themeSelector"
-            style="width: 100%; padding: 10px; background: #000; color: var(--neon-blue); border: 1px solid var(--neon-blue); outline: none; font-size: 14px; cursor: pointer;">
+            style="width: 100%; padding: 10px; background: var(--card-bg); color: var(--text); border: none; box-shadow: var(--neu-shadow-inset); border-radius: 10px; outline: none; font-size: 14px; cursor: pointer;">
             <option value="default">Tema Moderno (Glassmorphism)</option>
             <option value="retro">Tema Retro (Arcade)</option>
             <option value="snokido">Tema Snokido</option>
           </select>
         </div>
 
-        <label
-          style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: rgba(0,234,255,0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--neon-blue); cursor: pointer; box-sizing: border-box; width: 100%;">
+        <label class="settings-card"
+          style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
           <span style="font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue);"
             data-es="🌈 Modo RGB (Chroma)" data-en="RGB Mode (Chroma)">Modo RGB (Chroma)</span>
           <input type="checkbox" id="chromaToggle" style="transform: scale(1.3);">
         </label>
 
-        <div
-          style="margin-top: 15px; text-align: left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid #333; box-sizing: border-box; width: 100%;">
+        <div class="settings-card">
           <h3 style="margin-top:0; font-size: 14px; color: var(--neon-blue); text-align: center;"
             data-es="⚡ Visuales y Rendimiento" data-en="⚡ Visuals & Performance">⚡ Visuales y Rendimiento</h3>
 
@@ -369,65 +375,56 @@
     </div>
 
     <div id="update-popup" class="popup">
-      <div class="popup-content glass-update-card" style="padding: 0; width: 90%; max-width: 400px;">
+      <div class="popup-content premium-update-card">
 
-        <div class="update-header-art">
-          <div class="update-icon-circle"
-            style="background: rgb(42, 42, 42); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 0 20px rgba(255,255,255,0.3);">
-            <img src="https://cdn-icons-png.flaticon.com/128/14466/14466980.png" alt="Actualización"
-              style="width: 65px;">
+        <div class="premium-close-btn" onclick="closeUpdatePopup()">✖</div>
+
+        <div class="premium-update-header">
+          <div class="premium-orb"></div>
+          <div class="premium-icon-container">
+            <img src="https://cdn-icons-png.flaticon.com/128/13544/13544292.png" alt="Update"
+              class="premium-floating-icon">
           </div>
-          <div class="popup-close" onclick="closeUpdatePopup()"
-            style="position: absolute; top: 15px; right: 15px; color: white; cursor: pointer;">✖</div>
+          <h2 class="premium-title glow-text" data-es="VERSIÓN 7.0.0" data-en="VERSION 7.0.0">VERSIÓN 7.0.0</h2>
+          <p class="premium-subtitle" data-es="Novedades de esta versión:" data-en="What's new:">Novedades de esta
+            versión</p>
         </div>
-        <div class="update-body">
-          <h2 class="glow" style="margin: 0; font-size: 24px; color: white; letter-spacing: 1px;"
-            data-es="¡Novedades v6.5.0!" data-en="What's New v6.5.0!">¡Novedades v6.5.0!</h2>
-          <p style="text-align: center; color: #a1a1aa; font-size: 14px; margin-bottom: 20px;">Los cambios más recientes
-            en FNF Mobile:</p>
-          <ul class="update-list-modern" style="margin-top:15px; list-style: none; padding-left: 0;">
 
-            <li
-              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/16595/16595006.png" alt=""
-                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se
-                añadieron 2 nuevos mods: <b>Matt V3</b> & <b>Due Debts BF Mix</b>"
-                data-en="Two new mods were added: <b>Matt V3</b> & <b>Due Debts BF Mix</b>"
-                style="font-size: 13.5px; line-height: 1.3;"> Se
-                añadieron 2 nuevos mods: <b>Matt V3</b> & <b>Due Debts BF Mix</b></span>
+        <div class="premium-update-body">
+          <ul class="premium-update-list">
+            <li>
+              <div class="premium-list-icon"
+                style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--neon-gold);">
+                <img src="https://cdn-icons-png.flaticon.com/128/4660/4660715.png"
+                  style="width:22px; filter: drop-shadow(0 0 5px var(--neon-gold));">
+              </div>
+              <div class="premium-list-text">
+                <h4 style="color: var(--neon-gold);" data-es="Rediseño" data-en="Redesign">Rediseño</h4>
+                <p data-es="Se hizo un rediseño completo a la página web, mejorando drásticamente la experiencia del usuario."
+                  data-en="A complete redesign of the website was made, drastically improving the user experience.">Se
+                  hizo un rediseño completo a la página web, mejorando drásticamente la experiencia del usuario.</p>
+              </div>
             </li>
-
-            <li
-              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-yellow); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/3632/3632000.png" alt=""
-                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se mejoro el funcionamiento de particulas animadas en ajustes."
-                data-en="The functionality of animated particles in settings has been improved."
-                style="font-size: 13.5px; line-height: 1.3;">
-                Se mejoro el funcionamiento del led naranja para mostrar comentarios nuevos en los chats.</span>
+            <li>
+              <div class="premium-list-icon"
+                style="background: rgba(0, 234, 255, 0.1); border: 1px solid var(--neon-blue);">
+                <img src="https://cdn-icons-png.flaticon.com/128/4149/4149678.png"
+                  style="width:22px; filter: drop-shadow(0 0 5px var(--neon-blue));">
+              </div>
+              <div class="premium-list-text">
+                <h4 style="color: var(--neon-blue);" data-es="Mejoras y Fixes" data-en="Improvements & Fixes">Mejoras y
+                  Fixes</h4>
+                <p data-es="Corrección de errores, nueva ventana de perfil y mejoras de rendimiento."
+                  data-en="Minor bug fixes, new profile window and performance improvements.">Corrección de errores
+                  menores, nueva ventana de perfil y mejoras de rendimiento.</p>
+              </div>
             </li>
-
-            <li
-              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-yellow); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/3632/3632000.png" alt=""
-                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Se mejoro el apartado de favoritos en su perfil."
-                data-en="Improved favorites section in profile." style="font-size: 13.5px; line-height: 1.3;">
-                Se mejoro el apartado de favoritos en su perfil.</span>
-            </li>
-
-            <li
-              style="display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--neon-blue_dark); padding: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.05);">
-              <img src="https://cdn-icons-png.flaticon.com/128/4149/4149678.png" alt=""
-                style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(1.5px);">
-              <span data-es="Corrección de errores y mejoras" data-en="Bug fixes and improvements"
-                style="font-size: 13.5px; line-height: 1.3;">Corrección de errores y mejoras</span>
-            </li>
-
           </ul>
-          <button class="btn-update-action" onclick="closeUpdatePopup()" data-es="¡Entendido!" data-en="Got it!"
-            style="margin-top: 15px;">¡Entendido!</button>
+
+          <button class="premium-btn-action" onclick="closeUpdatePopup()">
+            <span style="position: relative; z-index: 2;" data-es="¡ACEPTAR!" data-en="OK!">¡ACEPTAR!</span>
+            <div class="btn-glow-overlay"></div>
+          </button>
         </div>
       </div>
     </div>
@@ -451,7 +448,10 @@
         <div class="logo-text">FNF'</div>
 
         <div class="top-bar-actions">
-          <div class="action-icon" onclick="toggleTheme()" title="Cambiar Tema">☼</div>
+          <div class="action-icon theme-toggle-btn" onclick="toggleTheme()" title="Cambiar Tema">
+            <img id="theme-icon" src="https://cdn-icons-png.flaticon.com/128/1828/1828231.png"
+              style="width: 20px; height: 20px; filter: invert(1); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
+          </div>
           <div class="action-icon" onclick="document.getElementById('search-popup').classList.add('show')"
             title="Buscar">🔍</div>
           <div class="action-icon" onclick="abrirPerfil()" title="Perfil">👤</div>
@@ -475,7 +475,8 @@
         <div style="text-align:center">
 
           <div>
-            <h1 id="fnf-title" class="fnf-animated-title" data-text="Friday Night Funkin'" onclick="activarAdminOculto()">
+            <h1 id="fnf-title" class="fnf-animated-title" data-text="Friday Night Funkin'"
+              onclick="activarAdminOculto()">
               Friday Night Funkin'
             </h1>
           </div>
@@ -2433,21 +2434,22 @@
               </p>
 
               <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
-                <a href="https://play.google.com/store/apps/details?id=ru.zdevs.zarchiver" target="_blank"
-                  style="display: flex; align-items: center; gap: 6px; background: #00ff41; color: #000; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #000;">
+                <a href="https://play.google.com/store/apps/details?id=ru.zdevs.zarchiver" target="_blank" class="btn"
+                  style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 12px; font-weight: bold; margin-top: 0;">
                   <img src="https://www.svgrepo.com/show/505132/zarchiver.svg" alt="ZArchiver"
                     style="width: 16px; height: 16px; object-fit: contain;"> ZArchiver
                 </a>
 
                 <a href="https://play.google.com/store/apps/details?id=com.alphainventor.filemanager" target="_blank"
-                  style="display: flex; align-items: center; gap: 6px; background: #ffeb33; color: #fff; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #000;">
+                  class="btn"
+                  style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 12px; font-weight: bold; margin-top: 0;">
                   <img src="https://www.svgrepo.com/show/504324/files.svg" alt="Gestor"
-                    style="width: 16px; height: 16px; object-fit: contain;"> Gestor de Archivos+
+                    style="width: 16px; height: 16px; object-fit: contain;"> Gestor+
                 </a>
 
                 <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.files"
-                  target="_blank"
-                  style="display: flex; align-items: center; gap: 6px; background: #00b8ff; color: #000; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #000;">
+                  target="_blank" class="btn"
+                  style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 12px; font-weight: bold; margin-top: 0;">
                   <img src="https://www.svgrepo.com/show/504326/files-by-google.svg" alt="Files"
                     style="width: 16px; height: 16px; object-fit: contain;"> Files
                 </a>
@@ -2585,16 +2587,14 @@
       </a>
       </div>
 
-      <div class="ticket-soporte-box"
-        style="margin-top: 20px; padding: 15px; border-radius: 15px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.1);">
-        <h3 style="margin-bottom: 10px; font-size: 16px; color: var(--neon-blue);">Mensaje Rápido</h3>
-        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Escríbeme tu duda o sugerencia.</p>
+      <div class="ticket-soporte-box settings-card">
+        <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: var(--neon-blue);">Mensaje Rápido</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Escríbeme tu duda o sugerencia.</p>
 
         <textarea id="txt-mensaje-telegram" placeholder="Escribe..."
-          style="width: 100%; height: 80px; border-radius: 10px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px; font-family: inherit; resize: none; margin-bottom: 10px;"></textarea>
+          style="width: 100%; height: 80px; border-radius: 16px; background: var(--card-bg); color: var(--text); border: none; box-shadow: var(--neu-shadow-inset); padding: 10px; font-family: inherit; resize: none; margin-bottom: 10px; box-sizing: border-box; outline: none;"></textarea>
 
-        <button id="btn-enviar-telegram" onclick="enviarMensajeAlBot()"
-          style="width: 100%; padding: 10px; border-radius: 10px; background: var(--neon-blue); color: black; font-weight: bold; border: none; cursor: pointer;">
+        <button id="btn-enviar-telegram" onclick="enviarMensajeAlBot()" class="btn" style="width: 100%;">
           🚀 Enviar Mensaje
         </button>
       </div>
@@ -2603,7 +2603,7 @@
     </section>
 
     <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
-      © <span id="year"></span> LaloCF | V6.5.0 <br>
+      © <span id="year"></span> LaloCF | V7.0.0 <br>
       <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span>
       </div>
     </footer>
