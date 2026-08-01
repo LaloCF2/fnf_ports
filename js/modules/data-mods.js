@@ -1,4 +1,22 @@
 window.MOD_DATA = {
+  mod97_7: {
+    img: "assets/images/mods/bum.webp",
+    title: "Bumfuzzle11",
+    desc: "Friday Night Funkin' FNF' Bumfuzzle11 Port P-Slice Engine Optimizado Para (Pc/Android).",
+    version: "Compatible: P-Slice Engine (Pc/Android/iOS)",
+    downloads: [
+      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/zruz8ukhpg834a5/%2528LCF%2529_bumfuzzle11.zip/file" },
+    ]
+  },
+  mod97_8: {
+    img: "assets/images/mods/Block.webp",
+    title: "Vs Herobrine Blocky Myths V2",
+    desc: "Friday Night Funkin' FNF' Vs Herobrine Blocky Myths V2 Port CodeName Engine Optimizado Para (Pc/Android).",
+    version: "Compatible: CodeName Engine (Pc/Android/iOS)",
+    downloads: [
+      { name: "Descarga (MediaFire)", link: "https://www.mediafire.com/file/lfi4c73hixbh8zm/%2528LCF%2529_Vs_Herobrine_Blocky_Myths_V2_%2528Modpack_Edition%2529.zip/file" },
+    ]
+  },
   mod97_9: {
     img: "assets/images/mods/Duet.webp",
     title: "Due Debts BF Mix",
