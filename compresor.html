@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -103,78 +103,70 @@
 
     <div class="main-workspace">
 
-        <div id="win-home" class="window-content active">
-            <h2 class="section-title" style="text-align: center; border:none; color: white; justify-content: center;">
-                ENTORNO DE DESARROLLO</h2>
+        <div id="win-compresor" class="window-content">
+            <h2 class="section-title" style="color: #b57cff;"><img
+                    src="https://cdn-icons-png.flaticon.com/512/8208/8208316.png" class="icon"
+                    style="filter: brightness(0) saturate(100%) invert(58%) sepia(56%) saturate(4171%) hue-rotate(244deg) brightness(102%) contrast(101%);"
+                    alt="Compresor"> Optimizador de Peso (PNG)</h2>
 
-            <div class="home-grid">
-                <div class="home-card" onclick="window.location.href='escaner.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/128/1913/1913663.png" class="icon-lg" alt="Escaneo">
-                    <h3 class="home-title">Escanear de Cero</h3>
-                    <p class="home-desc">Esta opcion funciona importando una imagen con formato .png para escanearlo y
-                        generar un archivo xml para el personaje.</p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%;">Abrir Modo Creador</div>
-                </div>
-
-                <div class="home-card" onclick="window.location.href='optimizador.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/128/7100/7100753.png" class="icon-lg"
-                        alt="Optimizador">
-                    <h3 class="home-title">Optimizador</h3>
-                    <p class="home-desc">Esta opcion funciona subiendo un XML+PNG para modificar o corregir sprites del
-                        personaje o simplemente edita y exporta el XML sin tocar el PNG.</p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%; border-color:#ffcc00; color:#ffcc00;">
-                        Abrir Optimizador</div>
-                </div>
-
-                <div class="home-card psych" onclick="window.location.href='psych.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135692.png" class="icon-lg"
-                        style="filter: brightness(0) saturate(100%) invert(86%) sepia(85%) saturate(1637%) hue-rotate(34deg) brightness(108%) contrast(106%) drop-shadow(0 0 10px rgba(170,255,0,0.4));"
-                        alt="Psych">
-                    <h3 class="home-title" style="color:var(--accent-psych);">Psych Character Builder (BETA)</h3>
-                    <p class="home-desc">Esta opcion sirve para visualizar y alinear animaciones en vivo para generar
-                        archivos .json sin necesidad de entrar al Character Editor de Psych Engine.</p>
-                    <div class="btn-pildora btn-secundario"
-                        style="width: 100%; border-color:var(--accent-psych); color:var(--accent-psych);">
-                        Abrir Psych Builder</div>
-                </div>
-
-                <div class="home-card" onclick="window.location.href='compresor.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/8208/8208316.png" class="icon-lg"
-                        style="filter: brightness(0) saturate(100%) invert(58%) sepia(56%) saturate(4171%) hue-rotate(244deg) brightness(102%) contrast(101%);"
-                        alt="Comprimir">
-                    <h3 class="home-title" style="color: #b57cff;">Compresor PNG</h3>
-                    <p class="home-desc">Esta opcion funciona importando una imagen .PNG para recudir su tamaño (MB),
-                        manteniendo la misma calidad de pixeles de la imagen.</p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%; border-color:#b57cff; color:#b57cff;">
-                        Abrir Optimizador PNG</div>
-                </div>
-
-                <div class="home-card" onclick="window.location.href='audio.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/862/862700.png" class="icon-lg"
-                        style="filter: brightness(0) saturate(100%) invert(67%) sepia(98%) saturate(1906%) hue-rotate(359deg) brightness(101%) contrast(105%) drop-shadow(0 0 10px rgba(255,170,0,0.4));"
-                        alt="Audio">
-                    <h3 class="home-title" style="color: #ffaa00;">Compresor OGG (BETA)</h3>
-                    <p class="home-desc">Esta opción reduce el peso de tus Instrumentales y Voces (.OGG) eligiendo el
-                        equilibrio perfecto entre peso y calidad de sonido. (Por el momento no funciona correctamente).
-                    </p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%; border-color:#ffaa00; color:#ffaa00;">
-                        Abrir Compresor Audio</div>
-                </div>
-
-                <div class="home-card" onclick="window.location.href='atlas.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/8243/8243003.png" class="icon-lg"
-                        style="filter: brightness(0) saturate(100%) invert(32%) sepia(97%) saturate(2250%) hue-rotate(327deg) brightness(101%) contrast(106%) drop-shadow(0 0 10px rgba(255,51,102,0.4));"
-                        alt="Atlas">
-                    <h3 class="home-title" style="color: #ff3366;">Conversor Animate Atlas</h3>
-                    <p class="home-desc">Convierte Texture Atlas exportados desde Adobe Animate (spritemap.json) directo
-                        al formato Sparrow XML nativo de FNF.</p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%; border-color:#ff3366; color:#ff3366;">
-                        Abrir Conversor Atlas</div>
-                </div>
+            <div style="display:flex; width: 100%; gap:10px; margin-bottom: 20px;">
+                <input type="file" id="imgCompresorUpload" class="hidden-file" accept="*/*">
+                <button class="btn-pildora"
+                    style="flex:1; padding: 15px; font-size: 1rem; background: #b57cff; color: #000; border:none;"
+                    onclick="document.getElementById('imgCompresorUpload').click();">
+                    <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" class="icon icon-black"
+                        alt="Upload"> SELECCIONAR IMAGEN .PNG
+                </button>
             </div>
 
-            <div class="home-footer">
-                &copy; LaloCF 2026 | Versión 1.4
+            <div class="split-workspace" style="align-items: flex-start;">
+                <div class="psych-panel" style="flex: 1;">
+                    <h3 style="color: var(--text); margin-top:0;">Configuración</h3>
+                    <p style="font-size: 0.8rem; color:#aaa;">Este algoritmo funciona reduciendo el peso de la imagen en
+                        MegaBytes manteniendo la calidad visual intacta.</p>
+
+                    <div class="panel-rango" style="margin-top:20px;">
+                        <label>Paleta de Colores: <span id="valColors" style="color: #b57cff;">256</span>
+                            (Recomendado)</label>
+                        <input type="range" id="sliderCompColors" min="16" max="256" value="256"
+                            oninput="document.getElementById('valColors').textContent = this.value">
+                    </div>
+
+                    <button class="btn-pildora" id="btnRunCompressor"
+                        style="width:100%; margin-top: 20px; display:none;" onclick="ejecutarCompresion()">
+                        <img src="https://cdn-icons-png.flaticon.com/128/11252/11252744.png" class="icon"
+                            alt="Procesar"> INICIAR COMPRESIÓN
+                    </button>
+
+                    <button class="btn-pildora" id="btnDownloadComp"
+                        style="width:100%; margin-top: 20px; display:none; background: var(--accent-psych); color:black; border:none;">
+                        <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" class="icon icon-black"
+                            alt="Bajar"> DESCARGAR PNG OPTIMIZADO
+                    </button>
+                </div>
+
+                <div class="psych-panel" style="flex: 1; text-align: center; border-color: #b57cff;">
+                    <h3 style="color: var(--text); margin-top:0;">Resultados</h3>
+
+                    <div style="display:flex; justify-content: space-around; margin: 20px 0;">
+                        <div>
+                            <div style="font-size: 0.8rem; color:#aaa;">Peso Original</div>
+                            <div id="txtCompOrigSize" style="font-size: 1.5rem; font-weight:bold; color:#ff4d88;">--- MB
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.8rem; color:#aaa;">Peso Optimizado</div>
+                            <div id="txtCompNewSize"
+                                style="font-size: 1.5rem; font-weight:bold; color:var(--accent-psych);">--- MB</div>
+                        </div>
+                    </div>
+
+                    <div class="inner-glass-box"
+                        style="height: 200px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                        <canvas id="canvasCompresorPreview"
+                            style="max-width: 100%; max-height: 100%; object-fit: contain;"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -214,11 +206,6 @@
                         <li><img src="https://cdn-icons-png.flaticon.com/512/862/862700.png" class="icon-sm"> <b
                                 style="color:#ffaa00;">Compresor Audio OGG:</b> Reduce el tamaño de tus voces e
                             instrumentales en segundos.</li>
-                        <li><img src="https://cdn-icons-png.flaticon.com/512/8243/8243003.png" class="icon-sm"> <b
-                                style="color:#ffaa00;">Conversor Animate Atlas:</b> Convierte Texture Atlas exportados
-                            desde
-                            Adobe Animate (spritemap.json) directo al formato Sparrow XML nativo de FNF u optimizando
-                            la resolucion de la imagen .png.</li>
                     </ul>
                 </div>
                 <button class="btn-pildora btn-modal-action" onclick="closeWelcomeModal()">¡Comenzar a Crear!</button>
@@ -227,19 +214,29 @@
 
         <div class="overlay-modal" id="changelogModal" style="display: none;">
             <div class="modal-box modal-box-changelog">
-                <h2 class="modal-title" style="color: var(--accent-gold);">¡Novedades en la Versión 1.4! ✨</h2>
+                <h2 class="modal-title" style="color: var(--accent-gold);">¡Novedades en la Versión 1.3! ✨</h2>
                 <div class="modal-body">
-                    <p>El proyecto se ha actualizado. Aquí tienes los últimos cambios implementados v1.4:</p>
+                    <p>El proyecto se ha actualizado. Aquí tienes los últimos cambios implementados v1.3:</p>
                     <ul class="modal-list">
-                        <li><b><span style="color: #ffaa00;">[NUEVO]</span> Conversor Animate Atlas:</b> Puedes importar
-                            los
-                            archivos .json y su imagen .png para optimizarla y reducir su resolucion de imagen.
+                        <li><b><span style="color: #ffaa00;">[NUEVO]</span> Compresor Audio OGG:</b> Ya puedes bajar el
+                            peso
+                            de tus Instrumentales y Voces sin instalar nada, directamente en la página con motor FFmpeg.
                         </li>
-                        <li><b><span style="color: #b57cff;">[NUEVO]</span> Optimizador:</b> Ahora no nomas puedes
-                            editar y
-                            modificar la escala del personaje, ahora puedes modificar y optimizar la resolucion de la
-                            imagen .png
-                            manteniendo un peso drasticamente reducido.</li>
+                        <li><b><span style="color: #b57cff;">[NUEVO]</span> Compresor PNG:</b> Ahora puedes optimizar el
+                            peso en MB de tus PNG directamente en el navegador, sin usar páginas externas.</li>
+                        <li><b><span style="color: var(--accent-gold);">[NUEVO]</span> Compresión ZIP Inteligente:</b>
+                            Al
+                            optimizar, se descargará un archivo .ZIP conteniendo tu nuevo PNG y el XML listo para
+                            usarse.
+                        </li>
+                        <li><b><span style="color: var(--accent);">[NUEVO]</span> Conversor Animate Atlas:</b> Este
+                            escaner
+                            realiza uan funcion
+                            para tener todos los prites en .PNG y .XML.</li>
+                        <li><b><span style="color: var(--accent);">[NUEVO]</span> Correccion de Errores:</b>Se
+                            solucionaron
+                            varios errores,
+                            y agregando nuevas funciones utiles.</li>
                     </ul>
                 </div>
                 <button class="btn-pildora btn-modal-action"
@@ -254,7 +251,6 @@
                 <h2 class="modal-title"><img src="https://cdn-icons-png.flaticon.com/128/2088/2088617.png"
                         style="width:30px; filter:brightness(0) invert(1);"> Sesión Anterior</h2>
                 <div class="modal-body" id="historyModalContent">
-                    <!-- Se inyecta desde js -->
                 </div>
                 <button class="btn-pildora btn-secundario" style="width:100%; margin-top:20px;"
                     onclick="closeHistoryModal()">Cancelar</button>
@@ -319,8 +315,9 @@
             </div>
         </div>
 
-        <script src="js/history.js"></script>
-        <script src="js/main.js" defer></script>
+        <script src="js/history.js?v=2"></script>
+        <script src="js/main.js?v=2" defer></script>
+        <script src="js/compresor.js?v=2" defer></script>
 
         <script>
             if ('serviceWorker' in navigator) {
@@ -331,6 +328,7 @@
                 });
             }
         </script>
+        <script>window.addEventListener("DOMContentLoaded", () => { appMode = "COMPRESS"; if (typeof toggleNavButtons === "function") toggleNavButtons(); if (typeof openWindow === "function") openWindow("win-compresor"); });</script>
 </body>
 
 </html>

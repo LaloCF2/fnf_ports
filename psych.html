@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -103,78 +103,132 @@
 
     <div class="main-workspace">
 
-        <div id="win-home" class="window-content active">
-            <h2 class="section-title" style="text-align: center; border:none; color: white; justify-content: center;">
-                ENTORNO DE DESARROLLO</h2>
+        <div id="win-psych" class="window-content active">
+            <h2 class="section-title" style="color:var(--accent-psych); border-bottom-color:var(--accent-psych);">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135692.png" class="icon"
+                    style="filter: brightness(0) saturate(100%) invert(86%) sepia(85%) saturate(1637%) hue-rotate(34deg) brightness(108%) contrast(106%);"
+                    alt="Psych"> Psych Character Builder
+            </h2>
 
-            <div class="home-grid">
-                <div class="home-card" onclick="window.location.href='escaner.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/128/1913/1913663.png" class="icon-lg" alt="Escaneo">
-                    <h3 class="home-title">Escanear de Cero</h3>
-                    <p class="home-desc">Esta opcion funciona importando una imagen con formato .png para escanearlo y
-                        generar un archivo xml para el personaje.</p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%;">Abrir Modo Creador</div>
-                </div>
+            <div class="dual-upload" style="margin-bottom: 15px; justify-content: center;">
+                <input type="file" id="psychImage" class="hidden-file" accept="*/*">
+                <button class="btn-pildora btn-secundario" onclick="document.getElementById('psychImage').click();"><img
+                        src="https://cdn-icons-png.flaticon.com/512/716/716784.png" class="icon" alt="PNG">Subir Imagen
+                    .PNG</button>
 
-                <div class="home-card" onclick="window.location.href='optimizador.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/128/7100/7100753.png" class="icon-lg"
-                        alt="Optimizador">
-                    <h3 class="home-title">Optimizador</h3>
-                    <p class="home-desc">Esta opcion funciona subiendo un XML+PNG para modificar o corregir sprites del
-                        personaje o simplemente edita y exporta el XML sin tocar el PNG.</p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%; border-color:#ffcc00; color:#ffcc00;">
-                        Abrir Optimizador</div>
-                </div>
-
-                <div class="home-card psych" onclick="window.location.href='psych.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135692.png" class="icon-lg"
-                        style="filter: brightness(0) saturate(100%) invert(86%) sepia(85%) saturate(1637%) hue-rotate(34deg) brightness(108%) contrast(106%) drop-shadow(0 0 10px rgba(170,255,0,0.4));"
-                        alt="Psych">
-                    <h3 class="home-title" style="color:var(--accent-psych);">Psych Character Builder (BETA)</h3>
-                    <p class="home-desc">Esta opcion sirve para visualizar y alinear animaciones en vivo para generar
-                        archivos .json sin necesidad de entrar al Character Editor de Psych Engine.</p>
-                    <div class="btn-pildora btn-secundario"
-                        style="width: 100%; border-color:var(--accent-psych); color:var(--accent-psych);">
-                        Abrir Psych Builder</div>
-                </div>
-
-                <div class="home-card" onclick="window.location.href='compresor.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/8208/8208316.png" class="icon-lg"
-                        style="filter: brightness(0) saturate(100%) invert(58%) sepia(56%) saturate(4171%) hue-rotate(244deg) brightness(102%) contrast(101%);"
-                        alt="Comprimir">
-                    <h3 class="home-title" style="color: #b57cff;">Compresor PNG</h3>
-                    <p class="home-desc">Esta opcion funciona importando una imagen .PNG para recudir su tamaño (MB),
-                        manteniendo la misma calidad de pixeles de la imagen.</p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%; border-color:#b57cff; color:#b57cff;">
-                        Abrir Optimizador PNG</div>
-                </div>
-
-                <div class="home-card" onclick="window.location.href='audio.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/862/862700.png" class="icon-lg"
-                        style="filter: brightness(0) saturate(100%) invert(67%) sepia(98%) saturate(1906%) hue-rotate(359deg) brightness(101%) contrast(105%) drop-shadow(0 0 10px rgba(255,170,0,0.4));"
-                        alt="Audio">
-                    <h3 class="home-title" style="color: #ffaa00;">Compresor OGG (BETA)</h3>
-                    <p class="home-desc">Esta opción reduce el peso de tus Instrumentales y Voces (.OGG) eligiendo el
-                        equilibrio perfecto entre peso y calidad de sonido. (Por el momento no funciona correctamente).
-                    </p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%; border-color:#ffaa00; color:#ffaa00;">
-                        Abrir Compresor Audio</div>
-                </div>
-
-                <div class="home-card" onclick="window.location.href='atlas.html'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/8243/8243003.png" class="icon-lg"
-                        style="filter: brightness(0) saturate(100%) invert(32%) sepia(97%) saturate(2250%) hue-rotate(327deg) brightness(101%) contrast(106%) drop-shadow(0 0 10px rgba(255,51,102,0.4));"
-                        alt="Atlas">
-                    <h3 class="home-title" style="color: #ff3366;">Conversor Animate Atlas</h3>
-                    <p class="home-desc">Convierte Texture Atlas exportados desde Adobe Animate (spritemap.json) directo
-                        al formato Sparrow XML nativo de FNF.</p>
-                    <div class="btn-pildora btn-secundario" style="width: 100%; border-color:#ff3366; color:#ff3366;">
-                        Abrir Conversor Atlas</div>
-                </div>
+                <input type="file" id="psychXML" class="hidden-file" accept=".xml">
+                <button class="btn-pildora btn-secundario"
+                    style="border-color:var(--accent-psych); color:var(--accent-psych);"
+                    onclick="document.getElementById('psychXML').click();"><img
+                        src="https://cdn-icons-png.flaticon.com/128/4668/4668221.png" class="icon"
+                        style="filter: brightness(0) saturate(100%) invert(86%) sepia(85%) saturate(1637%) hue-rotate(34deg) brightness(108%) contrast(106%);"
+                        alt="XML"> Subir Archivo .XML</button>
             </div>
 
-            <div class="home-footer">
-                &copy; LaloCF 2026 | Versión 1.4
+            <div class="psych-grid">
+
+                <div class="psych-panel">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <h3 style="margin:0; font-size: 0.9rem; color:white; display:flex; align-items:center;"><img
+                                src="https://cdn-icons-png.flaticon.com/512/126/126472.png" class="icon" alt="Globales">
+                            Globales</h3>
+                        <select id="bgPsychSelect" onchange="changePsychBg(this.value)" class="inner-glass-box">
+                            <option value="">Fondo Transparente</option>
+                            <option value="bg-editor">Editor (Editors)</option>
+                            <option value="bg-stage">Stage (Stageback)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Image Path</label><input type="text" id="p_image"
+                            value="characters/BOYFRIEND" class="inner-glass-box" oninput="updatePsychLive()"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Icon</label><input type="text" class="inner-glass-box"
+                                id="p_icon" value="bf"></div>
+                        <div class="form-group"><label>Bar Color</label><input type="color" id="p_color" value="#31b0d1"
+                                style="height:36px; padding:2px; cursor:pointer;" class="inner-glass-box"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Scale</label><input type="number" id="p_scale" value="1"
+                                step="0.1" class="inner-glass-box" oninput="updatePsychLive()"></div>
+                        <div class="form-group"><label>Sing Dur</label><input type="number" class="inner-glass-box"
+                                id="p_sing" value="4"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Cam X <small>(Punto Rojo)</small></label><input type="number"
+                                id="p_camX" class="inner-glass-box" value="0" oninput="updatePsychLive()"></div>
+                        <div class="form-group"><label>Cam Y <small>(Punto Rojo)</small></label><input type="number"
+                                id="p_camY" class="inner-glass-box" value="0" oninput="updatePsychLive()"></div>
+                    </div>
+                    <div style="display:flex; gap:15px; margin-top:5px; flex-wrap:wrap;">
+                        <label style="color:var(--text); font-size:0.8rem;"><input type="checkbox" id="p_flip"
+                                onchange="updatePsychLive()"> Flip X</label>
+                        <label style="color:var(--text); font-size:0.8rem;"><input type="checkbox" id="p_antialias"
+                                checked onchange="updatePsychLive()"> Antialias</label>
+                        <label style="color:var(--text); font-size:0.8rem; color:var(--accent-pink);"><input
+                                type="checkbox" id="p_onion" onchange="updatePsychLive()"> Fantasma</label>
+                    </div>
+                    <div class="inner-glass-box"
+                        style="display:flex; gap:15px; margin-top:5px; flex-wrap:wrap; padding: 10px;">
+                        <label style="color:var(--text); font-size:0.8rem;"><input type="checkbox" id="chkSilBF" checked
+                                onchange="document.getElementById('imgSilBF').style.display = this.checked ? 'block' : 'none'">
+                            Guía BF</label>
+                        <label style="color:var(--text); font-size:0.8rem;"><input type="checkbox" id="chkSilDad"
+                                checked
+                                onchange="document.getElementById('imgSilDad').style.display = this.checked ? 'block' : 'none'">
+                            Guía Dad</label>
+                    </div>
+                </div>
+
+                <div class="psych-preview-container" id="psychPreviewContainer">
+                    <div id="psychBgEditorLayer"
+                        style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; pointer-events:none; z-index:0;">
+                        <img src="img/editors/bg.png"
+                            style="position:absolute; width:100%; height:100%; object-fit:cover; z-index:1;">
+                    </div>
+                    <div id="psychStageLayers"
+                        style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; pointer-events:none; z-index:0;">
+                        <img src="img/stage/stageback.png"
+                            style="position:absolute; width:100%; height:100%; object-fit:cover; z-index:1;">
+                        <img src="img/stage/stagefront.png"
+                            style="position:absolute; width:100%; height:100%; object-fit:contain; bottom:-20px; z-index:2;">
+                        <img src="img/stage/stagecurtains.png"
+                            style="position:absolute; width:100%; height:100%; object-fit:cover; top:-10px; z-index:10;">
+                    </div>
+                    <div id="psychSilhouettesLayer"
+                        style="width:100%; height:100%; position:absolute; top:0; left:0; pointer-events:none; z-index:4;">
+                        <img src="img/editors/silhouetteBF.png" id="imgSilBF"
+                            style="position:absolute; width:220px; bottom: 20px; right: 20%; opacity:0.7;">
+                        <img src="img/editors/silhouetteDad.png" id="imgSilDad"
+                            style="position:absolute; width:250px; bottom: 20px; left: 20%; opacity:0.7;">
+                    </div>
+
+                    <div class="crosshair" style="z-index:3;"></div>
+                    <div class="crosshair v" style="z-index:3;"></div>
+                    <canvas id="canvasPsychLive" style="z-index:5; position:relative;"></canvas>
+                </div>
+
+                <div class="psych-panel">
+                    <h3
+                        style="margin:0 0 5px 0; font-size: 0.9rem; color:var(--text); display:flex; align-items:center;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2503/2503508.png" class="icon"
+                            alt="Animaciones"> Animaciones
+                    </h3>
+                    <div class="inner-glass-box" style="padding: 12px; margin-bottom:10px;">
+                        <div class="form-row">
+                            <div class="form-group"><label>Anim (JSON)</label><input type="text" id="p_animName"
+                                    class="inner-glass-box" placeholder="ej: singUP"></div>
+                            <div class="form-group"><label>XML Prefix</label><select id="p_animPrefix"
+                                    class="inner-glass-box"></select></div>
+                        </div>
+                        <button class="btn-pildora"
+                            style="background: var(--accent-psych); border:none; color:white; width:100%; padding:8px;"
+                            onclick="addPsychAnimation()"><img
+                                src="https://cdn-icons-png.flaticon.com/512/1828/1828817.png" class="icon icon-white"
+                                alt="Añadir"> Añadir</button>
+                    </div>
+                    <div class="anim-list" id="psychAnimList"></div>
+                </div>
+
             </div>
         </div>
 
@@ -184,8 +238,7 @@
                 <div class="modal-body">
                     <p>La herramienta definitiva creada en la web para optimizar y crear spritesheets listos para
                         <b>Friday
-                            Night Funkin'</b>. Esto es lo que puedes hacer aquí:
-                    </p>
+                            Night Funkin'</b>. Esto es lo que puedes hacer aquí:</p>
 
                     <ul class="modal-list">
                         <li><img src="https://cdn-icons-png.flaticon.com/128/10301/10301595.png" class="icon-sm">
@@ -201,8 +254,7 @@
                             <b>Laboratorio
                                 de Offsets:</b> Ajusta posiciones, escala, duplica frames, renombra en masa y visualiza
                             cómo
-                            lucirá cada animación.
-                        </li>
+                            lucirá cada animación.</li>
                         <li><img src="https://cdn-icons-png.flaticon.com/512/3135/3135692.png" class="icon-sm"> <b>Psych
                                 Live Editor:</b> Crea el archivo JSON de tu personaje alineando posiciones, barra de
                             vida y
@@ -214,11 +266,6 @@
                         <li><img src="https://cdn-icons-png.flaticon.com/512/862/862700.png" class="icon-sm"> <b
                                 style="color:#ffaa00;">Compresor Audio OGG:</b> Reduce el tamaño de tus voces e
                             instrumentales en segundos.</li>
-                        <li><img src="https://cdn-icons-png.flaticon.com/512/8243/8243003.png" class="icon-sm"> <b
-                                style="color:#ffaa00;">Conversor Animate Atlas:</b> Convierte Texture Atlas exportados
-                            desde
-                            Adobe Animate (spritemap.json) directo al formato Sparrow XML nativo de FNF u optimizando
-                            la resolucion de la imagen .png.</li>
                     </ul>
                 </div>
                 <button class="btn-pildora btn-modal-action" onclick="closeWelcomeModal()">¡Comenzar a Crear!</button>
@@ -227,19 +274,29 @@
 
         <div class="overlay-modal" id="changelogModal" style="display: none;">
             <div class="modal-box modal-box-changelog">
-                <h2 class="modal-title" style="color: var(--accent-gold);">¡Novedades en la Versión 1.4! ✨</h2>
+                <h2 class="modal-title" style="color: var(--accent-gold);">¡Novedades en la Versión 1.3! ✨</h2>
                 <div class="modal-body">
-                    <p>El proyecto se ha actualizado. Aquí tienes los últimos cambios implementados v1.4:</p>
+                    <p>El proyecto se ha actualizado. Aquí tienes los últimos cambios implementados v1.3:</p>
                     <ul class="modal-list">
-                        <li><b><span style="color: #ffaa00;">[NUEVO]</span> Conversor Animate Atlas:</b> Puedes importar
-                            los
-                            archivos .json y su imagen .png para optimizarla y reducir su resolucion de imagen.
+                        <li><b><span style="color: #ffaa00;">[NUEVO]</span> Compresor Audio OGG:</b> Ya puedes bajar el
+                            peso
+                            de tus Instrumentales y Voces sin instalar nada, directamente en la página con motor FFmpeg.
                         </li>
-                        <li><b><span style="color: #b57cff;">[NUEVO]</span> Optimizador:</b> Ahora no nomas puedes
-                            editar y
-                            modificar la escala del personaje, ahora puedes modificar y optimizar la resolucion de la
-                            imagen .png
-                            manteniendo un peso drasticamente reducido.</li>
+                        <li><b><span style="color: #b57cff;">[NUEVO]</span> Compresor PNG:</b> Ahora puedes optimizar el
+                            peso en MB de tus PNG directamente en el navegador, sin usar páginas externas.</li>
+                        <li><b><span style="color: var(--accent-gold);">[NUEVO]</span> Compresión ZIP Inteligente:</b>
+                            Al
+                            optimizar, se descargará un archivo .ZIP conteniendo tu nuevo PNG y el XML listo para
+                            usarse.
+                        </li>
+                        <li><b><span style="color: var(--accent);">[NUEVO]</span> Conversor Animate Atlas:</b> Este
+                            escaner
+                            realiza uan funcion
+                            para tener todos los prites en .PNG y .XML.</li>
+                        <li><b><span style="color: var(--accent);">[NUEVO]</span> Correccion de Errores:</b>Se
+                            solucionaron
+                            varios errores,
+                            y agregando nuevas funciones utiles.</li>
                     </ul>
                 </div>
                 <button class="btn-pildora btn-modal-action"
@@ -319,8 +376,9 @@
             </div>
         </div>
 
-        <script src="js/history.js"></script>
-        <script src="js/main.js" defer></script>
+        <script src="js/history.js?v=2"></script>
+        <script src="js/main.js?v=2" defer></script>
+        <script src="js/psych.js?v=2" defer></script>
 
         <script>
             if ('serviceWorker' in navigator) {
@@ -331,6 +389,7 @@
                 });
             }
         </script>
+        <script>window.addEventListener("DOMContentLoaded", () => { appMode = "PSYCH"; if (typeof toggleNavButtons === "function") toggleNavButtons(); if (typeof openWindow === "function") openWindow("win-psych"); });</script>
 </body>
 
 </html>
