@@ -1,0 +1,1210 @@
+﻿<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>FNF' - Ports
+    Mobile</title>
+
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fnf-mobile-lalocf-default-rtdb.firebaseio.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Titan+One&display=swap" rel="stylesheet">
+  <link rel="apple-touch-icon" href="assets/icons/logo192.png">
+  <link rel="icon" type="image/png" href="assets/icons/logo192.png">
+  <link rel="shortcut icon" href="assets/icons/logo192.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00eaff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/notifications.css">
+  <link rel="stylesheet" href="css/popups.css">
+  <link id="theme-style" rel="stylesheet" href="">
+
+  <script>
+    const currentTheme = localStorage.getItem('fnf_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+  </script>
+
+  <script>
+    const savedTheme = localStorage.getItem('activeTheme') || 'default';
+    if (savedTheme === 'retro') {
+      document.write('<link rel="stylesheet" href="css/style2.css">');
+    } else if (savedTheme === 'snokido') {
+      document.write('<link rel="stylesheet" href="css/style3.css">');
+    }
+
+  </script>
+</head>
+
+<body>
+  <!-- GLOBAL LOADER -->
+  <div id="global-loader"
+    style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0a0a0c; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease, visibility 0.4s ease;">
+    <div
+      style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--neon-blue, #00eaff); animation: spin-loader 0.8s linear infinite; filter: drop-shadow(0 0 10px rgba(0, 234, 255, 0.5));">
+    </div>
+    <h2
+      style="margin-top: 25px; color: #fff; font-size: 16px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; animation: pulse-text 1.5s ease-in-out infinite;">
+      Cargando</h2>
+    <style>
+      @keyframes spin-loader {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes pulse-text {
+
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+
+        50% {
+          opacity: 1;
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+      }
+
+      body.loaded #global-loader {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+    </style>
+    <script>
+      window.addEventListener('load', function () {
+        setTimeout(() => {
+          document.body.classList.add('loaded');
+        }, 500);
+      });
+    </script>
+  </div>
+
+  <div id="auth-overlay" class="auth-screen" style="display: none;">
+    <div class="auth-card">
+      <img src="assets/images/logo/LaloCF.webp" alt="Logo App" class="auth-logo">
+      <h2>FNF' Ports Mobile</h2>
+      <p data-es="Inicia sesión para acceder a las mejores bases, mods, scripts y soporte tecnico."
+        data-en="Sign in to access the best engines, mods, scripts, and technical support.">
+        Inicia sesión para acceder a las mejores bases, mods, scripts y soporte tecnico.
+      </p>
+
+      <button id="btn-google-login" onclick="iniciarSesionConGoogle()">
+        <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google">
+        <span data-es="Entrar con Google" data-en="Sign in with Google">Iniciar sesión con Google</span>
+      </button>
+
+      <button onclick="entrarComoInvitado()"
+        style="margin-top: 15px; width: 100%; padding: 12px; background: transparent; color: #b5b5bd; border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; cursor: pointer; transition: 0.2s;">
+        <span data-es="Iniciar sesión después" data-en="Sign in later">Iniciar sesión después</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="profile-popup" class="popup">
+    <div class="popup-content"
+      style="text-align: center; padding: 25px; background: rgba(20, 20, 25, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; max-width: 340px; margin: auto;">
+      <span class="popup-close" onclick="document.getElementById('profile-popup').classList.remove('show')"
+        style="position: absolute; top: 15px; right: 15px; color: #aaa; cursor: pointer; font-size: 18px;">✖</span>
+      <h2 class="glow" style="margin-bottom: 20px; color: white;" data-es="Mi Perfil" data-en="My Profile">Mi Perfil
+      </h2>
+
+      <div id="perfil-dinamico-contenido"></div>
+    </div>
+  </div>
+
+  <div id="favorites-popup" class="popup">
+    <div class="popup-content popup-scroll-body" style="text-align: center; padding: 20px;">
+      <span class="popup-close" onclick="document.getElementById('favorites-popup').classList.remove('show')"
+        style="position: absolute; top: 15px; right: 15px; color: var(--text-muted); cursor: pointer; font-size: 18px;">✖</span>
+      <h2 class="glow" style="margin-bottom: 20px; color: white;">⭐ Mis Favoritos</h2>
+      <div id="favorites-list" style="display: flex; flex-direction: column; gap: 10px;">
+        <p style="color:#aaa; font-size:13px;">No has guardado ningún mod aún. ¡Toca el 🤍 en tus mods favoritos!</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="requests-popup" class="popup">
+    <div class="popup-content popup-scroll-body" style="padding: 20px;">
+      <span class="popup-close" onclick="document.getElementById('requests-popup').classList.remove('show')"
+        style="position: absolute; top: 15px; right: 15px; color: var(--text-muted); cursor: pointer; font-size: 18px;">✖</span>
+      <h2 class="glow" style="margin-bottom: 10px; color: var(--text); text-align: center;">📝 Pedir un Mod</h2>
+      <p style="color:var(--text-muted); font-size:12px; text-align:center; margin-bottom: 15px;">¿Qué port te
+        gustaría ver en la
+        página? ¡Vota o añade uno nuevo!</p>
+
+      <div class="settings-card" style="margin-bottom: 15px;">
+        <input type="text" id="req-mod-name" placeholder="Nombre del Mod..." class="reg-input"
+          style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:var(--card-bg); color:var(--text); border:none; box-shadow:var(--neu-shadow-inset); border-radius:12px; outline:none;">
+        <input type="url" id="req-mod-link" placeholder="Enlace (Opcional GameBanana...)" class="reg-input"
+          style="width:100%; margin-bottom:10px; box-sizing:border-box; padding:10px; background:var(--card-bg); color:var(--text); border:none; box-shadow:var(--neu-shadow-inset); border-radius:12px; outline:none;">
+        <button id="btn-enviar-solicitud" onclick="enviarSolicitudMod()" class="btn"
+          style="width:100%; padding:10px;">Enviar Solicitud</button>
+      </div>
+
+      <h3 style="color:white; font-size:15px; border-bottom:1px solid #444; padding-bottom:5px; margin-bottom:10px;">
+        Comunidad (Votos)</h3>
+      <div id="requests-list" style="display: flex; flex-direction: column; gap: 10px;">
+        <p style="color:#aaa; font-size:13px; text-align:center;">Cargando...</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="pro-menu-overlay" onclick="toggleProMenu()"></div>
+
+  <div id="particles-container"></div>
+  <script src="js/modules/layout.js"></script>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <div class="lang-btn float-ui-btn" onclick="toggleLanguage()" title="Idioma" id="langBtn"
+    style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/3898/3898082.png"
+      style="width: 20px; height: 20px; filter: invert(var(--icon-invert, 0));">
+    <span style="font-weight: bold; font-size: 12px;">EN</span>
+  </div>
+
+  <div class="profile-btn float-ui-btn" onclick="abrirPerfil()" id="profileBtn"
+    style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1077/1077114.png"
+      style="width: 18px; height: 18px; filter: invert(var(--icon-invert, 0));">
+    <span data-es="Perfil" data-en="Profile" style="font-weight: bold; font-size: 12px;">Perfil</span>
+  </div>
+
+  <div id="settingsBtn" class="settings-btn float-ui-btn"
+    onclick="document.getElementById('settings-popup').classList.add('show')" title="Configuración"
+    style="display: flex; align-items: center; justify-content: center;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1040/1040221.png" alt="Configuración"
+      style="width: 24px; height: 24px; object-fit: contain; filter: invert(var(--icon-invert, 0));">
+  </div>
+
+  <div class="admin-float-btn float-ui-btn" onclick="document.getElementById('admin-tools-popup').classList.add('show')"
+    style="display: flex; align-items: center; justify-content: center;">
+    <img src="https://cdn-icons-png.flaticon.com/128/1077/1077147.png" alt="Admin"
+      style="width: 24px; height: 24px; object-fit: contain; filter: invert(var(--icon-invert, 0));">
+  </div>
+
+  <div class="theme-btn float-ui-btn" onclick="toggleTheme()" title="Tema"
+    style="display: flex; align-items: center; justify-content: center;">
+    <img id="theme-icon" src="https://cdn-icons-png.flaticon.com/128/1828/1828231.png" alt="Tema Claro/Oscuro"
+      style="width: 24px; height: 24px; object-fit: contain; filter: invert(var(--icon-invert, 0)); transition: transform 0.2s;">
+  </div>
+
+  <div class="notif-container">
+    <button class="notif-bell-btn" onclick="toggleNotificaciones()" title="Notificaciones">
+      <img src="https://cdn-icons-png.flaticon.com/128/8509/8509651.png" alt="Notificaciones">
+      <span id="badge-contador" class="notif-badge" style="display: none;">0</span>
+    </button>
+  </div>
+
+  <div id="panel-notificaciones" class="notif-panel hidden">
+    <div class="notif-header">
+      <h3>Notificaciones</h3>
+      <button class="close-notif" onclick="toggleNotificaciones()">✕</button>
+    </div>
+    <div id="admin-notif-area" class="admin-area" style="display: none;">
+      <textarea id="txt-nueva-notif" placeholder="Aviso para los usuarios..."></textarea>
+      <button class="btn-enviar-notif" onclick="enviarNotificacion()">Enviar Aviso</button>
+    </div>
+    <div id="lista-notificaciones" class="notif-list"></div>
+  </div>
+  </div>
+
+  <div id="settings-popup" class="popup">
+    <div class="popup-content popup-scroll-body"
+      style="text-align: center; padding: 20px; max-width: 90%; width: 400px; max-height: 80vh; overflow-y: auto; box-sizing: border-box;">
+      <span class="popup-close" onclick="document.getElementById('settings-popup').classList.remove('show')">✖</span>
+      <h2 class="glow" data-es="Configuración" data-en="Settings">Configuración'</h2>
+
+      <div class="color-picker-wrapper" style="box-sizing: border-box; width: 100%;">
+        <input type="color" id="themeColor" value="#00eaff">
+        <span data-es="Color del Tema" data-en="Theme Color" style="font-weight: bold; color: var(--neon-blue);">Color
+          del Tema</span>
+      </div>
+
+      <div class="settings-card">
+        <span style="font-weight: bold; display: block; margin-bottom: 10px;" data-es="Skin de la Página"
+          data-en="Page Skin">Skin de la Página</span>
+
+        <select id="themeSelector"
+          style="width: 100%; padding: 10px; background: var(--card-bg); color: var(--text); border: none; box-shadow: var(--neu-shadow-inset); border-radius: 10px; outline: none; font-size: 14px; cursor: pointer;">
+          <option value="default">Tema Moderno (Glassmorphism)</option>
+          <option value="retro">Tema Retro (Arcade)</option>
+          <option value="snokido">Tema Snokido</option>
+        </select>
+      </div>
+
+      <label class="settings-card"
+        style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+        <span style="font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue);"
+          data-es="🌈 Modo RGB (Chroma)" data-en="RGB Mode (Chroma)">Modo RGB (Chroma)</span>
+        <input type="checkbox" id="chromaToggle" style="transform: scale(1.3);">
+      </label>
+
+      <div class="settings-card">
+        <h3 style="margin-top:0; font-size: 14px; color: var(--neon-blue); text-align: center;"
+          data-es="⚡ Visuales y Rendimiento" data-en="⚡ Visuals & Performance">⚡ Visuales y Rendimiento</h3>
+
+        <label
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer; width: 100%;">
+          <span data-es="Partículas Animadas" data-en="Animated Particles">Partículas Animadas</span>
+          <input type="checkbox" id="particlesToggle" style="transform: scale(1.3);">
+        </label>
+
+        <div id="particle-settings-container"
+          style="display: none; border-left: 2px solid var(--neon-blue); padding-left: 10px; margin-bottom: 15px;">
+          <span style="display:block; margin-bottom: 5px; color: #ccc; font-size: 11px;" data-es="Escala de Partículas"
+            data-en="Particle Scale">Escala de Partículas</span>
+          <input type="range" id="particleScaleSlider" min="20" max="80" value="40"
+            style="width: 100%; cursor: pointer; box-sizing: border-box; margin-bottom: 10px;">
+
+          <span style="display:block; margin-bottom: 5px; color: #ccc; font-size: 11px;" data-es="Cantidad (Frecuencia)"
+            data-en="Spawn Rate">Cantidad (Frecuencia)</span>
+          <input type="range" id="particleSpawnSlider" min="1" max="100" value="25"
+            style="width: 100%; cursor: pointer; box-sizing: border-box; margin-bottom: 10px;">
+
+          <span style="display:block; margin-bottom: 5px; color: #ccc; font-size: 11px;" data-es="Velocidad de subida"
+            data-en="Float Speed">Velocidad de subida</span>
+          <input type="range" id="particleSpeedSlider" min="1" max="100" value="50"
+            style="width: 100%; cursor: pointer; box-sizing: border-box;">
+        </div>
+
+        <label
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; color: #ccc; font-size: 13px; cursor: pointer; width: 100%;">
+          <span data-es="Modo Gama Baja" data-en="Low-End Mode">Modo Gama Baja</span>
+          <input type="checkbox" id="lowEndToggle" style="transform: scale(1.3);">
+        </label>
+
+        <div style="border-top: 1px dashed #555; padding-top: 15px; margin-top: 5px; width: 100%;">
+          <span style="display:block; margin-bottom: 10px; color: #ccc; font-size: 13px;"
+            data-es="Intensidad del Cristal (Blur)" data-en="Glass Intensity (Blur)">Intensidad del Cristal
+            (Blur)</span>
+          <input type="range" id="blurSlider" min="0" max="30" value="15"
+            style="width: 100%; cursor: pointer; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-top: 15px; width: 100%;">
+          <span style="display:block; margin-bottom: 10px; color: #ccc; font-size: 13px;"
+            data-es="Grosor de Píldora iOS" data-en="iOS Pill Thickness">Grosor de Píldora iOS</span>
+          <input type="range" id="pillSizeSlider" min="0" max="15" value="5"
+            style="width: 100%; cursor: pointer; box-sizing: border-box;">
+        </div>
+      </div>
+
+      <div class="font-picker-wrapper"
+        style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; text-align: left; border: 1px solid #333; box-sizing: border-box; width: 100%;">
+        <span style="display:block; margin-bottom: 8px; font-weight: bold; color: #fff;"
+          data-es="Fuente Personalizada (.ttf)" data-en="Custom Font (.ttf)">Fuente Personalizada (.ttf)</span>
+        <input type="file" id="customFontUpload" accept=".ttf"
+          style="width: 100%; color: #fff; font-size: 12px; box-sizing: border-box;">
+      </div>
+
+      <div
+        style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; box-sizing: border-box; width: 100%;">
+        <button class="btn" style="width:100%; background: #444; box-sizing: border-box;" onclick="resetSettings()"
+          data-es="Restablecer Por Defecto" data-en="Reset to Default">Restablecer Por Defecto</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="maintenance-popup" class="popup">
+    <div class="popup-content"
+      style="border: 2px solid #ff003c; box-shadow: 0 0 20px rgba(255, 0, 60, 0.5); text-align: center; max-width: 300px;">
+      <h2 style="color: #ff003c; text-shadow: 0 0 10px #ff003c; font-size: 24px; margin-bottom: 10px;">🚧
+        MANTENIMIENTO 🚧</h2>
+
+      <h3 id="maintenance-mod-name" style="color: var(--neon-yellow); margin-bottom: 15px; font-size: 18px;">Nombre
+        del Mod</h3>
+
+      <p style="color: #ddd; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+        El enlace de descarga de este MOD ha sido reportado por la comunidad debido a una caída.
+      </p>
+      <p style="color: var(--neon-green); font-size: 13px; font-weight: bold; margin-bottom: 20px;">
+        El Administrador ya ha sido notificado y está trabajando en repararlo. ¡Vuelve pronto!
+      </p>
+
+      <button class="btn" onclick="document.getElementById('maintenance-popup').classList.remove('show')"
+        style="background-color: #333; color: white; width: 100%;">Entendido</button>
+    </div>
+  </div>
+
+
+
+  <div id="ban-popup" class="popup">
+    <div class="popup-content" style="padding: 20px;">
+      <h2 class="glow" style="text-align: center;">🔨 Control de Baneo</h2>
+      <p id="ban-target-info" style="font-size: 14px; margin-bottom: 15px; color: var(--neon-pink);"></p>
+      <input type="text" id="banReason" class="reg-input" placeholder="Motivo del baneo">
+      <input type="number" id="banDuration" class="reg-input" placeholder="Horas (ej: 24)" value="24">
+      <button class="btn" id="confirmBanBtn" style="width: 100%; background: red;">Banear Usuario</button>
+      <button class="btn" onclick="document.getElementById('ban-popup').classList.remove('show')"
+        style="width: 100%; background: #444; margin-top: 10px;">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="admin-popup" class="popup">
+    <div class="popup-content" style="text-align: center; padding: 20px;">
+      <h2 class="glow">Acceso Superusuario</h2>
+      <p>Introduce el código de seguridad:</p>
+      <input type="password" id="adminCode" class="reg-input" placeholder="Código">
+      <button class="btn" onclick="verifyAdmin()" style="width: 100%">Entrar</button>
+      <p onclick="document.getElementById('admin-popup').classList.remove('show')"
+        style="cursor:pointer; color:gray; font-size:12px; margin-top:10px;">Cancelar</p>
+    </div>
+  </div>
+
+  <div id="admin-tools-popup" class="popup">
+    <div class="popup-content" style="padding: 20px; text-align: center;">
+      <span class="popup-close" onclick="document.getElementById('admin-tools-popup').classList.remove('show')">✖</span>
+      <h2 class="glow">Panel de Control Global</h2>
+      <textarea id="globalNotifText" class="reg-input" placeholder="Ej: Enviar una Notificación" rows="3"
+        style="resize:none;"></textarea>
+      <button class="btn" onclick="sendGlobalNotification()"
+        style="width: 30%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <img src="https://cdn-icons-png.flaticon.com/128/1827/1827370.png" style="align-items: center;" alt="Campana"
+          class="btn-icon">
+        Enviar Notificación
+      </button>
+
+      <hr style="border: 1px solid #333; margin: 15px 0;">
+      <h3 style="color: #aaa; font-size: 14px; margin-bottom: 10px;">Opciones de Desarrollador:</h3>
+      <button class="btn" id="btnForceIOS" onclick="toggleForceIOS()"
+        style="width: 100%; background: #222; border: 1px solid #00eaff; color: #00eaff;">🍏 Forzar Interfaz
+        iOS</button>
+    </div>
+  </div>
+
+  <div id="update-popup" class="popup">
+    <div class="popup-content premium-update-card">
+
+      <div class="premium-close-btn" onclick="closeUpdatePopup()">✖</div>
+
+      <div class="premium-update-header">
+        <div class="premium-orb"></div>
+        <div class="premium-icon-container">
+          <img src="https://cdn-icons-png.flaticon.com/128/13544/13544292.png" alt="Update"
+            class="premium-floating-icon">
+        </div>
+        <h2 class="premium-title glow-text" data-es="VERSIÓN 7.0.1" data-en="VERSION 7.0.1">VERSIÓN 7.0.1</h2>
+        <p class="premium-subtitle" data-es="Novedades de esta versión:" data-en="What's new:">Novedades de esta
+          versión</p>
+      </div>
+
+      <div class="premium-update-body">
+        <ul class="premium-update-list">
+          <li>
+            <div class="premium-list-icon"
+              style="background: rgba(255, 215, 0, 0.1); border: 1px solid var(--neon-gold);">
+              <img src="https://cdn-icons-png.flaticon.com/128/5166/5166323.png"
+                style="width:22px; filter: drop-shadow(0 0 5px var(--neon-gold));">
+            </div>
+            <div class="premium-list-text">
+              <h4 style="color: var(--neon-gold);" data-es="Nuevos Mods" data-en="New Mods">Nuevos Mods:</h4>
+              <p data-es="Se añadieron 2 nuevos mods: <b>Herobrine Blocky Myths</b> & <b>Bumfuzzle11</b>." data-en="2 new
+                  mods were added: Herobrine Blocky Myths and Bumfuzzle11.">Se
+                añadieron 2 nuevos mods: Herobrine Blocky Myths y Bumfuzzle11.</p>
+            </div>
+          </li>
+        </ul>
+
+        <button class="premium-btn-action" onclick="closeUpdatePopup()">
+          <span style="position: relative; z-index: 2;" data-es="¡ACEPTAR!" data-en="OK!">¡ACEPTAR!</span>
+          <div class="btn-glow-overlay"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="install-popup" class="popup">
+    <div class="popup-content" style="text-align: center; padding: 25px; max-width: 350px;">
+      <h2 class="glow" style="margin-top:0; font-size:22px;" data-es="📱 Instalar WebApp" data-en="📱 Install WebApp">
+        📱
+        Instalar WebApp</h2>
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button class="btn" style="flex: 1; background: #444;" onclick="dismissInstall()" data-es="Despues"
+          data-en="Later">Despues</button>
+        <button class="btn" style="flex: 1;" onclick="installApp()" data-es="Instalar" data-en="Install">
+          Instalar</button>
+      </div>
+    </div>
+  </div>
+
+  <header id="snokido-header" class="master-header" style="display: none;">
+    <div class="top-bar">
+      <div class="logo-text">FNF'</div>
+
+      <div class="top-bar-actions">
+        <div class="action-icon theme-toggle-btn" onclick="toggleTheme()" title="Cambiar Tema">
+          <img id="theme-icon" src="https://cdn-icons-png.flaticon.com/128/1828/1828231.png"
+            style="width: 20px; height: 20px; filter: invert(1); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
+        </div>
+        <div class="action-icon" onclick="document.getElementById('search-popup').classList.add('show')" title="Buscar">
+          🔍</div>
+        <div class="action-icon" onclick="abrirPerfil()" title="Perfil">👤</div>
+      </div>
+    </div>
+
+    <nav class="sub-bar">
+      <div class="sub-bar-wrapper">
+        <div class="home-nav-item" onclick="window.location.href='index.html'">🏠</div>
+        <button class="filter-btn" onclick="window.location.href='bases.html'">Bases</button>
+        <button class="filter-btn" onclick="window.location.href='mods.html'">Mods</button>
+        <button class="filter-btn" onclick="window.location.href='ayuda.html'">Ayuda</button>
+        <button class="filter-btn" onclick="window.location.href='scripts.html'">Scripts</button>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container">
+    <header
+      style="display:flex; justify-content:center; align-items:center; margin-bottom:20px; position:relative; margin-top: 30px;">
+      <div style="text-align:center">
+
+        <div>
+          <h1 id="fnf-title" class="fnf-animated-title" data-text="Friday Night Funkin'" onclick="activarAdminOculto()">
+            Friday Night Funkin'
+          </h1>
+        </div>
+
+        <div class="server-status" style="margin-top: 10px;">
+          <div id="statusDot" class="status-dot"></div>
+          <span id="statusText">Conectando...</span>
+        </div>
+
+      </div>
+    </header>
+
+    <div id="searchContainer" class="search-wrapper" style="display:none;">
+      <input type="text" id="globalSearch" class="search-input" placeholder="🔍 Buscar..." onkeyup="filterContent()">
+    </div>
+
+    <div id="filterContainer" class="filter-bar" style="display:none;">
+      <div class="filter-btn active" onclick="setFilter('all', this)" data-es="Todos" data-en="All">Todos</div>
+      <div class="filter-btn" onclick="setFilter('low', this)">🟢 <span data-es="Gama Baja" data-en="Low End">Gama
+          Baja</span></div>
+      <div class="filter-btn" onclick="setFilter('mid', this)">🟡 <span data-es="Gama Media" data-en="Mid End">Gama
+          Media</span></div>
+      <div class="filter-btn" onclick="setFilter('high', this)">🔴 <span data-es="Gama Alta" data-en="High End">Gama
+          Alta</span></div>
+    </div>
+
+    <section id="home" class="section active">
+      <div class="hero-banner">
+        <h1 class="glow" style="font-size: 28px; margin-bottom: 15px; margin-top: 0;"
+          data-es="¡Bienvenido a FNF' Mobile!" data-en="Welcome to FNF' Mobile!">¡Bienvenido a FNF' Ports Mobile!</h1>
+        <p style="color: #ddd; margin-bottom: 25px; font-size: 15px; line-height: 1.4;"
+          data-es="El mejor lugar para descargar tus mods optimizados."
+          data-en="The best place to download optimized mods.">El mejor lugar para descargar tus mods optimizados.</p>
+        <button class="btn" style="font-size: 16px; padding: 12px 30px;"
+          onclick="document.querySelectorAll('.nav-item')[2].click()" data-es="Explorar MODs 🚀"
+          data-en="Explore MODs 🚀">Explorar MODs 🚀</button>
+      </div>
+
+      <div class="info-card">
+        <h2 class="glow" style="font-size: 22px; margin-top: 0;" data-es="✨ ¿De qué trata esta página?"
+          data-en="✨ What is this page about?">✨ ¿De qué trata esta página?</h2>
+        <p style="color: #ccc; font-size: 15px; line-height: 1.6; margin-bottom: 20px;"
+          data-es="En esta página me dedico a subir la mayoría de <b>MODs, Bases y Scripts para móviles</b>. Mi objetivo es traerles mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones."
+          data-en="On this page, I upload most of the <b>MODs, Engines, and Scripts</b> for mobile devices. My goal is to bring you better optimizations, detailed information, and a comfortable, hassle-free experience.">
+          En esta página me dedico a subir la mayoría de <b>MODs, Motores y Scripts para móviles</b>. Mi objetivo es
+          traerles mejores optimizaciones, información detallada y una experiencia cómoda sin complicaciones.</p>
+
+        <ul class="info-list">
+          <li style="display: flex; align-items: flex-start; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/892/892303.png" alt="Cohete"
+              style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+            <span data-es="<b>Descargas Directas:</b> Enlaces limpios, sin acortadores molestos."
+              data-en="<b>Direct Downloads:</b> Clean links, without annoying shorteners."
+              style="line-height: 1.4;"><b>Descargas Directas:</b> Enlaces limpios, sin acortadores molestos.</span>
+          </li>
+
+          <li style="display: flex; align-items: flex-start; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/541/541070.png" alt="Celular"
+              style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+            <span
+              data-es="<b>Optimización Total:</b> Versiones adaptadas para que corran bien en celulares de todas gamas."
+              data-en="<b>Total Optimization:</b> Adapted versions to run smoothly on all mobile devices."
+              style="line-height: 1.4;"><b>Optimización Total:</b> Versiones adaptadas para que corran bien en
+              celulares de todas gamas.</span>
+          </li>
+
+          <li style="display: flex; align-items: flex-start; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/17205/17205086.png" alt="Scripts"
+              style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+            <span
+              data-es="<b>Scripts Especiales:</b> Ahora puedes descargar código suelto para añadir a tus propios juegos y personalizarlo a tu gusto."
+              data-en="<b>Special Scripts:</b> Now you can download custom code to add to your own games and personalize it to your liking."
+              style="line-height: 1.4;"><b>Scripts Especiales:</b> Ahora puedes descargar código suelto para añadir a
+              tus propios juegos y personalizarlo a tu gusto.</span>
+          </li>
+
+          <li style="display: flex; align-items: flex-start; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/3097/3097841.png" alt="Comunidad"
+              style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+            <span data-es="<b>Comunidad Activa:</b> Chatea, da likes y comparte tu opinión."
+              data-en="<b>Active Community:</b> Chat, leave likes, and share your opinion."
+              style="line-height: 1.4;"><b>Comunidad Activa:</b> Chatea, da likes y comparte tu opinión.</span>
+          </li>
+
+          <li style="display: flex; align-items: flex-start; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/128/1265/1265905.png" alt="Campana"
+              style="width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; border-radius: 0 !important; transform: translateY(2px);">
+            <span data-es="<b>Actualizaciones Constantes:</b> Si tienes dudas o ideas puedes contactarme. ¡Animo!"
+              data-en="<b>Constant Updates:</b> If you have questions or ideas, you can contact me. Keep it up!"
+              style="line-height: 1.4;"><b>Actualizaciones Constantes:</b> Si tienes dudas o ideas puedes contactarme.
+              ¡Animo!</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="info-card"
+        style="margin-top: 20px; border: 1px solid var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 255, 0.15);">
+        <h2 class="glow"
+          style="font-size: 20px; margin-top: 0; color: var(--neon-pink); text-shadow: 0 0 5px var(--neon-pink);"
+          data-es="Spritesheet Generator FNF" data-en="Spritesheet Generator FNF">Spritesheet Generator FNF</h2>
+        <p style="color: #ddd; font-size: 14.5px; line-height: 1.5; margin-bottom: 20px;"
+          data-es="¡Ahora ya está disponible una nueva página para hacer y editar <b>spritesheets</b> directamente en móviles!"
+          data-en="A new page is now available to make and edit <b>spritesheets</b> directly on mobile!">¡Ahora ya
+          está disponible una nueva página para hacer y editar <b>spritesheets</b> directamente en móviles!</p>
+        <button class="btn"
+          style="width: 100%; font-size: 15px; padding: 12px; background: rgba(255, 0, 255, 0.15); border: 1px solid var(--neon-pink); color: #fff; text-shadow: 0 0 5px var(--neon-pink); font-weight: bold; transition: all 0.3s ease;"
+          onclick="window.open('https://lalocf2.github.io/spritesheet-generator-fnf/', '_blank')"
+          data-es="Ir a la Página 🚀" data-en="Go to Page 🚀">Ir a la Página 🚀</button>
+      </div>
+
+    </section>
+
+
+
+
+
+
+
+
+
+    <section id="contact" class="section">
+      <h2 class="glow" data-es="Redes Sociales" data-en="Social Media">Redes Sociales</h2>
+      <div class="social-grid">
+        <a class="social-item" href="https://youtube.com/@lalocf_1" target="_blank"><img
+            src="assets/icons/youtube.webp"><span class="btn" style="width: 100%;">YouTube</span></a>
+        <a class="social-item" href="https://t.me/lalo_cf_mods" target="_blank"><img
+            src="assets/icons/telegram.webp"><span class="btn" style="width: 100%;">Telegram</span></a>
+        <a class="social-item" href="https://instagram.com/lalo_cf1" target="_blank"><img
+            src="assets/icons/instagram.webp"><span class="btn" style="width: 100%;">Instagram</span></a>
+        <a class="social-item" href="https://tiktok.com/@lalo_cf" target="_blank"><img
+            src="assets/icons/tiktok.webp"><span class="btn" style="width: 100%;">TikTok</span></a>
+        <a class="social-item" href="mailto:ec331325@gmail.com?subject=Soporte%20Técnico%20FNF" target="_blank"><img
+            src="assets/icons/gmail.webp"><span class="btn" style="width: 100%;">Gmail</span></a>
+      </div>
+
+      </a>
+  </div>
+
+  <div class="ticket-soporte-box settings-card">
+    <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: var(--neon-blue);">Mensaje Rápido</h3>
+    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Escríbeme tu duda o sugerencia.</p>
+
+    <textarea id="txt-mensaje-telegram" placeholder="Escribe..."
+      style="width: 100%; height: 80px; border-radius: 16px; background: var(--card-bg); color: var(--text); border: none; box-shadow: var(--neu-shadow-inset); padding: 10px; font-family: inherit; resize: none; margin-bottom: 10px; box-sizing: border-box; outline: none;"></textarea>
+
+    <button id="btn-enviar-telegram" onclick="enviarMensajeAlBot()" class="btn" style="width: 100%;">
+      🚀 Enviar Mensaje
+    </button>
+  </div>
+  </div>
+
+  </section>
+
+  <footer style="margin-top:40px; margin-bottom: 20px; text-align:center; color:white;">
+    © <span id="year"></span> LaloCF | V7.0.0 <br>
+    <div class="visitor-counter"><span data-es="Visitas:" data-en="Visitors:">Visitas:</span> <span>Habilitado</span>
+    </div>
+  </footer>
+  </div>
+
+  <div id="apk-popup" class="popup">
+    <div class="popup-content">
+      <span class="popup-close" onclick="closeApkInfo()">✖</span>
+      <div class="popup-scroll-body">
+        <img id="apk-img">
+        <h2 id="apk-title"></h2>
+        <p id="apk-desc"></p>
+        <h3 id="apk-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
+        <div id="rating-container-apk"
+          style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
+          <span onclick="window.rateAppItem('apk', 1)">★</span><span
+            onclick="window.rateAppItem('apk', 2)">★</span><span onclick="window.rateAppItem('apk', 3)">★</span><span
+            onclick="window.rateAppItem('apk', 4)">★</span><span onclick="window.rateAppItem('apk', 5)">★</span>
+          <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="apk-rating-text"
+              data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
+        </div>
+        <div id="apk-downloads"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mod-popup" class="popup">
+    <div class="popup-content">
+      <span class="popup-close" onclick="closeModInfo()">✖</span>
+      <div class="popup-scroll-body">
+        <img id="popup-img">
+        <h2 id="popup-title"></h2>
+        <p id="popup-desc"></p>
+        <h3 id="popup-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
+        <div id="rating-container-mod"
+          style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
+          <span onclick="window.rateAppItem('mod', 1)">★</span><span
+            onclick="window.rateAppItem('mod', 2)">★</span><span onclick="window.rateAppItem('mod', 3)">★</span><span
+            onclick="window.rateAppItem('mod', 4)">★</span><span onclick="window.rateAppItem('mod', 5)">★</span>
+          <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="mod-rating-text"
+              data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
+        </div>
+        <div id="popup-downloads"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="script-popup" class="popup">
+    <div class="popup-content">
+      <span class="popup-close" onclick="closeScriptInfo()">✖</span>
+      <div class="popup-scroll-body">
+        <div class="carousel-container">
+          <button class="carousel-btn carousel-prev" onclick="prevScriptImage()">&#10094;</button>
+          <img id="script-img" class="carousel-image" src="">
+          <button class="carousel-btn carousel-next" onclick="nextScriptImage()">&#10095;</button>
+        </div>
+        <h2 id="script-title"></h2>
+        <p id="script-desc"></p>
+        <h3 id="script-version" style="color:var(--neon-blue); margin-bottom:10px;"></h3>
+        <div id="rating-container-script"
+          style="margin-bottom: 15px; text-align: center; color: gold; font-size: 24px; letter-spacing: 5px; cursor: pointer;">
+          <span onclick="window.rateAppItem('script', 1)">★</span><span
+            onclick="window.rateAppItem('script', 2)">★</span><span
+            onclick="window.rateAppItem('script', 3)">★</span><span
+            onclick="window.rateAppItem('script', 4)">★</span><span onclick="window.rateAppItem('script', 5)">★</span>
+          <div style="font-size: 12px; color: #aaa; letter-spacing: 0; margin-top: 5px;"><span id="script-rating-text"
+              data-es="Califica este contenido" data-en="Rate this">Califica este contenido</span></div>
+        </div>
+        <div id="script-downloads"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mod-comments-popup" class="popup">
+    <div class="popup-content" style="max-width: 600px;">
+      <span class="popup-close" onclick="closeModComments()">✖</span>
+      <div class="popup-scroll-body">
+        <h2 id="mc-title" class="glow" style="font-size: 20px; text-align: center; margin-top: 0;">Comentarios</h2>
+        <div
+          style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--neon-blue);">
+          <div style="display:flex; gap:12px;">
+            <div id="mc-myAvatar" class="yt-avatar" style="background:#555">?</div>
+            <div style="flex:1">
+              <div id="mc-displayMyName"
+                style="color:var(--neon-blue); font-weight:bold; margin-bottom:10px; font-size:14px;" data-es=\"Usuario:
+                Cargando...\" data-en=\"User: Loading...\">Usuario: Cargando...</div>
+              <textarea id="mc-commentText" placeholder="Escribe tu opinión o reporte de bug..." maxlength="100"
+                style="width:100%; background:none; border:none; border-bottom:1px solid #555; color:white; padding:8px 0; outline:none; resize:none;"></textarea>
+              <div style="text-align:right; font-size:11px; color:var(--neon-blue); margin-top:5px;"><span
+                  id="mc-charCounter">0</span> / 100</div>
+              <div style="display:flex; justify-content: flex-end; gap:10px; margin-top:10px;">
+                <button class="btn" style="background:#444" onclick="document.getElementById('mc-commentText').value=''"
+                  data-es="Cancelar" data-en="Cancel">Cancelar</button>
+                <button class="btn" onclick="addModComment()" data-es="Comentar" data-en="Post">Comentar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="mc-commentList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js" defer></script>
+  <script src="js/init.js"></script>
+
+  <script>
+    const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
+    document.documentElement.style.setProperty('--neon-blue', savedColor);
+
+    const applyCustomFont = (base64Font) => {
+      const newStyle = document.createElement('style');
+      newStyle.appendChild(document.createTextNode(`@font-face { font-family: 'CustomUserFont'; src: url('${base64Font}') format('truetype'); } body, h1, h2, h3, p, span, div, button, input, textarea, a { font-family: 'CustomUserFont', sans-serif !important; }`));
+      document.head.appendChild(newStyle);
+    };
+    const savedFont = localStorage.getItem('customUserFont');
+    if (savedFont) applyCustomFont(savedFont);
+
+    if (localStorage.getItem('lowEndMode') === 'true') document.body.classList.add('low-end-mode');
+
+    const savedPillInset = localStorage.getItem('pillInset') || '5';
+    document.documentElement.style.setProperty('--pill-inset', savedPillInset + 'px');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.currentLang = localStorage.getItem('fnf_lang') || 'es';
+
+      window.triggerVibrate = (ms = 15) => {
+        if (localStorage.getItem('hapticMode') === 'true' && navigator.vibrate) {
+          navigator.vibrate(ms);
+        }
+      };
+
+      document.body.addEventListener('click', (e) => {
+        if (e.target.closest('.btn, .nav-item, .settings-btn, .lang-btn, .profile-btn, .filter-btn, .admin-led-btn, .admin-pin-btn')) {
+          window.triggerVibrate(15);
+        }
+      });
+
+      window.toggleLanguage = () => {
+        window.currentLang = window.currentLang === 'es' ? 'en' : 'es';
+        localStorage.setItem('fnf_lang', window.currentLang);
+        applyLanguage();
+      };
+
+      function applyLanguage() {
+        const elements = document.querySelectorAll('[data-es][data-en]');
+        elements.forEach(el => {
+          el.classList.add('lang-fade');
+          setTimeout(() => { el.innerHTML = el.getAttribute(`data-${window.currentLang}`); el.classList.remove('lang-fade'); }, 150);
+        });
+        const btn = document.getElementById('langBtn');
+        if (btn) btn.innerHTML = window.currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
+      }
+      applyLanguage();
+
+      setTimeout(() => {
+        const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+        if (profile) {
+          if (document.getElementById('editProfileName') && profile.name) document.getElementById('editProfileName').value = profile.name;
+          if (document.getElementById('editProfileAvatar') && profile.avatar) {
+            document.getElementById('editProfileAvatar').value = profile.avatar;
+            document.getElementById('profile-avatar-preview').src = profile.avatar;
+          }
+        }
+      }, 500);
+
+      const avInput = document.getElementById('editProfileAvatar');
+      if (avInput) avInput.addEventListener('input', (e) => { document.getElementById('profile-avatar-preview').src = e.target.value.trim() || "https://via.placeholder.com/80/555/fff?text=?"; });
+
+      window.saveProfileChanges = () => {
+        let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
+        const name = document.getElementById('editProfileName').value.trim();
+        if (name.length < 3) return alert(window.currentLang === 'es' ? "Nombre muy corto." : "Name too short.");
+        profile.name = name; profile.avatar = document.getElementById('editProfileAvatar').value.trim();
+        localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
+        document.getElementById('profile-popup').classList.remove('show');
+        alert(window.currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
+      };
+
+      const themeSelector = document.getElementById('themeSelector');
+      if (themeSelector) {
+        themeSelector.value = savedTheme;
+        themeSelector.addEventListener('change', (e) => {
+          const selected = e.target.value;
+          localStorage.setItem('activeTheme', selected);
+          location.reload();
+        });
+      }
+
+      const colorInput = document.getElementById('themeColor');
+      if (colorInput) {
+        colorInput.value = savedColor;
+        colorInput.addEventListener('input', (e) => {
+          document.documentElement.style.setProperty('--neon-blue', e.target.value);
+          localStorage.setItem('customThemeColor', e.target.value);
+        });
+      }
+
+      const lowEndToggle = document.getElementById('lowEndToggle');
+      if (lowEndToggle) {
+        lowEndToggle.checked = localStorage.getItem('lowEndMode') === 'true';
+        lowEndToggle.addEventListener('change', (e) => {
+          localStorage.setItem('lowEndMode', e.target.checked);
+          e.target.checked ? document.body.classList.add('low-end-mode') : document.body.classList.remove('low-end-mode');
+          window.triggerVibrate(30);
+        });
+      }
+
+      const hapticToggle = document.getElementById('hapticToggle');
+      if (hapticToggle) {
+        hapticToggle.checked = localStorage.getItem('hapticMode') === 'true';
+        hapticToggle.addEventListener('change', (e) => {
+          localStorage.setItem('hapticMode', e.target.checked);
+          if (e.target.checked) navigator.vibrate(50);
+        });
+      }
+
+      const pillSlider = document.getElementById('pillSizeSlider');
+      if (pillSlider) {
+        pillSlider.value = savedPillInset;
+        pillSlider.addEventListener('input', (e) => {
+          document.documentElement.style.setProperty('--pill-inset', e.target.value + 'px');
+          localStorage.setItem('pillInset', e.target.value);
+        });
+      }
+
+      const fontInput = document.getElementById('customFontUpload');
+      if (fontInput) {
+        fontInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file && file.name.toLowerCase().endsWith('.ttf')) {
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+              try { localStorage.setItem('customUserFont', evt.target.result); applyCustomFont(evt.target.result); }
+              catch (err) { applyCustomFont(evt.target.result); alert("Archivo muy pesado para guardarse permanente, pero se aplicará ahora."); }
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      window.resetSettings = () => {
+        if (confirm("¿Restablecer diseño predeterminado?")) {
+          localStorage.removeItem('customThemeColor'); localStorage.removeItem('customUserFont');
+          localStorage.removeItem('lowEndMode'); localStorage.removeItem('hapticMode'); localStorage.removeItem('pillInset');
+          location.reload();
+        }
+      };
+
+      const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
+      const isIOS = isTrueIOS || forceIOS;
+
+      window.toggleForceIOS = () => {
+        const current = localStorage.getItem('force_ios_ui') === 'true';
+        localStorage.setItem('force_ios_ui', !current);
+        location.reload();
+      };
+
+      const initAdminBtn = setInterval(() => {
+        const btn = document.getElementById('btnForceIOS');
+        if (btn) { btn.innerHTML = forceIOS ? 'Quitar Interfaz iOS' : 'Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
+      }, 500);
+
+      setTimeout(() => {
+        const nav = document.querySelector('.bottom-nav');
+        const pill = document.getElementById('ios-pill');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        if (isIOS && nav && pill) {
+          nav.classList.add('is-ios');
+          if (navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
+
+          const snapPill = (index) => {
+            pill.classList.remove('is-dragging');
+            const target = navItems[index];
+            if (target) {
+              pill.style.width = `${target.offsetWidth}px`;
+              pill.style.transform = `translateX(${target.offsetLeft}px) scale(1)`;
+              window.triggerVibrate(25);
+            }
+          };
+
+          const originalSelectSection = window.selectSection;
+          window.selectSection = (sec, el) => {
+            if (originalSelectSection) originalSelectSection(sec, el);
+            const index = Array.from(navItems).indexOf(el);
+            if (index !== -1) snapPill(index);
+          };
+
+          let isDraggingPill = false;
+
+          const moveDrag = (e) => {
+            if (!e.touches && !isDraggingPill) return;
+            if (e.touches) e.preventDefault();
+            isDraggingPill = true;
+            pill.classList.add('is-dragging');
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const navRect = nav.getBoundingClientRect();
+            let xPos = Math.max(0, Math.min(clientX - navRect.left, navRect.width));
+
+            const itemWidth = navRect.width / navItems.length;
+            let visualX = Math.max(0, Math.min(xPos - (itemWidth / 2), navRect.width - itemWidth));
+            pill.style.transform = `translateX(${visualX}px) scaleX(1.15) scaleY(0.85)`;
+
+            const hoveredIndex = Math.floor(xPos / itemWidth);
+            const targetItem = navItems[hoveredIndex];
+
+            if (targetItem && !targetItem.classList.contains('active')) {
+              const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
+              document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+              document.getElementById(sectionId).classList.add('active');
+              document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+              targetItem.classList.add('active');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              window.triggerVibrate(15);
+            }
+          };
+
+          const endDrag = () => {
+            if (isDraggingPill) {
+              isDraggingPill = false;
+              const activeItem = document.querySelector('.nav-item.active');
+              const index = Array.from(navItems).indexOf(activeItem);
+              if (index !== -1) snapPill(index);
+            }
+          };
+
+          nav.addEventListener('touchmove', moveDrag, { passive: false });
+          nav.addEventListener('touchend', endDrag);
+          nav.addEventListener('mousedown', () => isDraggingPill = true);
+          nav.addEventListener('mousemove', moveDrag);
+          nav.addEventListener('mouseup', endDrag);
+          nav.addEventListener('mouseleave', endDrag);
+
+          window.addEventListener('resize', () => {
+            const activeItem = document.querySelector('.nav-item.active');
+            const index = Array.from(navItems).indexOf(activeItem);
+            if (index !== -1) snapPill(index);
+          });
+        }
+      }, 1000);
+    });
+  </script>
+
+  <div id="secret-unlocked-popup">
+    <h2 style="color: #ff00ea; text-shadow: 0 0 15px #ff00ea; font-size: 28px; margin-bottom: 10px;">¡BINGO! 🎉</h2>
+    <p style="color: white; font-size: 16px; margin-bottom: 20px;">
+      La descarga del Mod fue Desbloqueado. <br>
+      ¡Disfruta del Mod!.
+    </p>
+    <button onclick="document.getElementById('secret-unlocked-popup').classList.remove('show')"
+      style="background: #ff00ea; color: white; border: none; padding: 10px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 0 10px #ff00ea;">
+      ¡Ir a Descargarlo!
+    </button>
+  </div>
+
+  <div id="share-modal" class="popup">
+    <div class="popup-content"
+      style="border: 2px solid #fff; text-align: center; max-width: 300px; padding: 25px; position: relative;">
+
+      <span onclick="document.getElementById('share-modal').classList.remove('show')"
+        style="position: absolute; top: 10px; right: 15px; font-size: 28px; cursor: pointer; color: white;">&times;</span>
+
+      <h3 style="color: #00eaff; margin-bottom: 20px;">¡Comparte esto!</h3>
+
+      <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
+        <button class="social-btn btn-whatsapp" onclick="enviarWhatsApp()">
+          <img src="https://cdn-icons-png.flaticon.com/128/3670/3670051.png" style="width: 25px;">
+        </button>
+
+        <button class="social-btn btn-telegram" onclick="enviarTelegram()">
+          <img src="https://cdn-icons-png.flaticon.com/128/2111/2111646.png" style="width: 25px;">
+        </button>
+
+        <button class="social-btn btn-copiar" onclick="copiarEnlace()">
+          <img src="https://cdn-icons-png.flaticon.com/128/1621/1621635.png" style="width: 20px;">
+        </button>
+      </div>
+
+      <p id="mensaje-copiado" style="color: #00ff41; font-size: 12px; display: none; font-weight: bold;">¡Enlace
+        copiado al portapapeles!</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCG2_mOYbHLkCB5xcaker4mR7KJZVt0zRM",
+      authDomain: "fnf-mobile-lalocf.firebaseapp.com",
+      databaseURL: "https://fnf-mobile-lalocf-default-rtdb.firebaseio.com",
+      projectId: "fnf-mobile-lalocf",
+      storageBucket: "fnf-mobile-lalocf.firebasestorage.app",
+      messagingSenderId: "407243542354",
+      appId: "1:407243542354:web:0da0f6a80db245f6bb348b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let notificacionesBD = [];
+    let idNotificacionesLeidas = JSON.parse(localStorage.getItem('notifsLeidas')) || [];
+
+    function comprobarSiEsAdmin() {
+      try {
+        if (window.isSuperUser) return true;
+        const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
+        if (userProfile && (userProfile.key === "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2" || (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf'))) {
+          return true;
+        }
+      } catch (error) {
+      }
+      return false;
+    }
+
+    window.toggleNotificaciones = function () {
+      const panel = document.getElementById('panel-notificaciones');
+      const adminArea = document.getElementById('admin-notif-area');
+
+      panel.classList.toggle('hidden');
+
+      if (!panel.classList.contains('hidden')) {
+        window.marcarComoLeidas();
+
+        const esAdmin = comprobarSiEsAdmin();
+
+        if (esAdmin) {
+          adminArea.style.display = 'block';
+        } else {
+
+          adminArea.style.display = 'none';
+        }
+      }
+    }
+
+    window.actualizarCampana = function () {
+      const badge = document.getElementById('badge-contador');
+      let noLeidas = 0;
+
+      notificacionesBD.forEach(notif => {
+        if (!idNotificacionesLeidas.includes(notif.id)) {
+          noLeidas++;
+        }
+      });
+
+      if (noLeidas > 0) {
+        badge.style.display = 'block';
+        badge.innerText = noLeidas > 9 ? '9+' : noLeidas;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    window.marcarComoLeidas = function () {
+      notificacionesBD.forEach(notif => {
+        if (!idNotificacionesLeidas.includes(notif.id)) {
+          idNotificacionesLeidas.push(notif.id);
+        }
+      });
+      localStorage.setItem('notifsLeidas', JSON.stringify(idNotificacionesLeidas));
+      window.actualizarCampana();
+    }
+
+    window.renderizarNotificaciones = function () {
+      const lista = document.getElementById('lista-notificaciones');
+      lista.innerHTML = '';
+
+      const esAdmin = comprobarSiEsAdmin();
+
+      if (notificacionesBD.length === 0) {
+        lista.innerHTML = '<p style="text-align:center; color:#888; font-size:13px; margin-top: 20px;">No hay notificaciones nuevas.</p>';
+        return;
+      }
+
+      const notifsOrdenadas = [...notificacionesBD].reverse();
+
+      notifsOrdenadas.forEach(notif => {
+        const div = document.createElement('div');
+        div.className = 'notif-item';
+
+        let htmlContent = `
+        <p class="notif-text">${notif.texto}</p>
+        <p class="notif-date">${notif.fecha}</p>
+      `;
+
+        if (esAdmin) {
+          htmlContent += `
+          <div class="admin-controls">
+            <button class="btn-editar" onclick="editarNotificacion('${notif.id}')">Editar</button>
+            <button class="btn-borrar" onclick="borrarNotificacion('${notif.id}')">Borrar</button>
+          </div>
+        `;
+        }
+
+        div.innerHTML = htmlContent;
+        lista.appendChild(div);
+      });
+
+      window.actualizarCampana();
+    }
+
+    window.enviarNotificacion = function () {
+      if (!comprobarSiEsAdmin()) return;
+
+      const txtArea = document.getElementById('txt-nueva-notif');
+      const texto = txtArea.value.trim();
+      if (texto === '') return;
+
+      const fechaActual = new Date().toLocaleString('es-MX', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      const idUnico = 'notif_' + Date.now();
+      set(ref(db, 'notificaciones/' + idUnico), {
+        id: idUnico, texto: texto, fecha: fechaActual
+      });
+      txtArea.value = '';
+    }
+
+    window.borrarNotificacion = function (id) {
+      if (!comprobarSiEsAdmin()) return;
+      if (confirm('¿Seguro que quieres borrar esta notificación?')) {
+        remove(ref(db, 'notificaciones/' + id));
+      }
+    }
+
+    window.editarNotificacion = function (id) {
+      if (!comprobarSiEsAdmin()) return;
+      const notifActual = notificacionesBD.find(n => n.id === id);
+      const nuevoTexto = prompt('Edita tu notificación:', notifActual.texto);
+      if (nuevoTexto !== null && nuevoTexto.trim() !== '') {
+        update(ref(db, 'notificaciones/' + id), { texto: nuevoTexto });
+      }
+    }
+
+    const notificacionesRef = ref(db, 'notificaciones');
+    onValue(notificacionesRef, (snapshot) => {
+      notificacionesBD = [];
+      snapshot.forEach((childSnapshot) => {
+        notificacionesBD.push(childSnapshot.val());
+      });
+      window.renderizarNotificaciones();
+    });
+  </script>
+
+  <div id="modal-novedades-ios" class="popup"
+    style="z-index: 99999; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+
+    <div class="popup-content"
+      style="background: rgba(25, 25, 30, 0.75); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); width: 85%; max-width: 340px; padding: 20px; margin: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column;">
+
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 15px;">
+        <h3 style="margin: 0; color: white; font-size: 16px; font-weight: 600;">📋 Novedades de Versión</h3>
+        <span onclick="cerrarModalNovedades()"
+          style="background: rgba(255,255,255,0.1); color: #a1a1aa; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s;">✖</span>
+      </div>
+
+      <div id="texto-novedades-ios"
+        style="color: #e5e5ea; font-size: 13px; line-height: 1.5; white-space: pre-line; text-align: left; max-height: 40vh; overflow-y: auto; padding-right: 5px;">
+      </div>
+
+    </div>
+  </div>
+
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/modules/auth.js"></script>
+  <script src="js/modules/profile.js"></script>
+</body>
+
+</html>

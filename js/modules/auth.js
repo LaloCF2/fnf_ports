@@ -1,8 +1,8 @@
-import { db, auth, googleProvider } from './firebase-config.js';
-import { ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+window.fbReady.then((FB) => {
+const { db, auth, googleProvider, ref, get, set, update, remove, push, onValue, runTransaction, signInWithPopup, onAuthStateChanged, signOut, APP_VERSION } = FB;
+const { store, t, esc, icon, vibrate, openPopup, closePopup, toast, getProfile, profileName, profilePhoto, stringToColor } = FNF;
 
-export let usuarioActualFirebase = null;
+let usuarioActualFirebase = null;
 window.usuarioActualFirebase = null;
 
 onAuthStateChanged(auth, async (user) => {
@@ -69,6 +69,8 @@ onAuthStateChanged(auth, async (user) => {
       if (overlayAuth) overlayAuth.style.display = 'flex';
     }
   }
+
+  if (window.updateHeaderUser) window.updateHeaderUser();
 });
 
 window.iniciarSesionConGoogle = async function () {
@@ -85,8 +87,6 @@ window.iniciarSesionConGoogle = async function () {
 
   if (btn) {
     btn.innerHTML = "⏳ Accediendo a Google...";
-    btn.style.background = "#ffea00";
-    btn.style.color = "#000";
   }
 
   try {
@@ -95,8 +95,6 @@ window.iniciarSesionConGoogle = async function () {
     console.error("Error al iniciar sesión:", error);
     if (btn) {
       btn.innerHTML = "❌ Falló, intenta de nuevo";
-      btn.style.background = "#ff003c";
-      btn.style.color = "#fff";
     }
 
     if (error.code === 'auth/popup-closed-by-user') {
@@ -107,12 +105,6 @@ window.iniciarSesionConGoogle = async function () {
   }
 };
 
-window.entrarComoInvitado = function () {
-  localStorage.setItem('fnf_guest_mode', 'true');
-  const overlayAuth = document.getElementById('auth-overlay');
-  if (overlayAuth) overlayAuth.style.display = 'none';
-};
-
 window.cerrarSesion = function () {
   signOut(auth).then(() => {
     localStorage.removeItem('fnf_guest_mode');
@@ -120,3 +112,4 @@ window.cerrarSesion = function () {
     location.reload();
   });
 };
+}).catch(err => console.error(err));

@@ -1,5 +1,6 @@
 window.MOD_DATA = {
   mod97_7: {
+    gama: "low", engine: "P-Slice Engine", ram: "2GB RAM", size: "12.17 MB",
     img: "assets/images/mods/bum.webp",
     title: "Bumfuzzle11",
     desc: "Friday Night Funkin' FNF' Bumfuzzle11 Port P-Slice Engine Optimizado Para (Pc/Android).",
@@ -9,6 +10,7 @@ window.MOD_DATA = {
     ]
   },
   mod97_8: {
+    gama: "low", engine: "CodeName Engine", ram: "3-4GB RAM", size: "106.2 MB",
     img: "assets/images/mods/Block.webp",
     title: "Vs Herobrine Blocky Myths V2",
     desc: "Friday Night Funkin' FNF' Vs Herobrine Blocky Myths V2 Port CodeName Engine Optimizado Para (Pc/Android).",
@@ -18,6 +20,7 @@ window.MOD_DATA = {
     ]
   },
   mod97_9: {
+    gama: "low", engine: "Psych Engine", ram: "1-2GB RAM", size: "12.64 MB",
     img: "assets/images/mods/Duet.webp",
     title: "Due Debts BF Mix",
     desc: "Friday Night Funkin' FNF' Due Debts BF Mix Port Opt Psych Engine Optimizado Para (Pc/Android).",
@@ -27,6 +30,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_0: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "16.78 MB",
     img: "assets/images/mods/Wish.webp",
     title: "The Wish Super Funkin' Galaxy",
     desc: "Friday Night Funkin' FNF' The Wish Super Funkin' Galaxy Port Opt Psych Engine Optimizado Para (Pc/Android).",
@@ -37,6 +41,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_1: {
+    gama: "low", engine: "Psych Engine", ram: "2-3GB RAM", size: "17.11 MB",
     img: "assets/images/mods/M-E.webp",
     title: "Milf Erect",
     desc: "Friday Night Funkin' FNF' Milf Erect Port Opt Psych Engine Optimizado Para (Pc/Android).",
@@ -47,6 +52,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_2: {
+    gama: "low", engine: "Psych Engine", ram: "2-3GB RAM", size: "31.16 MB Opt / 100.02 MB",
     img: "assets/images/mods/Elias.webp",
     title: "EliasFunkin Revival",
     desc: "Friday Night Funkin' FNF' EliasFunkin Revival Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
@@ -61,6 +67,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_3: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "6.66 MB",
     img: "assets/images/mods/GG.webp",
     title: "GameOverse",
     desc: "Friday Night Funkin' FNF' GameOverse Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
@@ -72,6 +79,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_4: {
+    gama: "low", engine: "P-Slice Engine", ram: "2GB RAM", size: "16.15 MB",
     img: "assets/images/mods/pibby.webp",
     title: "Pibby Rescript",
     desc: "Friday Night Funkin' FNF' Pibby Rescript Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
@@ -83,6 +91,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_5: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "56.30 MB",
     img: "assets/images/mods/fruit.webp",
     title: "FruitNinja V1.5",
     desc: "Friday Night Funkin' FNF' FruitNinja V1.5 Port Opt Psych Engine Optimizado Para (Pc/Android/iOS).",
@@ -93,6 +102,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_6: {
+    gama: "low", engine: "Psych Engine", ram: "3GB RAM", size: "7.86 MB",
     img: "assets/images/mods/II.webp",
     title: "TKOII FanChart",
     desc: "Friday Night Funkin' FNF' TKOII FanChart Port Opt Psych Engine Optimizado Para (Pc/Android).",
@@ -103,6 +113,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_7: {
+    gama: "low", engine: "Psych Engine", ram: "4GB RAM", size: "303 MB",
     img: "assets/images/mods/FromTheTop.webp",
     title: "From The Top!",
     desc: "Friday Night Funkin' FNF' From The Top! Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 303.00MB",
@@ -114,6 +125,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_8: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "79.87 MB",
     img: "assets/images/webp/logopsychengine.webp",
     title: "Naomi FanCharts",
     desc: "Friday Night Funkin' FNF' Naomi FanCharts Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 79.87MB",
@@ -123,6 +135,7 @@ window.MOD_DATA = {
     ]
   },
   mod98_9: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "72.87 MB",
     img: "assets/images/mods/bot.webp",
     title: "Vs BotFriend",
     desc: "Friday Night Funkin' FNF' Vs Botfriend Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nPeso del Archivo: 72.87MB",
@@ -133,6 +146,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_0: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "18.88 MB",
     img: "assets/images/mods/star2026.webp",
     title: "Stargazer (2026) FanChart",
     desc: "Friday Night Funkin' FNF' Stargazer (2026) FanChart Port Psych Engine Optimizado Para (Pc/Android/iOS).\n\nEste solo esta optimizado y para que fuera compatible con iOS.\n\nPeso del archivo: 18.88MB",
@@ -143,6 +157,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_1: {
+    gama: "mid", engine: "Psych Engine Opt", ram: "3-4GB RAM", size: "620 MB",
     img: "assets/images/mods/wii.webp",
     title: "VS Matt V3",
     desc: "Friday Night Funkin' FNF' Vs Matt V3 Port Psych Engine Optimizado Para (Pc/Android).\n\nEste puede tener errores en la base de Psych Online, todas las demas son compatibles correctamente.\n\nSe recomienda usar la base de Psych Engine optimizada para mejor jugabilidad.",
@@ -153,6 +168,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_2: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "16.16 MB",
     img: "assets/images/mods/play.webp",
     title: "Child's Play Pico Mix",
     desc: "Friday Night Funkin' FNF' Child's Play Pico Mix & Wip Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
@@ -164,6 +180,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_3: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "26.6 MB",
     img: "assets/images/mods/fate.webp",
     title: "TaintedFate",
     desc: "Friday Night Funkin' FNF' TaintedFate Mod Port Psych Engine Optimizado Para (Pc/Android/iOS)",
@@ -174,6 +191,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_4: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "? MB",
     img: "assets/images/mods/logojeffy.jpeg",
     title: "VS Jeffy V3 (BABY BF VS BABY PICO)",
     desc: "Friday Night Funkin' FNF' Vs Jeffy V3 Port Psych Engine Optimizado Para (Pc/Android).",
@@ -181,6 +199,7 @@ window.MOD_DATA = {
     downloads: [{ name: "Descarga", link: "assets/zip/VS Jeffy V3 (BABY BF VS BABY PICO).zip" }]
   },
   mod99_5: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "? MB", hidden: true,
     img: "assets/images/mods/logonusky.jpeg",
     title: "VS Nusky",
     desc: "Friday Night Funkin' FNF' Vs Nusky Mod Psych Engine Optimizado Para (Pc/Android).",
@@ -191,6 +210,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_6: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "29.95 MB",
     img: "assets/images/mods/chritmas.jpeg",
     title: "Cocoa Noimix",
     desc: "Friday Night Funkin' FNF' Cocoa Noimix Port Psych Engine Optimizado Para (Pc/Android/iOS).",
@@ -203,6 +223,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_7: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "26.13 MB",
     img: "assets/images/mods/metal.png",
     title: "Vs Metal Pipe V2",
     desc: "Friday Night Funkin' FNF' Vs Metal Pipe V2 Port Psych Engine Optimizado Para (Pc/Android) y en especial iOS.",
@@ -213,6 +234,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_8: {
+    gama: "low", engine: "Psych Engine", ram: "1GB RAM", size: "11.38 MB",
     img: "assets/images/mods/Girl.png",
     title: "Rolling Girl",
     desc: "Friday Night Funkin' FNF' Rolling Girl Port Psych Engine Optimizado Para (Pc/Android/iOS).",
@@ -223,6 +245,7 @@ window.MOD_DATA = {
     ]
   },
   mod99_9: {
+    gama: "mid", engine: "Psych Engine", ram: "3-4GB RAM", size: "711.12 MB",
     img: "assets/images/mods/tales.webp",
     title: "Herobrine Reborn Tales",
     desc: "Friday Night Funkin' FNF' Herobrine Reborn Tales Port Psych Engine Para (Pc/Android/iOS).",
@@ -232,6 +255,7 @@ window.MOD_DATA = {
     ]
   },
   mod100: {
+    gama: "low", engine: "Psych Engine", ram: "2GB RAM", size: "? MB",
     img: "assets/images/mods/odd.webp",
     title: "Vs. TheOdd1sOut ONESHOT",
     desc: "Friday Night Funkin' FNF' Vs. TheOdd1sOut ONESHOT Port Psych Engine Para (Pc/Android/iOS).",

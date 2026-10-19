@@ -1,7 +1,6 @@
 $path = "index.html"
 $content = [System.IO.File]::ReadAllText($path, [System.Text.Encoding]::UTF8)
 
-# Matches <div class="mod-card" data-gama="low" id="card-mod98_5">
 $pattern = '(?s)<div\s+class="mod-card"\s+data-gama="([^"]+)"([^>]*)>'
 
 $evaluator = [System.Text.RegularExpressions.MatchEvaluator] {
@@ -9,7 +8,6 @@ $evaluator = [System.Text.RegularExpressions.MatchEvaluator] {
     $gama = $m.Groups[1].Value
     $rest = $m.Groups[2].Value
     
-    # Si ya tiene data-engine, no lo tocamos
     if ($rest -match "data-engine") {
         return $m.Value
     }

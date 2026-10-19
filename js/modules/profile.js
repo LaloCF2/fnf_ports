@@ -1,180 +1,133 @@
-import { db } from './firebase-config.js';
-import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+window.fbReady.then((FB) => {
+const { db, auth, googleProvider, ref, get, set, update, remove, push, onValue, runTransaction, signInWithPopup, onAuthStateChanged, signOut, APP_VERSION } = FB;
+const { store, t, esc, icon, vibrate, openPopup, closePopup, toast, getProfile, profileName, profilePhoto, stringToColor } = FNF;
+
+const DEFAULT_AVATAR = 'https://cdn-icons-png.flaticon.com/128/149/149071.png';
+const FRAMES = [
+  ['var(--accent)', '💜 Acento del tema'],
+  ['#ff4fa8', '🌸 Rosa'],
+  ['#f7b500', '⭐ Dorado VIP'],
+  ['#19b56b', '🟢 Verde'],
+  ['#ef3e6d', '🔴 Fuego'],
+  ['#3d8bff', '🔵 Azul']
+];
 
 window.abrirPerfil = async function () {
-  const contenedor = document.getElementById('perfil-dinamico-contenido');
-  if (!contenedor) return;
-
-  document.getElementById('profile-popup').classList.add('show');
+  const box = document.getElementById('perfil-dinamico-contenido');
+  openPopup('profile-popup');
 
   if (!window.usuarioActualFirebase) {
-    contenedor.innerHTML = `
-      <img src="https://cdn-icons-png.flaticon.com/128/149/149071.png" style="width: 80px; filter: grayscale(1); margin-bottom: 10px;">
-      <p style="color: #ccc; margin-bottom: 20px; font-size: 13px;">Estás en modo invitado. Inicia sesión para guardar likes, comentar y descargar.</p>
-      <button onclick="iniciarSesionConGoogle()" class="btn" style="width: 100%; background: white; color: black; font-weight: bold; padding: 12px; border-radius: 12px; border: none; cursor: pointer;">
-        <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" style="width: 18px; vertical-align: middle; margin-right: 5px;">
-        Conectar con Google
-      </button>
-    `;
+    box.innerHTML = `
+      <img src="${DEFAULT_AVATAR}" class="profile-avatar" style="filter:grayscale(1);border-color:var(--line)" alt="">
+      <p class="popup-sub">${t('Estás en modo invitado. Inicia sesión para guardar likes, comentar y descargar.', 'You are a guest. Sign in to like, comment and download.')}</p>
+      <button onclick="iniciarSesionConGoogle()" class="btn btn-google btn-block">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" style="width:20px">
+        ${t('Conectar con Google', 'Connect with Google')}
+      </button>`;
     return;
   }
 
-  contenedor.innerHTML = `<p style="color: #aaa; font-size: 14px;">⏳ Cargando datos de perfil...</p>`;
+  box.innerHTML = `<p class="empty">${t('Cargando perfil...', 'Loading profile...')}</p>`;
+  const u = window.usuarioActualFirebase;
 
   try {
-    const snap = await get(ref(db, 'usuarios/' + window.usuarioActualFirebase.uid));
+    const snap = await get(ref(db, 'usuarios/' + u.uid));
     const datos = snap.val() || {};
 
-    const nombreUsuario = datos.nombre || window.usuarioActualFirebase.displayName || "Usuario FNF";
-    const fotoUsuario = datos.foto || window.usuarioActualFirebase.photoURL || "https://cdn-icons-png.flaticon.com/128/149/149071.png";
-    const correoUsuario = datos.correo || window.usuarioActualFirebase.email || "Sin correo";
-    
-    // Privacy mask for email
-    const [nombreCorreo, dominioCorreo] = correoUsuario.split("@");
-    const correoOculto = nombreCorreo && dominioCorreo 
-      ? nombreCorreo.substring(0, 3) + "***@" + dominioCorreo 
-      : correoUsuario;
+    const nombre = datos.nombre || u.displayName || 'Usuario FNF';
+    const foto = datos.foto || u.photoURL || DEFAULT_AVATAR;
+    const correo = datos.correo || u.email || '';
+    const [user, dom] = correo.split('@');
+    const correoOculto = user && dom ? user.slice(0, 3) + '***@' + dom : correo;
 
-    const fechaRegString = datos.fechaRegistro || new Date().toISOString();
-    const fechaObj = new Date(fechaRegString);
-    const opcionesFecha = { year: 'numeric', month: 'long' };
-    const fechaFormateada = fechaObj.toLocaleDateString('es-ES', opcionesFecha);
-    const fechaFinal = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+    const fechaObj = new Date(datos.fechaRegistro || Date.now());
+    const fecha = fechaObj.toLocaleDateString(t('es-ES', 'en-US'), { year: 'numeric', month: 'long' });
+    const marco = datos.marcoAvatar && !String(datos.marcoAvatar).includes('neon') ? datos.marcoAvatar : 'var(--accent)';
+    const totalFavs = Object.keys(datos.favoritos || store.json('fnf_favorites', {})).length;
 
-    const marcoActivo = datos.marcoAvatar || "var(--neon-blue)";
-    const totalFavoritos = datos.favoritos ? Object.keys(datos.favoritos).length : 0;
+    const dias = Math.floor((Date.now() - fechaObj.getTime()) / 86400000);
+    const rango = dias > 180 ? '🥇 Leyenda FNF' : dias > 30 ? "🥈 Funkin' Gamer" : '🥉 Port-Boy (Nuevo)';
 
-    const ultimaFecha = datos.ultimaFechaCambio || 0;
-    const ahora = Date.now();
-    const diasPasados = Math.floor((ahora - ultimaFecha) / (1000 * 60 * 60 * 24));
-    
-    const diasRegistrado = Math.floor((ahora - fechaObj.getTime()) / (1000 * 60 * 60 * 24));
-    let rango = "🥉 Port-Boy (Nuevo)";
-    if (diasRegistrado > 30) rango = "🥈 Funkin' Gamer";
-    if (diasRegistrado > 180) rango = "🥇 Leyenda FNF";
+    const ultima = datos.ultimaFechaCambio || 0;
+    const diasPasados = Math.floor((Date.now() - ultima) / 86400000);
+    const bloqueado = ultima !== 0 && diasPasados < 15;
 
-    let bloqueado = "";
-    let textoBoton = "✨ Guardar Perfil";
+    box.innerHTML = `
+      <img src="${esc(foto)}" class="profile-avatar" style="border-color:${esc(marco)}" alt="">
+      <h3 style="font-size:19px">${esc(nombre)}</h3>
+      <p class="rank">${rango}</p>
 
-    if (diasPasados < 15 && ultimaFecha !== 0) {
-      const diasFaltantes = 15 - diasPasados;
-      bloqueado = "disabled";
-      textoBoton = `✨ Guardar Preferencias (Nombre bloqueado ${diasFaltantes} d)`;
-    }
-
-    contenedor.innerHTML = `
-      <div style="position: relative; display: inline-block;">
-        <img src="${fotoUsuario}" style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid ${marcoActivo}; box-shadow: 0 0 20px ${marcoActivo}; margin-bottom: 5px; object-fit: cover;">
-        <div style="position: absolute; bottom: 5px; right: 0; background: #00eaff; border-radius: 50%; width: 22px; height: 22px; border: 2px solid #141419; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px #00eaff;" title="Online">
-          <div style="width: 10px; height: 10px; background: white; border-radius: 50%;"></div>
-        </div>
+      <div class="profile-stats">
+        <div onclick="abrirFavoritos()"><strong>${totalFavs}</strong><small>${t('Favoritos', 'Favorites')}</small></div>
+        <div><strong style="font-size:14px">${esc(fecha.charAt(0).toUpperCase() + fecha.slice(1))}</strong><small>${t('Registro', 'Joined')}</small></div>
       </div>
-      
-      <h3 style="color: white; margin: 10px 0 2px 0; font-size: 20px; text-shadow: 0 0 10px rgba(255,255,255,0.2);">${nombreUsuario}</h3>
-      <p style="color: #00eaff; font-size: 13px; font-weight: bold; margin: 0 0 15px 0;">${rango}</p>
 
-      <!-- Stats Dashboard -->
-      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <div style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 5px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'" onclick="document.getElementById('profile-popup').classList.remove('show'); abrirFavoritos();">
-          <h4 style="margin: 0; font-size: 20px; color: var(--neon-yellow); text-shadow: 0 0 10px rgba(255,234,0,0.3);">${totalFavoritos}</h4>
-          <p style="margin: 3px 0 0 0; font-size: 11px; color: #aaa; font-weight: bold; text-transform: uppercase;">Favoritos</p>
-        </div>
-        <div style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 5px;">
-          <h4 style="margin: 0; font-size: 14px; color: var(--neon-pink); text-shadow: 0 0 10px rgba(255,0,200,0.3); margin-bottom: 2px; line-height: 1.2;">${fechaFinal}</h4>
-          <p style="margin: 3px 0 0 0; font-size: 11px; color: #aaa; font-weight: bold; text-transform: uppercase;">Registro</p>
-        </div>
-      </div>
-      
-      <!-- Preferencias Card -->
-      <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.05);">
-        
-        <label style="color: #bbb; font-size: 11px; font-weight: bold; text-transform: uppercase;">Tu Apodo:</label>
-        <input type="text" id="input-nuevo-apodo" value="${nombreUsuario}" ${bloqueado} class="reg-input" style="width: 100%; margin-top: 6px; margin-bottom: 12px; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
-        
-        <label style="color: #bbb; font-size: 11px; font-weight: bold; text-transform: uppercase;">Color de Marco:</label>
-        <select id="select-marco" class="reg-input" style="width: 100%; margin-top: 6px; margin-bottom: 12px; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px; outline: none; appearance: none;">
-          <option value="var(--neon-blue)" style="background: #222;" ${marcoActivo==='var(--neon-blue)'?'selected':''}>🔵 Azul Neón Clásico</option>
-          <option value="var(--neon-pink)" style="background: #222;" ${marcoActivo==='var(--neon-pink)'?'selected':''}>🌸 Rosa Neón</option>
-          <option value="var(--neon-yellow)" style="background: #222;" ${marcoActivo==='var(--neon-yellow)'?'selected':''}>⭐ Dorado VIP</option>
-          <option value="var(--neon-green)" style="background: #222;" ${marcoActivo==='var(--neon-green)'?'selected':''}>🟢 Verde Tóxico</option>
-          <option value="#ff003c" style="background: #222;" ${marcoActivo==='#ff003c'?'selected':''}>🔴 Fuego Infernal</option>
+      <div class="setting-group" style="text-align:left;padding:14px 16px">
+        <label class="label" for="input-nuevo-apodo">${t('Tu apodo', 'Nickname')}${bloqueado ? ` · 🔒 ${15 - diasPasados} d` : ''}</label>
+        <input type="text" id="input-nuevo-apodo" class="field" value="${esc(nombre)}" maxlength="24" ${bloqueado ? 'disabled' : ''} style="margin-bottom:12px">
+
+        <label class="label" for="select-marco">${t('Color de marco', 'Frame color')}</label>
+        <select id="select-marco" class="field" style="margin-bottom:12px">
+          ${FRAMES.map(([v, n]) => `<option value="${v}" ${marco === v ? 'selected' : ''}>${n}</option>`).join('')}
         </select>
 
-        <label style="color: #bbb; font-size: 11px; font-weight: bold; text-transform: uppercase;">URL de Avatar Personalizado (Opcional)</label>
-        <input type="url" id="input-nuevo-avatar" placeholder="https://..." value="${datos.foto || ''}" class="reg-input" style="width: 100%; margin-top: 6px; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 8px; font-size: 13px;">
+        <label class="label" for="input-nuevo-avatar">${t('URL de avatar (opcional)', 'Avatar URL (optional)')}</label>
+        <input type="url" id="input-nuevo-avatar" class="field" placeholder="https://..." value="${esc(datos.foto || '')}">
 
-        <button onclick="guardarNuevoApodo()" class="btn" style="width: 100%; margin-top: 15px; background: var(--neon-blue); color: black; font-weight: bold; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; box-shadow: 0 0 10px rgba(0,234,255,0.4); text-transform: uppercase; letter-spacing: 0.5px;">${textoBoton}</button>
+        <button onclick="guardarNuevoApodo()" class="btn btn-block" style="margin-top:14px">${t('Guardar perfil', 'Save profile')}</button>
       </div>
 
-      <!-- Seguridad Card -->
-      <div style="background: rgba(255,0,60,0.05); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,0,60,0.2); display: flex; align-items: center; justify-content: space-between;">
-        <div style="text-align: left;">
-          <p style="color: #fff; font-size: 13px; margin: 0; font-weight: bold;">Google Connect</p>
-          <p style="color: rgba(255,255,255,0.6); font-size: 11px; margin: 2px 0 0 0;">${correoOculto}</p>
-        </div>
-        <button onclick="cerrarSesion()" class="btn" style="background: #ff003c; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; box-shadow: 0 4px 10px rgba(255,0,60,0.3);">Salir</button>
-      </div>
-    `;
+      <div class="list-item">
+        <div class="grow"><h4>Google</h4><p>${esc(correoOculto)}</p></div>
+        <button onclick="cerrarSesion()" class="btn btn-sm btn-danger">${t('Salir', 'Sign out')}</button>
+      </div>`;
   } catch (error) {
-    console.error("Error al cargar el perfil:", error);
-    contenedor.innerHTML = `
-      <img src="${window.usuarioActualFirebase.photoURL || 'https://cdn-icons-png.flaticon.com/128/149/149071.png'}" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid #ff003c; margin-bottom: 12px; object-fit: cover;">
-      <h3 style="color: white; margin: 0 0 5px 0;">${window.usuarioActualFirebase.displayName || 'Usuario'}</h3>
-      <p style="color: #ff003c; font-size: 12px; margin-bottom: 20px;">⚠️ Hubo un pequeño retraso de seguridad al conectar con Firebase. Cierra esta ventana y ábrela de nuevo.</p>
-      <button onclick="cerrarSesion()" class="btn" style="width: 100%; background: #ff003c; color: white; border: none; padding: 11px; border-radius: 12px; font-weight: bold; cursor: pointer;">🚪 Cerrar Sesión</button>
-    `;
+    console.error('Error al cargar el perfil:', error);
+    box.innerHTML = `
+      <p class="popup-sub" style="color:var(--danger)">${t('Hubo un retraso al conectar con el servidor. Cierra y vuelve a abrir.', 'There was a delay connecting. Close and try again.')}</p>
+      <button onclick="cerrarSesion()" class="btn btn-danger btn-block">${t('Cerrar sesión', 'Sign out')}</button>`;
   }
 };
 
 window.guardarNuevoApodo = async function () {
-  const nuevoNombreInput = document.getElementById('input-nuevo-apodo');
-  const nuevoAvatarInput = document.getElementById('input-nuevo-avatar');
-  const nuevoMarcoSelect = document.getElementById('select-marco');
+  const nombreInput = document.getElementById('input-nuevo-apodo');
+  if (!nombreInput || !window.usuarioActualFirebase) return;
 
-  if (!nuevoNombreInput) return;
+  const nuevoNombre = nombreInput.value.trim();
+  const nuevoAvatar = document.getElementById('input-nuevo-avatar').value.trim();
+  const nuevoMarco = document.getElementById('select-marco').value;
 
-  const nuevoNombre = nuevoNombreInput.value.trim();
-  const nuevoAvatar = nuevoAvatarInput.value.trim();
-  const nuevoMarco = nuevoMarcoSelect ? nuevoMarcoSelect.value : "var(--neon-blue)";
+  if (nuevoNombre.length < 3) return alert(t('El apodo debe tener mínimo 3 letras.', 'Nickname must be at least 3 letters.'));
 
-  if (nuevoNombre.length < 3) return alert("El apodo debe tener mínimo 3 letras.");
+  const cambiaNombre = !nombreInput.disabled;
+  const msg = cambiaNombre
+    ? t('¿Seguro que quieres este apodo? Se bloqueará por 15 días.', 'Keep this nickname? It will be locked for 15 days.')
+    : t('¿Guardar cambios en tus preferencias?', 'Save your preferences?');
+  if (!confirm(msg)) return;
 
-  let mensajeConfirmacion = "¿Guardar cambios en tus preferencias?";
-  if (!nuevoNombreInput.disabled) {
-    mensajeConfirmacion = "¿Seguro que quieres este apodo? Se bloqueará por 15 días. (Tus otras preferencias también se guardarán).";
-  }
+  const data = { marcoAvatar: nuevoMarco };
+  if (nuevoAvatar) data.foto = nuevoAvatar;
+  if (cambiaNombre) { data.nombre = nuevoNombre; data.ultimaFechaCambio = Date.now(); data.usernameModificado = false; }
 
-  if (confirm(mensajeConfirmacion)) {
+  await update(ref(db, 'usuarios/' + window.usuarioActualFirebase.uid), data);
 
-    let updateData = {
-      marcoAvatar: nuevoMarco
-    };
-    if (nuevoAvatar) updateData.foto = nuevoAvatar;
+  const perfil = getProfile() || {};
+  if (cambiaNombre) perfil.nombre = nuevoNombre;
+  if (nuevoAvatar) perfil.foto = nuevoAvatar;
+  perfil.marcoAvatar = nuevoMarco;
+  store.setJson('fnf_user_profile', perfil);
 
-    if (!nuevoNombreInput.disabled) {
-      updateData.nombre = nuevoNombre;
-      updateData.ultimaFechaCambio = Date.now();
-      updateData.usernameModificado = false;
-    }
-
-    await update(ref(db, 'usuarios/' + window.usuarioActualFirebase.uid), updateData);
-
-    const perfilActual = JSON.parse(localStorage.getItem('fnf_user_profile')) || {};
-    if (!nuevoNombreInput.disabled) perfilActual.nombre = nuevoNombre;
-    if (nuevoAvatar) perfilActual.foto = nuevoAvatar;
-    perfilActual.marcoAvatar = nuevoMarco;
-    localStorage.setItem('fnf_user_profile', JSON.stringify(perfilActual));
-
-    alert("¡Preferencias actualizadas exitosamente!");
-    abrirPerfil();
-  }
+  window.updateHeaderUser();
+  if (window.showToast) window.showToast(t('¡Perfil actualizado!', 'Profile updated!'), 'user');
+  window.abrirPerfil();
 };
 
 window.exigirRegistro = function () {
   if (!window.usuarioActualFirebase) {
-    alert("🔒 Debes iniciar sesión con Google para usar esta función.");
+    if (window.showToast) window.showToast(t('Inicia sesión con Google para usar esta función.', 'Sign in with Google to use this.'), 'shield');
     document.getElementById('auth-overlay').style.display = 'flex';
     return true;
   }
   return false;
 };
+}).catch(err => console.error(err));

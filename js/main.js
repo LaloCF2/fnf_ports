@@ -1,2030 +1,744 @@
-import { app, db, auth, googleProvider, APP_VERSION, MI_UID_ADMIN } from './modules/firebase-config.js';
-import { ref, get, set, update, remove, push, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+// Datos en vivo con Firebase. La página ya fue pintada por boot.js.
+window.fbReady.then((FB) => {
+const { db, auth, googleProvider, ref, get, set, update, remove, push, onValue, runTransaction, signInWithPopup, onAuthStateChanged, signOut, APP_VERSION } = FB;
+const { store, t, esc, icon, vibrate, openPopup, closePopup, toast, getProfile, profileName, profilePhoto, stringToColor } = FNF;
 
-let usuarioActualFirebase = null;
-
-import './modules/auth.js';
+const isSuperUser = window.isSuperUser;
+const urlParams = new URLSearchParams(location.search);
+document.getElementById('footer-version').textContent = APP_VERSION;
+document.getElementById('update-title').textContent = t('Versión ', 'Version ') + APP_VERSION.replace(/^v/, '');
+window.refreshFavoritesUI();
 
 // ==========================================
+// DATOS EN VIVO (Firebase)
+// ==========================================
+const live = { downloads: {}, likes: {}, leds: {}, comments: {}, pinned: {}, newMods: {}, broken: {}, ratings: {}, verified: {}, recomendados: {} };
+window.brokenLinksData = live.broken;
 
-import './modules/profile.js';
+const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
 
-//=======================================
+function paintDownloads() { Object.keys(live.downloads).forEach(id => setText('dl-' + id, live.downloads[id])); }
+function paintLikes() { Object.keys(live.likes).forEach(id => setText('count-' + id, live.likes[id])); syncLikeButtons(); }
 
-let isSuperUser = false;
-window.isSuperUser = false;
-const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-if (userProfile && (
-  userProfile.key === MI_UID_ADMIN ||
-  userProfile.key === "Mtsvw6hM8FYu19Sk3yPnbDLtfOf2" ||
-  (userProfile.nombre && userProfile.nombre.toLowerCase() === 'lalocf')
-)) {
-  isSuperUser = true;
-  window.isSuperUser = true;
-  document.body.classList.add('is-admin');
-}
-
-const urlParams = new URLSearchParams(window.location.search);
-const secretUid = urlParams.get('set_admin');
-
-if (secretUid) {
-  const newProfile = {
-    key: secretUid,
-    name: "Admin LaloCF",
-    verified: true
-  };
-  localStorage.setItem('fnf_user_profile', JSON.stringify(newProfile));
-
-  window.history.replaceState({}, document.title, window.location.pathname);
-
-  alert("🛠️ ¡Privilegios de Administrador Activados en este dispositivo a travez de un enlace compartido!");
-  window.location.reload();
-}
-
-let verifiedUsers = {};
-let downloadCounts = {};
-
-onValue(ref(db, 'downloads'), (snap) => {
-  downloadCounts = snap.val() || {};
-  Object.keys(downloadCounts).forEach(id => {
-    const el = document.getElementById('dl-' + id);
-    if (el) el.innerText = downloadCounts[id];
-  });
-});
-
-onValue(ref(db, 'verified_users'), (snap) => {
-  verifiedUsers = snap.val() || {};
-});
-
-import './modules/downloads.js';
-
-// -------------------------------------------
-
-window.toggleGreenLed = async (id, event) => {
-  event.stopPropagation();
-  if (!isSuperUser) return;
-  const ledRef = ref(db, `updates_led/${id}`);
-  const snap = await get(ledRef);
-  if (snap.exists()) {
-    await set(ledRef, null);
-  } else {
-    await set(ledRef, true);
-  }
-};
-
-onValue(ref(db, 'updates_led'), (snap) => {
-  const leds = snap.val() || {};
-  document.querySelectorAll('.led-green').forEach(el => el.style.display = 'none');
-  Object.keys(leds).forEach(id => {
-    const el = document.getElementById(`led-green-${id}`);
+function paintLeds() {
+  document.querySelectorAll('.led-green').forEach(el => { el.style.display = 'none'; });
+  document.querySelectorAll('.admin-led-btn').forEach(btn => { btn.textContent = '🟢 Act. LED'; });
+  Object.keys(live.leds).forEach(id => {
+    const el = document.getElementById('led-green-' + id);
     if (el) el.style.display = 'inline-block';
-    const btn = document.getElementById(`btn-led-${id}`);
-    if (btn) btn.innerText = '⭕ Quitar LED';
+    const btn = document.getElementById('btn-led-' + id);
+    if (btn) btn.textContent = '⭕ Quitar LED';
   });
-  document.querySelectorAll('.admin-led-btn').forEach(btn => {
-    const id = btn.id.replace('btn-led-', '');
-    if (!leds[id]) btn.innerText = '🟢 Act. LED';
-  });
-});
+}
 
-onValue(ref(db, 'last_comment_time'), (snap) => {
-  const times = snap.val() || {};
-  document.querySelectorAll('.led-yellow').forEach(el => el.style.display = 'none');
-  Object.keys(times).forEach(id => {
-    const lastComment = times[id];
-    const lastSeen = localStorage.getItem(`seen_comments_${id}`) || 0;
-    if (lastComment > lastSeen) {
-      const el = document.getElementById(`led-yellow-${id}`);
+function paintCommentLeds() {
+  document.querySelectorAll('.led-yellow').forEach(el => { el.style.display = 'none'; });
+  Object.keys(live.comments).forEach(id => {
+    if (live.comments[id] > Number(store.get(`seen_comments_${id}`, 0))) {
+      const el = document.getElementById('led-yellow-' + id);
       if (el) el.style.display = 'inline-block';
     }
   });
-});
+}
 
-window.toggleModPin = async (modId, event) => {
-  event.stopPropagation();
-  if (!isSuperUser) return;
-  const pinRef = ref(db, `pinned_mods/${modId}`);
-  const snap = await get(pinRef);
-  if (snap.exists()) {
-    await set(pinRef, null);
-  } else {
-    await set(pinRef, true);
-  }
-};
-
-onValue(ref(db, 'pinned_mods'), (snap) => {
-  const pinned = snap.val() || {};
+function paintPinned() {
   const container = document.getElementById('modsContainer');
-  const cards = Array.from(container.querySelectorAll('.mod-card:not(.coming-soon-card)'));
-
+  const cards = [...container.querySelectorAll('.mod-card')];
   cards.forEach(card => {
-    const modId = card.id.replace('card-', '');
+    const pinned = !!live.pinned[card.dataset.id];
+    card.classList.toggle('pinned-mod', pinned);
     const btn = card.querySelector('.admin-pin-btn');
-    if (pinned[modId]) {
-      card.classList.add('pinned-mod');
-      if (btn) btn.innerText = '❌ Desfijar';
-    } else {
-      card.classList.remove('pinned-mod');
-      if (btn) btn.innerText = '📌 Fijar';
-    }
+    if (btn) btn.textContent = pinned ? '❌ Desfijar' : '📌 Fijar';
   });
+  cards.sort((a, b) => (live.pinned[b.dataset.id] ? 1 : 0) - (live.pinned[a.dataset.id] ? 1 : 0))
+    .forEach(card => container.appendChild(card));
+}
 
-  cards.sort((a, b) => {
-    const aId = a.id.replace('card-', '');
-    const bId = b.id.replace('card-', '');
-    const aPinned = pinned[aId] ? 1 : 0;
-    const bPinned = pinned[bId] ? 1 : 0;
-    return bPinned - aPinned;
+function paintFlags() {
+  document.querySelectorAll('.item-card').forEach(card => {
+    card.classList.toggle('is-new-mod', live.newMods[card.id] === true);
+    card.classList.toggle('is-broken-mod', !!live.broken[card.dataset.id]);
   });
+}
 
-  cards.forEach(card => container.appendChild(card));
+function paintRecomendados() {
+  document.querySelectorAll('.script-card').forEach(card => {
+    const media = card.querySelector('.media-badges');
+    let badge = media.querySelector('.badge-top');
+    if (live.recomendados[card.dataset.id]) {
+      if (!badge) media.insertAdjacentHTML('afterbegin', '<span class="pill-badge badge-top">🔥 TOP</span>');
+    } else if (badge) badge.remove();
+  });
+}
+
+function repaintLiveData() {
+  paintDownloads(); paintLikes(); paintLeds(); paintCommentLeds(); paintPinned(); paintFlags(); paintRecomendados();
+}
+window.repaintLiveData = repaintLiveData;
+
+onValue(ref(db, 'downloads'), s => { live.downloads = s.val() || {}; paintDownloads(); });
+onValue(ref(db, 'likes'), s => { live.likes = s.val() || {}; paintLikes(); });
+onValue(ref(db, 'updates_led'), s => { live.leds = s.val() || {}; paintLeds(); });
+onValue(ref(db, 'last_comment_time'), s => { live.comments = s.val() || {}; paintCommentLeds(); });
+onValue(ref(db, 'pinned_mods'), s => { live.pinned = s.val() || {}; paintPinned(); });
+onValue(ref(db, 'new_mods_status'), s => { live.newMods = s.val() || {}; paintFlags(); });
+onValue(ref(db, 'broken_links'), s => { live.broken = s.val() || {}; window.brokenLinksData = live.broken; paintFlags(); });
+onValue(ref(db, 'verified_users'), s => { live.verified = s.val() || {}; });
+onValue(ref(db, 'scripts_recomendados'), s => { live.recomendados = s.val() || {}; paintRecomendados(); });
+onValue(ref(db, 'ratings'), s => {
+  live.ratings = s.val() || {};
+  if (window.currentItemRatingId) window.loadItemRating(window.currentItemRatingId);
 });
 
-window.sendGlobalNotification = async () => {
-  const text = document.getElementById('globalNotifText').value.trim();
-  if (!text) return alert("Escribe un mensaje primero.");
-
-  await set(ref(db, 'notifications/latest'), {
-    message: text,
-    timestamp: Date.now(),
-    id: Math.random().toString(36).substr(2, 9)
-  });
-
-  document.getElementById('globalNotifText').value = '';
-  document.getElementById('admin-tools-popup').classList.remove('show');
-};
-
-window.showToast = (msg) => {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerHTML = `<span style="font-size:20px;">🔔</span> <span>${msg}</span>`;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.classList.add('hide');
-    setTimeout(() => toast.remove(), 500);
-  }, 6000);
-};
-
-onValue(ref(db, 'notifications/latest'), (snap) => {
-  const data = snap.val();
-  if (!data) return;
-
-  const lastSeen = localStorage.getItem('last_notif_id');
-  const isRecent = (Date.now() - data.timestamp) < (24 * 60 * 60 * 1000);
-
-  if (lastSeen !== data.id && isRecent) {
-    window.showToast(data.message);
-    localStorage.setItem('last_notif_id', data.id);
-  }
+onValue(ref(db, '.info/connected'), (snap) => {
+  const on = snap.val() === true;
+  document.getElementById('statusDot').classList.toggle('online', on);
+  setText('statusText', on ? t('Servidor activo', 'Server online') : t('Desconectado', 'Offline'));
 });
 
-let personalNotifListener = null;
-window.listenToPersonalNotifications = (uid) => {
-  if (personalNotifListener) return;
-
-  const userNotifRef = ref(db, `user_notifications/${uid}`);
-  personalNotifListener = onValue(userNotifRef, (snap) => {
-    const data = snap.val();
-    if (!data) return;
-
-    const lastSeen = localStorage.getItem(`last_personal_notif_${uid}`);
-    if (lastSeen !== data.id) {
-      alert("🔔 Notificación sobre tu pedido:\n\n" + data.message);
-      localStorage.setItem(`last_personal_notif_${uid}`, data.id);
-    }
-  });
-};
-
-let currentModCommentsId = null;
-let modCommentsListener = null;
-
-window.openModComments = (id, title) => {
-  if (exigirRegistro()) return;
-  currentModCommentsId = id;
-  document.getElementById("mc-title").innerText = "Comentarios: " + title;
-
-  localStorage.setItem(`seen_comments_${id}`, Date.now());
-  const yellowLed = document.getElementById(`led-yellow-${id}`);
-  if (yellowLed) yellowLed.style.display = 'none';
-
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if (!user) {
-    document.getElementById('register-popup').classList.add('show');
-    return;
-  }
-
-  const display = document.getElementById('mc-displayMyName');
-  const nombreUsuario = user.nombre || user.name || "Usuario";
-  const fotoUsuario = user.foto || user.avatar || "";
-
-  display.innerText = "Comentando como: " + nombreUsuario;
-  if (nombreUsuario.toLowerCase() === 'lalocf') display.classList.add('admin-name');
-
-  const avatar = document.getElementById('mc-myAvatar');
-  if (fotoUsuario) {
-    avatar.innerHTML = `<img src="${fotoUsuario}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-    avatar.style.background = 'transparent';
-  } else {
-    avatar.innerHTML = nombreUsuario.charAt(0).toUpperCase();
-    avatar.style.background = stringToColor(nombreUsuario);
-  }
-
-  document.getElementById("mod-comments-popup").classList.add("show");
-
-  if (modCommentsListener) modCommentsListener();
-
-  const commentsRef = ref(db, `mod_comments/${id}`);
-  modCommentsListener = onValue(commentsRef, (snapshot) => {
-    const list = document.getElementById('mc-commentList');
-    list.innerHTML = '';
-    const data = snapshot.val();
-    const myProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-    if (data) {
-      let commentsArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-
-      commentsArray.sort((a, b) => {
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        return b.id.localeCompare(a.id);
-      });
-
-      commentsArray.forEach(c => {
-        const userName = c.user || "Usuario";
-        const isLalo = userName.toLowerCase() === 'lalocf';
-        const isVerified = verifiedUsers[c.ownerKey] || isLalo;
-        const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
-        const activeClass = myLikedComments[c.id] ? 'active' : '';
-
-        const pinClass = c.isPinned ? 'pinned' : '';
-        const pinBadge = c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : '';
-        const verifyBadge = isVerified ? '<span class="verified-icon">☑️</span>' : '';
-
-        let adminBtns = '';
-        if (isSuperUser) {
-          adminBtns = `
-             <span style="color:gold; cursor:pointer" onclick="togglePinModComment('${c.id}', ${c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</span> • 
-             <span style="color:red; cursor:pointer" onclick="deleteModComment('${c.id}')">Eliminar</span>
-           `;
-        } else if (myProfile && c.ownerKey === myProfile.key) {
-          adminBtns = `<span style="color:red; cursor:pointer" onclick="deleteModComment('${c.id}')">Eliminar</span>`;
-        }
-
-        const avatarContent = c.avatar
-          ? `<img src="${c.avatar}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
-          : userName.charAt(0).toUpperCase();
-
-        const div = document.createElement('div');
-        div.className = `yt-comment-container ${pinClass}`;
-        div.innerHTML = `
-          <div class="yt-avatar" style="background:${c.avatar ? 'transparent' : stringToColor(c.user)}">${avatarContent}</div>
-          <div class="yt-content">
-            ${pinBadge}
-            <div class="yt-header">
-              <span class="yt-name ${isLalo ? 'admin-name' : ''}" onclick="openBanPanel('${c.ownerKey}', '${userName}')">
-                <a href="${c.link || '#'}" target="_blank" class="yt-name-link">${userName}</a>${verifyBadge}
-              </span>
-              <span class="yt-date">${c.date}</span>
-            </div>
-            <div class="yt-text">${c.text}</div>
-            <div class="yt-actions">
-              <span class="yt-action-btn ${activeClass}" id="btn-mclike-${c.id}" onclick="likeModComment('${c.id}')">👍 <span id="mcl-count-${c.id}">${c.likes || 0}</span></span> 
-              <span class="yt-action-btn" onclick="replyModComment('${userName}')">Responder</span>
-              ${adminBtns}
-            </div>
-          </div>`;
-        list.appendChild(div);
-      });
-    } else {
-      list.innerHTML = '<p style="text-align:center; color:#aaa; font-size:13px;">Sé el primero en comentar aquí.</p>';
-    }
-  });
-};
-
-window.closeModComments = () => {
-  document.getElementById("mod-comments-popup").classList.remove("show");
-  if (modCommentsListener) {
-    modCommentsListener();
-    modCommentsListener = null;
-  }
-};
-
-window.addModComment = async () => {
-  if (await checkBanStatus()) return;
-  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  const text = document.getElementById('mc-commentText').value.trim();
-  if (!profile) return checkUserStatus();
-  if (!text) return alert("Escribe algo...");
-
-  push(ref(db, `mod_comments/${currentModCommentsId}`), {
-    ownerKey: profile.key,
-    user: profile.nombre || profile.name || "Usuario",
-    link: profile.link || "#",
-    avatar: profile.foto || profile.avatar || "",
-    text,
-    date: new Date().toLocaleString(),
-    likes: 0,
-    isPinned: false
-  });
-
-  set(ref(db, `last_comment_time/${currentModCommentsId}`), Date.now());
-  document.getElementById('mc-commentText').value = '';
-};
-
-window.likeModComment = async (commentId) => {
-  if (await checkBanStatus()) return;
-
-  if (!usuarioActualFirebase) {
-    alert("🔒 Debes iniciar sesión con Google para dar Like a los comentarios.");
-    document.getElementById('auth-overlay').style.display = 'flex';
-    return;
-  }
-
-  const userKey = usuarioActualFirebase.uid;
-
-  const myLikedComments = JSON.parse(localStorage.getItem('my_liked_mod_comments') || '{}');
-  const likeRef = ref(db, `mod_comments/${currentModCommentsId}/${commentId}/userLikes/${userKey}`);
-  const snap = await get(likeRef);
-
-  if (snap.exists()) {
-    await set(likeRef, null);
-    runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 1) - 1);
-    delete myLikedComments[commentId];
-  } else {
-    await set(likeRef, true);
-    runTransaction(ref(db, `mod_comments/${currentModCommentsId}/${commentId}/likes`), (c) => (c || 0) + 1);
-    myLikedComments[commentId] = true;
-  }
-  localStorage.setItem('my_liked_mod_comments', JSON.stringify(myLikedComments));
-};
-
-window.deleteModComment = (id) => {
-  if (!usuarioActualFirebase) return alert("❌ Como Administrador, primero debes INICIAR SESIÓN con Google para tener permisos de base de datos y poder borrar.");
-  if (confirm("¿Borrar comentario?")) remove(ref(db, `mod_comments/${currentModCommentsId}/${id}`));
-};
-window.togglePinModComment = (cId, currentState) => update(ref(db, `mod_comments/${currentModCommentsId}/${cId}`), { isPinned: !currentState });
-window.replyModComment = (name) => { const txt = document.getElementById('mc-commentText'); txt.value = `@${name} `; txt.focus(); };
-
-document.getElementById('mc-commentText').addEventListener('input', function () { document.getElementById('mc-charCounter').innerText = this.value.length; });
-
-window.toggleVerify = (userKey) => { if (confirm("¿Dar insignia de verificado?")) { update(ref(db, `verified_users`), { [userKey]: true }); } };
-
-onValue(ref(db, ".info/connected"), (snap) => {
-  if (snap.val() === true) {
-    document.getElementById("statusDot").classList.add("online");
-    document.getElementById("statusText").innerText = "Servidor: Activo";
-    document.getElementById("statusText").style.color = "#00ff41";
-  } else {
-    document.getElementById("statusDot").classList.remove("online");
-    document.getElementById("statusText").innerText = "Servidor: Desconectado";
-    document.getElementById("statusText").style.color = "#aaa";
-  }
-});
-
-import './modules/ui-theme.js';
 // ==========================================
-
-let tiempoEsperaBusqueda;
-
-window.filterContent = () => {
-  clearTimeout(tiempoEsperaBusqueda);
-
-  tiempoEsperaBusqueda = setTimeout(() => {
-
-    const search = document.getElementById('globalSearch').value.toLowerCase();
-    const items = document.querySelectorAll('.mod-card');
-    const apks = document.querySelectorAll('.apk-card');
-
-    items.forEach(item => {
-      if (item.classList.contains('coming-soon-card')) return;
-      const title = item.querySelector('h3').innerText.toLowerCase();
-      const itemGama = item.getAttribute('data-gama') || 'mid';
-      const tags = (item.getAttribute('data-tags') || '').toLowerCase();
-      const matchesSearch = title.includes(search) || tags.includes(search);
-      const matchesFilter = typeof currentFilter !== 'undefined' ? (currentFilter === 'all' || itemGama === currentFilter) : true;
-      item.style.display = (matchesSearch && matchesFilter) ? "block" : "none";
-    });
-
-    apks.forEach(apk => {
-      const title = apk.querySelector('h3').innerText.toLowerCase();
-      apk.style.display = title.includes(search) ? "block" : "none";
-    });
-
-  }, 300);
+// ACCIONES DE ADMIN EN TARJETAS
+// ==========================================
+const toggleNode = async (path) => {
+  const r = ref(db, path);
+  const snap = await get(r);
+  await set(r, snap.exists() ? null : true);
 };
 
-async function checkBanStatus() {
-  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if (!profile) return false;
-  const snap = await get(ref(db, `banned_users/${profile.key}`));
-  if (snap.exists()) {
-    const banData = snap.val();
-    if (Date.now() < banData.expiresAt) {
-      const timeLeft = Math.ceil((banData.expiresAt - Date.now()) / 3600000);
-      alert(`⛔ ACCESO DENEGADO\nMotivo: ${banData.reason}\nExpira en: ${timeLeft}h`);
-      return true;
-    } else {
-      await set(ref(db, `banned_users/${profile.key}`), null);
-      return false;
-    }
+window.toggleGreenLed = (id, e) => { e && e.stopPropagation(); if (isSuperUser) toggleNode(`updates_led/${id}`); };
+window.toggleModPin = (id, e) => { e && e.stopPropagation(); if (isSuperUser) toggleNode(`pinned_mods/${id}`); };
+window.toggleNewMod = async (cardId) => {
+  if (!isSuperUser) return alert('No tienes permisos de administrador.');
+  const esNuevo = live.newMods[cardId] === true;
+  if (confirm(esNuevo ? '¿Quitar la etiqueta de NUEVO a este mod?' : '¿Marcar este mod como NUEVO?')) {
+    await set(ref(db, `new_mods_status/${cardId}`), esNuevo ? null : true);
   }
+};
+window.toggleRecomendarScript = (id) => {
+  if (!isSuperUser) return;
+  set(ref(db, 'scripts_recomendados/' + id), live.recomendados[id] ? null : true);
+};
+window.fixBrokenLink = async (id) => {
+  if (isSuperUser && confirm('🛠️ ¿Ya solucionaste el link de este mod?')) await set(ref(db, `broken_links/${id}`), null);
+};
+
+// ==========================================
+// BANEOS
+// ==========================================
+async function checkBanStatus() {
+  const p = getProfile();
+  if (!p) return false;
+  const snap = await get(ref(db, `banned_users/${p.key}`));
+  if (!snap.exists()) return false;
+  const ban = snap.val();
+  if (Date.now() < ban.expiresAt) {
+    alert(`⛔ ACCESO DENEGADO\nMotivo: ${ban.reason}\nExpira en: ${Math.ceil((ban.expiresAt - Date.now()) / 3600000)}h`);
+    return true;
+  }
+  await set(ref(db, `banned_users/${p.key}`), null);
   return false;
 }
 
 window.openBanPanel = (userKey, userName) => {
   if (!isSuperUser) return;
-  document.getElementById('ban-target-info').innerText = `Gestionando a: ${userName}`;
-  document.getElementById('ban-popup').classList.add('show');
+  document.getElementById('ban-target-info').textContent = `Gestionando a: ${userName}`;
+  openPopup('ban-popup');
   document.getElementById('confirmBanBtn').onclick = async () => {
-    const reason = document.getElementById('banReason').value || "Normas";
+    const reason = document.getElementById('banReason').value || 'Normas';
     const hours = parseInt(document.getElementById('banDuration').value) || 24;
-    await set(ref(db, `banned_users/${userKey}`), { userName, reason, expiresAt: Date.now() + (hours * 3600000) });
-    alert("Usuario baneado.");
-    document.getElementById('ban-popup').classList.remove('show');
+    await set(ref(db, `banned_users/${userKey}`), { userName, reason, expiresAt: Date.now() + hours * 3600000 });
+    toast('Usuario baneado.', 'shield');
+    closePopup('ban-popup');
   };
 };
 
-function checkUserStatus() {
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  if (!user) { document.getElementById('register-popup').classList.add('show'); }
-  else { updateCommentInterface(user); syncLikeButtons(); }
-}
-
-function updateCommentInterface(user) {
-  const display = document.getElementById('mc-displayMyName');
-  if (display) {
-    const nombreUsuario = user.nombre || user.name || "Usuario";
-    const fotoUsuario = user.foto || user.avatar || "";
-
-    display.innerText = "Comentando como: " + nombreUsuario;
-    if (nombreUsuario.toLowerCase() === 'lalocf') display.classList.add('admin-name');
-
-    const avatar = document.getElementById('mc-myAvatar');
-    if (fotoUsuario) {
-      avatar.innerHTML = `<img src="${fotoUsuario}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-      avatar.style.background = 'transparent';
-    } else {
-      avatar.innerText = nombreUsuario.charAt(0).toUpperCase();
-      avatar.style.background = stringToColor(nombreUsuario);
-    }
-  }
-}
-
-window.saveRegistration = () => {
-  const name = document.getElementById('regName').value.trim();
-  const link = document.getElementById('regLink').value.trim() || "#";
-  const avatar = document.getElementById('regAvatar').value.trim() || "";
-  if (name.length < 3) return alert("El nombre es corto, intenta agregarle mas caracteres.");
-
-  const oldProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  const key = oldProfile ? oldProfile.key : 'user_' + Math.random().toString(36).substr(2, 9);
-
-  const profile = { name, link, avatar, key };
-  localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
-  document.getElementById('register-popup').classList.remove('show');
-  location.reload();
-};
-
-let holdTimer;
-const fnfTitle = document.getElementById('fnf-title');
-const _0xd1a4 = "bGFsb2NmbW9kczE=";
-
-fnfTitle.addEventListener('mousedown', startHold);
-fnfTitle.addEventListener('mouseup', endHold);
-fnfTitle.addEventListener('touchstart', startHold);
-fnfTitle.addEventListener('touchend', endHold);
-
-function startHold() { holdTimer = setTimeout(() => { document.getElementById('admin-popup').classList.add('show'); }, 5000); }
-function endHold() { clearTimeout(holdTimer); }
-
-window.verifyAdmin = () => {
-  const input = document.getElementById('adminCode').value;
-  if (btoa(input) === _0xd1a4) {
-    localStorage.setItem('superUser', 'true');
-    alert("Modo Superusuario Activado.");
-    location.reload();
-  } else { alert("Código incorrecto."); }
-};
-
-function stringToColor(str) {
-  let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-  return `hsl(${hash % 360}, 65%, 50%)`;
+// ==========================================
+// LIKES
+// ==========================================
+function syncLikeButtons() {
+  const mine = store.json('my_liked_items', {});
+  document.querySelectorAll('.item-card .stat-btn[id^="like-"]').forEach(b => b.classList.toggle('active', !!mine[b.id.slice(5)]));
 }
 
 window.handleLike = async (id, el) => {
-
+  if (window.exigirRegistro()) return;
   if (await checkBanStatus()) return;
-
-  if (exigirRegistro()) return;
-
-  const userKey = usuarioActualFirebase.uid;
-
-  const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
-  const itemLikeRef = ref(db, `likes_registry/${id}/${userKey}`);
-  const snap = await get(itemLikeRef);
-
+  const uid = window.usuarioActualFirebase.uid;
+  const mine = store.json('my_liked_items', {});
+  const likeRef = ref(db, `likes_registry/${id}/${uid}`);
+  const snap = await get(likeRef);
   if (snap.exists()) {
-    await set(itemLikeRef, null);
-    runTransaction(ref(db, `likes/${id}`), (c) => (c || 1) - 1);
-    delete myLikedItems[id];
-    el.classList.remove('active');
+    await set(likeRef, null);
+    runTransaction(ref(db, `likes/${id}`), c => Math.max(0, (c || 1) - 1));
+    delete mine[id];
   } else {
-    await set(itemLikeRef, true);
-    runTransaction(ref(db, `likes/${id}`), (c) => (c || 0) + 1);
-    myLikedItems[id] = true;
-    el.classList.add('active');
+    await set(likeRef, true);
+    runTransaction(ref(db, `likes/${id}`), c => (c || 0) + 1);
+    mine[id] = true;
   }
-
-  localStorage.setItem('my_liked_items', JSON.stringify(myLikedItems));
+  store.setJson('my_liked_items', mine);
+  if (el) el.classList.toggle('active', !!mine[id]);
+  vibrate(20);
 };
-
-function syncLikeButtons() {
-  const myLikedItems = JSON.parse(localStorage.getItem('my_liked_items') || '{}');
-  Object.keys(myLikedItems).forEach(id => {
-    const btn = document.getElementById('like-' + id);
-    if (btn) btn.classList.add('active');
-  });
-}
-
-import './modules/data-scripts.js';
-
-let scriptImagesArray = [];
-let currentScriptImgIndex = 0;
 
 // ==========================================
-window.cargarNovedadesTXT = function (id, tipo) {
-  const modal = document.getElementById('modal-novedades-ios');
-  const cajaTexto = document.getElementById('texto-novedades-ios');
-
-  cajaTexto.innerHTML = `<div style="text-align: center; padding: 20px 0;"><span style="font-size: 24px;">⏳</span><br><br>Cargando información...</div>`;
-  modal.classList.add('show');
-
-  const rutaTXT = tipo === 'script' ? `assets/scripts/update/${id}.txt` : `assets/bases/update/${id}.txt`;
-
-  fetch(rutaTXT)
-    .then(response => {
-      if (!response.ok) throw new Error("Archivo no encontrado");
-      return response.text();
-    })
-    .then(textoLimpio => {
-      cajaTexto.innerText = textoLimpio;
-    })
-    .catch(error => {
-      console.error(error);
-      const idioma = localStorage.getItem('idioma_guardado') || 'es';
-      const msjError = idioma === 'en' ? "No update logs found." : "No hay novedades registradas para esta versión aún.";
-
-      cajaTexto.innerHTML = `<div style="text-align: center; color: #ff453a; padding: 10px 0;">${msjError}</div>`;
-    });
-};
-
-window.cerrarModalNovedades = function () {
-  document.getElementById('modal-novedades-ios').classList.remove('show');
-};
-
-//===================================
-
-
-
-import './modules/data-mods.js';
-import './modules/data-apks.js';
-import './modules/auth.js';
-import './modules/profile.js';
-import './modules/favorites.js';
-
-
-
-onValue(ref(db, 'likes'), (s) => { const d = s.val() || {}; Object.keys(d).forEach(k => { if (document.getElementById('count-' + k)) document.getElementById('count-' + k).innerText = d[k]; }); });
-
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-});
-
-window.closeUpdatePopup = () => {
-  document.getElementById('update-popup').classList.remove('show');
-  localStorage.setItem('lastVersionSeen', APP_VERSION);
-
-  if (deferredPrompt) {
-    document.getElementById('install-popup').classList.add('show');
-  } else {
-    checkUserStatus();
-  }
-};
-
-window.installApp = async () => {
-  document.getElementById('install-popup').classList.remove('show');
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  }
-  checkUserStatus();
-};
-
-window.dismissInstall = () => {
-  document.getElementById('install-popup').classList.remove('show');
-  checkUserStatus();
-};
-
-window.onload = () => {
-  document.getElementById("year").textContent = new Date().getFullYear();
-  if (localStorage.getItem('lastVersionSeen') !== APP_VERSION) document.getElementById('update-popup').classList.add('show');
-  else checkUserStatus();
-};
-
-let currentLang = localStorage.getItem('fnf_lang') || 'es';
-
-window.toggleLanguage = () => {
-  currentLang = currentLang === 'es' ? 'en' : 'es';
-  localStorage.setItem('fnf_lang', currentLang);
-  applyLanguage();
-};
-
-function applyLanguage() {
-  const elements = document.querySelectorAll('[data-es][data-en]');
-  elements.forEach(el => {
-    el.classList.add('lang-fade');
-    setTimeout(() => {
-      el.innerHTML = el.getAttribute(`data-${currentLang}`);
-      el.classList.remove('lang-fade');
-    }, 150);
-  });
-  const btn = document.getElementById('langBtn');
-  if (btn) btn.innerHTML = currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
-}
-
-const initV4 = setInterval(() => {
-  if (document.getElementById('langBtn')) {
-    clearInterval(initV4);
-    applyLanguage();
-
-    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-    if (profile) {
-      const nameInput = document.getElementById('editProfileName');
-      const avatarInput = document.getElementById('editProfileAvatar');
-      const preview = document.getElementById('profile-avatar-preview');
-
-      if (nameInput && profile.name) nameInput.value = profile.name;
-      if (avatarInput && profile.avatar) {
-        avatarInput.value = profile.avatar;
-        if (preview) preview.src = profile.avatar;
-      }
-    }
-
-    const avatarInput = document.getElementById('editProfileAvatar');
-    if (avatarInput) {
-      avatarInput.addEventListener('input', (e) => {
-        const url = e.target.value.trim();
-        const preview = document.getElementById('profile-avatar-preview');
-        if (preview) {
-          preview.src = url ? url : "https://via.placeholder.com/80/555/fff?text=?";
-        }
-      });
-    }
-  }
-}, 500);
-
-window.saveProfileChanges = () => {
-  let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
-
-  const name = document.getElementById('editProfileName').value.trim();
-  const avatar = document.getElementById('editProfileAvatar').value.trim();
-
-  if (name.length < 3) return alert(currentLang === 'es' ? "El nombre es corto, intenta agregarle mas caracteres." : "The name is too short, try adding more characters.");
-
-  profile.name = name;
-  profile.avatar = avatar;
-  localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
-
-  document.getElementById('profile-popup').classList.remove('show');
-
-  if (typeof window.showToast === 'function') {
-    window.showToast(currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
-  } else {
-    alert(currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
-  }
-};
-
-window.currentItemRatingId = null;
-
-setTimeout(() => {
-  if (window.openModInfo) {
-    const origOpenModInfo = window.openModInfo;
-    window.openModInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.loadItemRating(id, 'mod');
-      origOpenModInfo(id);
-    };
-  }
-  if (window.openApkInfo) {
-    const origOpenApkInfo = window.openApkInfo;
-    window.openApkInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.loadItemRating(id, 'apk');
-      origOpenApkInfo(id);
-    };
-  }
-  if (window.openScriptInfo) {
-    const origOpenScriptInfo = window.openScriptInfo;
-    window.openScriptInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.loadItemRating(id, 'script');
-      origOpenScriptInfo(id);
-    };
-  }
-}, 1000);
-
+// COMENTARIOS
 // ==========================================
+let currentCommentsId = null;
+let commentsUnsub = null;
+const safeUrl = (u) => /^https?:\/\//i.test(u || '') ? u : '#';
 
-let globalRatings = {};
-window.currentItemRatingId = null;
-window.currentItemType = null;
+window.openModComments = (id, title) => {
+  if (window.exigirRegistro()) return;
+  currentCommentsId = id;
+  document.getElementById('mc-title').textContent = t('Comentarios: ', 'Comments: ') + title;
 
-onValue(ref(db, 'ratings'), (snap) => {
-  globalRatings = snap.val() || {};
+  store.set(`seen_comments_${id}`, Date.now());
+  const led = document.getElementById('led-yellow-' + id);
+  if (led) led.style.display = 'none';
 
-  if (window.currentItemRatingId && window.currentItemType) {
-    window.loadItemRating(window.currentItemRatingId, window.currentItemType);
-  }
-});
+  const user = getProfile();
+  const nombre = profileName(user);
+  const foto = profilePhoto(user);
+  const display = document.getElementById('mc-displayMyName');
+  display.textContent = t('Comentando como: ', 'Commenting as: ') + nombre;
+  display.classList.toggle('admin-name', nombre.toLowerCase() === 'lalocf');
 
-setTimeout(() => {
-  if (window.openModInfo) {
-    const origModInfo = window.openModInfo;
-    window.openModInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.currentItemType = 'mod';
-      origModInfo(id);
-      window.loadItemRating(id, 'mod');
-    };
-  }
-  if (window.openApkInfo) {
-    const origApkInfo = window.openApkInfo;
-    window.openApkInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.currentItemType = 'apk';
-      origApkInfo(id);
-      window.loadItemRating(id, 'apk');
-    };
-  }
-  if (window.openScriptInfo) {
-    const origScriptInfo = window.openScriptInfo;
-    window.openScriptInfo = (id) => {
-      window.currentItemRatingId = id;
-      window.currentItemType = 'script';
-      origScriptInfo(id);
-      window.loadItemRating(id, 'script');
-    };
-  }
+  const avatar = document.getElementById('mc-myAvatar');
+  avatar.innerHTML = foto ? `<img src="${esc(foto)}" alt="">` : esc(nombre.charAt(0).toUpperCase());
+  avatar.style.background = foto ? 'transparent' : stringToColor(nombre);
 
-  // ==========================================
+  openPopup('mod-comments-popup');
 
-  let modRequestsListener = null;
-
-  window.loadModRequests = () => {
-    const reqRef = ref(db, 'mod_requests');
-    if (!modRequestsListener) {
-      modRequestsListener = onValue(reqRef, (snapshot) => {
-        const container = document.getElementById('requests-list');
-        container.innerHTML = '';
-        const data = snapshot.val();
-
-        if (!data) {
-          container.innerHTML = '<p style="color:#aaa; font-size:13px; text-align:center;">No hay solicitudes aún. ¡Sé el primero!</p>';
-          return;
-        }
-
-        const requests = Object.keys(data).map(k => ({ id: k, ...data[k] }));
-        requests.sort((a, b) => (b.votes || 0) - (a.votes || 0));
-
-        requests.forEach(req => {
-          const statusColors = {
-            'Pendiente': '#f2ff00ff',
-            'Seleccionado': '#0091ffff',
-            'En Progreso': '#ff8800ff',
-            'No Seleccionado': '#ff0000ee',
-            'Completado': '#00ff22ff'
-          };
-          const badgeColor = statusColors[req.status || 'Pendiente'] || '#ffaa00';
-
-          let adminBtns = '';
-          if (isSuperUser) {
-            const isProgress = req.status === 'En Progreso';
-            adminBtns = `
-              <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #444; display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
-                <button onclick="updateRequestStatus('${req.id}', 'Seleccionado')" style="flex:1; background:#0091ff; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">Seleccionado</button>
-                <button onclick="updateRequestStatus('${req.id}', 'No Seleccionado')" style="flex:1; background:#ff0040; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">No Sel.</button>
-                <button onclick="updateRequestStatus('${req.id}', 'En Progreso')" style="flex:1; background:#ff8800; color:white; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">En Progreso</button>
-                <button onclick="updateRequestStatus('${req.id}', 'Completado')" style="flex:1; background:#00ff22; color:black; border:none; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer; padding:8px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.1s;">Completado</button>
-                <button onclick="deleteRequest('${req.id}')" style="background:#444; color:white; border:none; border-radius:6px; font-size:10px; cursor:pointer; padding:8px;">🗑️</button>
-              </div>
-              ${isProgress ? `
-                <div style="margin-top:10px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid #ff880055;">
-                  <div style="display:flex; justify-content:space-between; font-size:11px; color:#ccc; margin-bottom:8px; font-weight:bold;">
-                    <span>Progreso del Port</span>
-                    <span id="prog-val-${req.id}" style="color:#ff8800;">${req.progress || 0}%</span>
-                  </div>
-                  <div style="display:flex; gap:10px; align-items:center;">
-                    <input type="range" min="0" max="100" value="${req.progress || 0}" style="flex:1; cursor:pointer; accent-color:#ff8800;" 
-                      oninput="document.getElementById('prog-val-${req.id}').innerText = this.value + '%'"
-                      onchange="updateRequestProgress('${req.id}', this.value)">
-                  </div>
-                </div>
-              ` : ''}
-            `;
-          }
-
-          const myVoted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
-          const isVoted = myVoted[req.id];
-
-          const div = document.createElement('div');
-          div.style.cssText = 'background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); text-align:left;';
-          div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div style="flex:1; padding-right:10px;">
-                <span style="font-size:10px; color:${badgeColor}; border:1px solid ${badgeColor}; padding:2px 5px; border-radius:10px; text-transform:uppercase; font-weight:bold;">${req.status || 'Pendiente'}</span>
-                <h4 style="margin:8px 0 5px 0; color:white; font-size:15px;">${req.modName}</h4>
-                ${req.link ? `<a href="${req.link}" target="_blank" style="color:var(--neon-pink); font-size:11px; text-decoration:underline;">Ver Link Original</a>` : ''}
-                <p style="color:#888; font-size:10px; margin-top:5px;">Pedido por: <b style="color:#aaa;">${req.user || 'Anónimo'}</b></p>
-                ${req.status === 'En Progreso' ? `
-                  <div style="margin-top:10px; background:rgba(255,255,255,0.05); border-radius:10px; height:6px; overflow:hidden; position:relative;">
-                    <div style="position:absolute; top:0; left:0; height:100%; width:${req.progress || 0}%; background:linear-gradient(90deg, #ff8800, #ffaa00); box-shadow:0 0 5px #ff8800; transition:width 0.3s ease;"></div>
-                  </div>
-                  <div style="text-align:right; font-size:9px; color:#ff8800; margin-top:2px; font-weight:bold;">${req.progress || 0}%</div>
-                ` : ''}
-              </div>
-              <div style="text-align:center;">
-                <button onclick="voteRequest('${req.id}')" class="btn" style="background:${isVoted ? 'var(--neon-green)' : '#333'}; color:${isVoted ? 'black' : 'white'}; border:none; border-radius:8px; width:45px; height:40px; font-weight:bold; cursor:pointer; font-size:14px; box-shadow: 0 4px 0 ${isVoted ? '#00cc00' : '#111'}; transform:${isVoted ? 'translateY(2px)' : 'none'}; transition:all 0.1s;">
-                  ▲
-                </button>
-                <div style="color:var(--neon-green); font-weight:bold; font-size:16px; margin-top:8px;">${req.votes || 0}</div>
-              </div>
-            </div>
-            ${adminBtns}
-          `;
-          container.appendChild(div);
-        });
-      });
-    }
-  };
-
-  window.enviarSolicitudMod = async () => {
-    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-    if (!profile || !profile.nombre) {
-      alert("🔒 Debes iniciar sesión con Google para poder solicitar mods.");
-      if (document.getElementById('auth-overlay')) document.getElementById('auth-overlay').style.display = 'flex';
+  if (commentsUnsub) commentsUnsub();
+  commentsUnsub = onValue(ref(db, `mod_comments/${id}`), (snapshot) => {
+    const list = document.getElementById('mc-commentList');
+    const data = snapshot.val();
+    if (!data) {
+      list.innerHTML = `<p class="empty">${t('Sé el primero en comentar aquí.', 'Be the first to comment.')}</p>`;
       return;
     }
+    const me = getProfile();
+    const liked = store.json('my_liked_mod_comments', {});
+    const comments = Object.keys(data).map(k => ({ id: k, ...data[k] }))
+      .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0) || b.id.localeCompare(a.id));
 
-    const name = document.getElementById('req-mod-name').value.trim();
-    const link = document.getElementById('req-mod-link').value.trim();
-
-    if (!name) return alert("Escribe el nombre del mod que quieres pedir.");
-
-    const userKey = profile.key || 'guest';
-    const lastReqKey = 'fnf_last_req_' + userKey;
-    const lastReqTime = parseInt(localStorage.getItem(lastReqKey) || '0');
-    const daysPassed = (Date.now() - lastReqTime) / (1000 * 60 * 60 * 24);
-
-    if (lastReqTime > 0 && daysPassed < 10) {
-      const daysLeft = Math.ceil(10 - daysPassed);
-      return alert(`⏳ Solo puedes pedir un mod cada 10 días. Te faltan ${daysLeft} día(s) restantes para pedir otro mod. Esto es para evitar saturaciones.`);
-    }
-
-    const sendBtn = document.getElementById('btn-enviar-solicitud');
-    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Enviando...'; }
-
-    try {
-      const reqSnap = await get(ref(db, 'mod_requests'));
-      const reqData = reqSnap.val() || {};
-
-      let activeCount = 0;
-      Object.values(reqData).forEach(req => {
-        if (req.status !== 'Completado') activeCount++;
-      });
-
-      if (activeCount >= 5) {
-        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar Solicitud'; }
-        return alert("🛑 La lista de peticiones está llena (Máximo 5 activas). Por favor espera a que el Administrador termine los puertos pendientes. Esto es para evitar saturaciones.");
+    list.innerHTML = comments.map(c => {
+      const name = c.user || 'Usuario';
+      const jsName = esc(name.replace(/['"\\]/g, ''));
+      const isLalo = name.toLowerCase() === 'lalocf';
+      const verified = live.verified[c.ownerKey] || isLalo;
+      let actions = '';
+      if (isSuperUser) {
+        actions = `<span class="gold-link" onclick="togglePinModComment('${esc(c.id)}', ${!!c.isPinned})">${c.isPinned ? 'Desfijar' : '📌 Fijar'}</span>
+                   <span class="danger-link" onclick="deleteModComment('${esc(c.id)}')">Eliminar</span>`;
+      } else if (me && c.ownerKey === me.key) {
+        actions = `<span class="danger-link" onclick="deleteModComment('${esc(c.id)}')">${t('Eliminar', 'Delete')}</span>`;
       }
-
-      const snap = await push(ref(db, 'mod_requests'), {
-        modName: name,
-        link: link || '',
-        user: profile.nombre || "Usuario",
-        ownerKey: profile.key || 'guest',
-        votes: 1,
-        status: 'Pendiente',
-        timestamp: Date.now()
-      });
-
-      localStorage.setItem(lastReqKey, Date.now().toString());
-
-      if (usuarioActualFirebase) {
-        update(ref(db, 'usuarios/' + usuarioActualFirebase.uid), { ultimaSolicitudPort: Date.now() }).catch(() => { });
-      }
-
-      let voted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
-      voted[snap.key] = true;
-      localStorage.setItem('fnf_voted_requests', JSON.stringify(voted));
-
-      document.getElementById('req-mod-name').value = '';
-      document.getElementById('req-mod-link').value = '';
-      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar Solicitud'; }
-      alert("¡Solicitud enviada! Ahora los demás usuarios pueden votar.");
-
-    } catch (err) {
-      console.error("Error al enviar solicitud:", err);
-      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Enviar Solicitud'; }
-      alert("❌ Hubo un error al enviar la solicitud. Verifica tu conexión e intenta de nuevo.");
-    }
-  };
-
-  window.voteRequest = (id) => {
-    if (exigirRegistro()) return;
-    let voted = JSON.parse(localStorage.getItem('fnf_voted_requests') || '{}');
-    if (voted[id]) {
-      delete voted[id];
-      runTransaction(ref(db, `mod_requests/${id}/votes`), (v) => (v || 1) - 1);
-    } else {
-      voted[id] = true;
-      runTransaction(ref(db, `mod_requests/${id}/votes`), (v) => (v || 0) + 1);
-    }
-    localStorage.setItem('fnf_voted_requests', JSON.stringify(voted));
-  };
-
-  window.updateRequestStatus = async (id, status) => {
-    if (!isSuperUser) return;
-
-    // -----------------------------------------------------------
-    const reqSnap = await get(ref(db, `mod_requests/${id}`));
-    const reqData = reqSnap.val();
-    if (!reqData) return;
-
-    await update(ref(db, `mod_requests/${id}`), { status });
-
-    // ------------------------------------------------------------
-    if (reqData.ownerKey && reqData.ownerKey !== 'guest') {
-      let message = '';
-      if (status === 'Seleccionado') {
-        message = `Hola ${reqData.user}, tu mod "${reqData.modName}" fue seleccionado con exito, puedes ver el progreso que lleva este port.`;
-      } else if (status === 'No Seleccionado') {
-        message = `Hola ${reqData.user}, lamentablemente tu mod "${reqData.modName}" no fue seleccionado por pocos votos, puedes intentar despues pedir el mod.`;
-      } else if (status === 'Completado') {
-        message = `Hola ${reqData.user}, tu mod "${reqData.modName}" que pediste fue completado con exito, puedes encontrarlo en el menú de mods.`;
-      }
-
-      if (message) {
-        await set(ref(db, `user_notifications/${reqData.ownerKey}`), {
-          message: message,
-          timestamp: Date.now(),
-          id: Math.random().toString(36).substr(2, 9)
-        });
-      }
-    }
-  };
-
-  window.updateRequestProgress = (id, progress) => {
-    if (!isSuperUser) return;
-    update(ref(db, `mod_requests/${id}`), { progress: parseInt(progress) });
-  };
-
-  window.deleteRequest = (id) => {
-    if (!isSuperUser) return;
-    if (confirm("¿Eliminar esta solicitud?")) remove(ref(db, `mod_requests/${id}`));
-  };
-
-}, 1500);
-
-window.rateAppItem = async (type, stars) => {
-  if (!window.currentItemRatingId) return;
-  const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-  if (!profile) {
-    alert(currentLang === 'es' ? "Debes registrarte o configurar tu perfil para calificar." : "You must register or set your profile to rate.");
-    return;
-  }
-
-  const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
-
-  if (myRates[window.currentItemRatingId]) {
-    alert(currentLang === 'es' ? "Ya calificaste esto. ¡Gracias!" : "You already rated this. Thanks!");
-    return;
-  }
-
-  myRates[window.currentItemRatingId] = stars;
-  localStorage.setItem('my_ratings', JSON.stringify(myRates));
-
-  await set(ref(db, `ratings/${window.currentItemRatingId}/${profile.key}`), stars);
-
-  window.updateStarsUI(type, stars);
-  const txt = document.getElementById(`${type}-rating-text`);
-  if (txt) txt.innerText = currentLang === 'es' ? "¡Gracias por calificar!" : "Thanks for rating!";
-};
-
-window.loadItemRating = (id, type) => {
-  const container = document.getElementById(`rating-container-${type}`);
-  if (!container) return;
-
-  const txt = document.getElementById(`${type}-rating-text`);
-  const myRates = JSON.parse(localStorage.getItem('my_ratings') || '{}');
-
-  const modRatings = globalRatings[id] || {};
-  const votosArray = Object.values(modRatings);
-  const totalVotos = votosArray.length;
-  let promedio = 0;
-
-  if (totalVotos > 0) {
-    const suma = votosArray.reduce((acc, val) => acc + val, 0);
-    promedio = (suma / totalVotos).toFixed(1);
-  }
-
-  const spans = container.querySelectorAll('span');
-
-  if (myRates[id]) {
-    window.updateStarsUI(type, myRates[id]);
-    if (txt) {
-      const baseText = currentLang === 'es' ? "Tu calificación" : "Your rating";
-      txt.innerText = totalVotos > 0 ? `${baseText} • Promedio: ${promedio} ⭐ (${totalVotos})` : baseText;
-    }
-  } else {
-    spans.forEach(s => { s.style.color = '#555'; s.style.textShadow = 'none'; });
-    if (txt) {
-      const baseText = currentLang === 'es' ? "Califica este contenido" : "Rate this content";
-      txt.innerText = totalVotos > 0 ? `Promedio: ${promedio} ⭐ (${totalVotos}) • ${baseText}` : baseText;
-    }
-  }
-};
-
-window.updateStarsUI = (type, stars) => {
-  const container = document.getElementById(`rating-container-${type}`);
-  if (!container) return;
-  const spans = container.querySelectorAll('span');
-  spans.forEach((s, index) => {
-    if (index < stars) {
-      s.style.color = 'gold';
-      s.style.textShadow = '0 0 10px gold';
-    } else {
-      s.style.color = '#555';
-      s.style.textShadow = 'none';
-    }
+      const av = c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : esc(name.charAt(0).toUpperCase());
+      return `
+        <div class="yt-comment-container ${c.isPinned ? 'pinned' : ''}">
+          <div class="yt-avatar" style="background:${c.avatar ? 'transparent' : stringToColor(name)}">${av}</div>
+          <div class="yt-content">
+            ${c.isPinned ? '<div class="pinned-badge">📌 FIJADO</div>' : ''}
+            <div class="yt-header">
+              <span class="yt-name ${isLalo ? 'admin-name' : ''}" onclick="openBanPanel('${esc(c.ownerKey)}', '${jsName}')">
+                <a href="${esc(safeUrl(c.link))}" target="_blank" rel="noopener">${esc(name)}</a>${verified ? ' ☑️' : ''}
+              </span>
+              <span class="yt-date">${esc(c.date)}</span>
+            </div>
+            <div class="yt-text">${esc(c.text)}</div>
+            <div class="yt-actions">
+              <span class="yt-action-btn ${liked[c.id] ? 'active' : ''}" onclick="likeModComment('${esc(c.id)}')">👍 ${Number(c.likes) || 0}</span>
+              <span class="yt-action-btn" onclick="replyModComment('${jsName}')">${t('Responder', 'Reply')}</span>
+              ${actions}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
   });
 };
 
-// ==========================================
-
-
-const savedColor = localStorage.getItem('customThemeColor') || '#00eaff';
-document.documentElement.style.setProperty('--neon-blue', savedColor);
-
-const savedPillInset = localStorage.getItem('pillInset') || '5';
-document.documentElement.style.setProperty('--pill-inset', savedPillInset + 'px');
-
-const savedBlur = localStorage.getItem('glassBlur') || '15';
-document.documentElement.style.setProperty('--glass-blur', savedBlur + 'px');
-
-if (localStorage.getItem('lowEndMode') === 'true') document.body.classList.add('low-end-mode');
-
-const applyCustomFont = (base64Font) => {
-  const newStyle = document.createElement('style');
-  newStyle.appendChild(document.createTextNode(`@font-face { font-family: 'CustomUserFont'; src: url('${base64Font}') format('truetype'); } body, h1, h2, h3, p, span, div, button, input, textarea, a { font-family: 'CustomUserFont', sans-serif !important; }`));
-  document.head.appendChild(newStyle);
+window.closeModComments = () => {
+  closePopup('mod-comments-popup');
+  if (commentsUnsub) { commentsUnsub(); commentsUnsub = null; }
 };
-const savedFont = localStorage.getItem('customUserFont');
+
+window.addModComment = async () => {
+  if (window.exigirRegistro()) return;
+  if (await checkBanStatus()) return;
+  const p = getProfile();
+  const box = document.getElementById('mc-commentText');
+  const text = box.value.trim();
+  if (!text) return toast(t('Escribe algo...', 'Write something...'), 'chat');
+
+  await push(ref(db, `mod_comments/${currentCommentsId}`), {
+    ownerKey: p.key, user: profileName(p), link: p.link || '#', avatar: profilePhoto(p),
+    text, date: new Date().toLocaleString(), likes: 0, isPinned: false
+  });
+  set(ref(db, `last_comment_time/${currentCommentsId}`), Date.now());
+  store.set(`seen_comments_${currentCommentsId}`, Date.now() + 1000);
+  box.value = '';
+  document.getElementById('mc-charCounter').textContent = '0';
+};
+
+window.likeModComment = async (commentId) => {
+  if (window.exigirRegistro()) return;
+  if (await checkBanStatus()) return;
+  const uid = window.usuarioActualFirebase.uid;
+  const liked = store.json('my_liked_mod_comments', {});
+  const base = `mod_comments/${currentCommentsId}/${commentId}`;
+  const likeRef = ref(db, `${base}/userLikes/${uid}`);
+  const snap = await get(likeRef);
+  if (snap.exists()) {
+    await set(likeRef, null);
+    runTransaction(ref(db, `${base}/likes`), c => Math.max(0, (c || 1) - 1));
+    delete liked[commentId];
+  } else {
+    await set(likeRef, true);
+    runTransaction(ref(db, `${base}/likes`), c => (c || 0) + 1);
+    liked[commentId] = true;
+  }
+  store.setJson('my_liked_mod_comments', liked);
+};
+
+window.deleteModComment = (id) => {
+  if (confirm(t('¿Borrar comentario?', 'Delete comment?'))) remove(ref(db, `mod_comments/${currentCommentsId}/${id}`));
+};
+window.togglePinModComment = (id, state) => update(ref(db, `mod_comments/${currentCommentsId}/${id}`), { isPinned: !state });
+window.replyModComment = (name) => { const tx = document.getElementById('mc-commentText'); tx.value = `@${name} `; tx.focus(); };
+window.toggleVerify = (key) => { if (confirm('¿Dar insignia de verificado?')) update(ref(db, 'verified_users'), { [key]: true }); };
+
+document.getElementById('mc-commentText').addEventListener('input', function () {
+  document.getElementById('mc-charCounter').textContent = this.value.length;
+});
+
+// ==========================================
+// CALIFICACIONES
+// ==========================================
+function paintStars(n) {
+  document.querySelectorAll('#detail-rating .stars button').forEach((b, i) => b.classList.toggle('on', i < n));
+}
+
+window.loadItemRating = (id) => {
+  const votes = Object.values(live.ratings[id] || {});
+  const avg = votes.length ? (votes.reduce((a, v) => a + v, 0) / votes.length).toFixed(1) : 0;
+  const mine = store.json('my_ratings', {})[id];
+  paintStars(mine || 0);
+  const base = mine ? t('Tu calificación', 'Your rating') : t('Califica este contenido', 'Rate this content');
+  setText('detail-rating-text', votes.length ? `${base} · ${t('Promedio', 'Average')}: ${avg} ⭐ (${votes.length})` : base);
+};
+
+window.rateAppItem = async (a, b) => {
+  const stars = typeof a === 'number' ? a : b;
+  const id = window.currentItemRatingId;
+  if (!id) return;
+  const p = getProfile();
+  if (!p) return window.exigirRegistro();
+  const mine = store.json('my_ratings', {});
+  if (mine[id]) return toast(t('Ya calificaste esto. ¡Gracias!', 'You already rated this. Thanks!'), 'sparkle');
+  mine[id] = stars;
+  store.setJson('my_ratings', mine);
+  await set(ref(db, `ratings/${id}/${p.key}`), stars);
+  paintStars(stars);
+  vibrate(20);
+  toast(t('¡Gracias por calificar!', 'Thanks for rating!'), 'sparkle');
+};
+
+// ==========================================
+// PEDIDOS DE MODS
+// ==========================================
+const STATUS_COLORS = { 'Pendiente': '#d9a400', 'Seleccionado': '#3d8bff', 'En Progreso': '#ff8800', 'No Seleccionado': '#ef3e6d', 'Completado': '#19b56b' };
+let requestsListening = false;
+
+window.abrirPedidos = () => {
+  openPopup('requests-popup');
+  if (requestsListening) return;
+  requestsListening = true;
+  onValue(ref(db, 'mod_requests'), (snapshot) => {
+    const container = document.getElementById('requests-list');
+    const data = snapshot.val();
+    if (!data) {
+      container.innerHTML = `<p class="empty">${t('No hay solicitudes aún. ¡Sé el primero!', 'No requests yet. Be the first!')}</p>`;
+      return;
+    }
+    const voted = store.json('fnf_voted_requests', {});
+    container.innerHTML = Object.keys(data).map(k => ({ id: k, ...data[k] }))
+      .sort((a, b) => (b.votes || 0) - (a.votes || 0))
+      .map(req => {
+        const status = req.status || 'Pendiente';
+        const prog = Number(req.progress) || 0;
+        const rid = esc(req.id);
+        const admin = isSuperUser ? `
+          <div class="req-admin">
+            <button style="background:#3d8bff" onclick="updateRequestStatus('${rid}', 'Seleccionado')">Selec.</button>
+            <button style="background:#ef3e6d" onclick="updateRequestStatus('${rid}', 'No Seleccionado')">No sel.</button>
+            <button style="background:#ff8800" onclick="updateRequestStatus('${rid}', 'En Progreso')">Progreso</button>
+            <button style="background:#19b56b" onclick="updateRequestStatus('${rid}', 'Completado')">Listo</button>
+            <button style="background:#555;flex:0 0 auto" onclick="deleteRequest('${rid}')">🗑️</button>
+            ${status === 'En Progreso' ? `<input type="range" min="0" max="100" value="${prog}" style="width:100%" onchange="updateRequestProgress('${rid}', this.value)">` : ''}
+          </div>` : '';
+        return `
+          <div class="list-item" style="flex-wrap:wrap;align-items:flex-start">
+            <div class="grow">
+              <span class="status-tag" style="background:${STATUS_COLORS[status] || '#999'}">${esc(status)}</span>
+              <h4 style="margin-top:6px">${esc(req.modName)}</h4>
+              ${req.link && /^https?:\/\//i.test(req.link) ? `<a href="${esc(req.link)}" target="_blank" rel="noopener" style="font-size:12px">${t('Ver link original', 'Original link')}</a>` : ''}
+              <p>${t('Pedido por', 'Requested by')}: <b>${esc(req.user || 'Anónimo')}</b></p>
+              ${status === 'En Progreso' ? `<div class="progress"><div style="width:${prog}%"></div></div><p style="text-align:right">${prog}%</p>` : ''}
+            </div>
+            <button class="vote-btn ${voted[req.id] ? 'voted' : ''}" onclick="voteRequest('${rid}')">▲<span>${Number(req.votes) || 0}</span></button>
+            ${admin}
+          </div>`;
+      }).join('');
+  });
+};
+window.loadModRequests = window.abrirPedidos;
+
+window.enviarSolicitudMod = async () => {
+  if (window.exigirRegistro()) return;
+  const p = getProfile();
+  const name = document.getElementById('req-mod-name').value.trim();
+  const link = document.getElementById('req-mod-link').value.trim();
+  if (!name) return toast(t('Escribe el nombre del mod que quieres pedir.', 'Type the name of the mod.'), 'list');
+
+  const lastKey = 'fnf_last_req_' + (p.key || 'guest');
+  const last = Number(store.get(lastKey, 0));
+  const days = (Date.now() - last) / 86400000;
+  if (last > 0 && days < 10) {
+    return alert(`⏳ Solo puedes pedir un mod cada 10 días. Te faltan ${Math.ceil(10 - days)} día(s).`);
+  }
+
+  const btn = document.getElementById('btn-enviar-solicitud');
+  btn.disabled = true; btn.textContent = t('Enviando...', 'Sending...');
+  try {
+    const all = (await get(ref(db, 'mod_requests'))).val() || {};
+    const active = Object.values(all).filter(r => r.status !== 'Completado').length;
+    if (active >= 5) {
+      alert('🛑 La lista de peticiones está llena (máximo 5 activas). Espera a que se terminen los ports pendientes.');
+      return;
+    }
+    const snap = await push(ref(db, 'mod_requests'), {
+      modName: name, link: link || '', user: profileName(p), ownerKey: p.key || 'guest',
+      votes: 1, status: 'Pendiente', timestamp: Date.now()
+    });
+    store.set(lastKey, String(Date.now()));
+    update(ref(db, 'usuarios/' + window.usuarioActualFirebase.uid), { ultimaSolicitudPort: Date.now() }).catch(() => { });
+    const voted = store.json('fnf_voted_requests', {});
+    voted[snap.key] = true;
+    store.setJson('fnf_voted_requests', voted);
+    document.getElementById('req-mod-name').value = '';
+    document.getElementById('req-mod-link').value = '';
+    toast(t('¡Solicitud enviada! Ahora otros pueden votar.', 'Request sent! Others can vote now.'), 'list');
+  } catch (err) {
+    console.error('Error al enviar solicitud:', err);
+    alert('❌ Hubo un error al enviar la solicitud. Verifica tu conexión.');
+  } finally {
+    btn.disabled = false; btn.textContent = t('Enviar solicitud', 'Send request');
+  }
+};
+
+window.voteRequest = (id) => {
+  if (window.exigirRegistro()) return;
+  const voted = store.json('fnf_voted_requests', {});
+  if (voted[id]) { delete voted[id]; runTransaction(ref(db, `mod_requests/${id}/votes`), v => Math.max(0, (v || 1) - 1)); }
+  else { voted[id] = true; runTransaction(ref(db, `mod_requests/${id}/votes`), v => (v || 0) + 1); }
+  store.setJson('fnf_voted_requests', voted);
+  vibrate(15);
+};
+
+window.updateRequestStatus = async (id, status) => {
+  if (!isSuperUser) return;
+  const req = (await get(ref(db, `mod_requests/${id}`))).val();
+  if (!req) return;
+  await update(ref(db, `mod_requests/${id}`), { status });
+  const msgs = {
+    'Seleccionado': `Hola ${req.user}, tu mod "${req.modName}" fue seleccionado con éxito, puedes ver el progreso que lleva este port.`,
+    'No Seleccionado': `Hola ${req.user}, lamentablemente tu mod "${req.modName}" no fue seleccionado por pocos votos, puedes intentar pedirlo después.`,
+    'Completado': `Hola ${req.user}, tu mod "${req.modName}" fue completado con éxito, ya puedes encontrarlo en el menú de mods.`
+  };
+  if (req.ownerKey && req.ownerKey !== 'guest' && msgs[status]) {
+    await set(ref(db, `user_notifications/${req.ownerKey}`), { message: msgs[status], timestamp: Date.now(), id: Math.random().toString(36).slice(2, 11) });
+  }
+};
+window.updateRequestProgress = (id, v) => { if (isSuperUser) update(ref(db, `mod_requests/${id}`), { progress: parseInt(v) }); };
+window.deleteRequest = (id) => { if (isSuperUser && confirm('¿Eliminar esta solicitud?')) remove(ref(db, `mod_requests/${id}`)); };
+
+// ==========================================
+// REPORTES DE LINKS + TELEGRAM
+// ==========================================
+const TELEGRAM_BOT_TOKEN = '7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI';
+const TELEGRAM_CHAT_ID = '5429172831';
+
+const sendTelegram = (text) => fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: 'Markdown' })
+});
+
+window.reportError = async (id) => {
+  if (window.exigirRegistro()) return;
+  const p = getProfile();
+  if (!confirm('🚨 ¿Estás seguro? Esto apagará la descarga para todos y alertará al administrador.')) return;
+  await set(ref(db, `broken_links/${id}`), { reportedBy: profileName(p), timestamp: Date.now() });
+  window.closeDetail();
+  toast(t('¡Reporte enviado! El administrador fue notificado.', 'Report sent! The admin was notified.'), 'alert');
+  const d = (window.MOD_DATA || {})[id] || (window.APK_DATA || {})[id] || (window.SCRIPTS_DATA || {})[id] || {};
+  sendTelegram(`🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${profileName(p)}* reportó un enlace caído:\n\n📦 Mod: *${d.title || 'Desconocido'}*\n🆔 ID: \`${id}\`\n\n🛠️ ¡Ve a solucionarlo!`)
+    .catch(err => console.error('Error Telegram:', err));
+};
+
+window.enviarMensajeAlBot = async () => {
+  const box = document.getElementById('txt-mensaje-telegram');
+  const btn = document.getElementById('btn-enviar-telegram');
+  const msg = box.value.trim();
+  if (!msg) return toast(t('¡Escribe un mensaje primero!', 'Write a message first!'), 'send');
+
+  const p = getProfile();
+  const label = btn.querySelector('span');
+  btn.disabled = true;
+  label.textContent = t('Enviando...', 'Sending...');
+  try {
+    const res = await sendTelegram(`🚨 *NUEVO TICKET DE SOPORTE* 🚨\n\n👤 *De:* ${p ? profileName(p) : 'Usuario invitado'}\n━━━━━━━━━━━━━━━━━━━━━━━━━\n💬 *Mensaje:*\n${msg}`);
+    if (!res.ok) throw new Error('API');
+    box.value = '';
+    toast(t('¡Mensaje enviado con éxito!', 'Message sent!'), 'send');
+  } catch (e) {
+    toast(t('No se pudo enviar. Intenta de nuevo.', 'Could not send. Try again.'), 'alert');
+  } finally {
+    btn.disabled = false;
+    label.textContent = t('Enviar mensaje', 'Send message');
+  }
+};
+
+// ==========================================
+// COMPARTIR
+// ==========================================
+let shareLink = '';
+let shareText = '';
+
+window.abrirMenuCompartir = (id, nombre) => {
+  shareLink = `${location.origin}${location.pathname}?share=${id}`;
+  shareText = `¡Mira esto: *${nombre}*! Descárgalo aquí:\n`;
+  if (navigator.share) {
+    navigator.share({ title: nombre, text: shareText.replace(/\*/g, ''), url: shareLink }).catch(() => { });
+    return;
+  }
+  openPopup('share-modal');
+};
+window.enviarWhatsApp = () => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + shareLink)}`, '_blank');
+window.enviarTelegram = () => window.open(`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(shareText)}`, '_blank');
+window.copiarEnlace = () => {
+  navigator.clipboard.writeText(shareText + shareLink).then(() => {
+    toast(t('¡Enlace copiado!', 'Link copied!'), 'share');
+    closePopup('share-modal');
+  });
+};
+
+const sharedId = urlParams.get('share');
+if (sharedId) {
+  history.replaceState({}, document.title, location.pathname);
+  setTimeout(() => {
+    if (sharedId.startsWith('apk')) window.openApkInfo(sharedId);
+    else if (sharedId.startsWith('script')) window.openScriptInfo(sharedId);
+    else window.openModInfo(sharedId);
+    const box = document.querySelector('#detail-popup .popup-content');
+    if (box) { box.classList.add('brillo-epico'); setTimeout(() => box.classList.remove('brillo-epico'), 5000); }
+  }, 1200);
+}
+
+// ==========================================
+// ACCESO OCULTO (mantener presionado el título 5 s)
+// ==========================================
+const fnfTitle = document.getElementById('fnf-title');
+let holdTimer;
+const startHold = () => { holdTimer = setTimeout(() => openPopup('admin-popup'), 5000); };
+const endHold = () => clearTimeout(holdTimer);
+fnfTitle.addEventListener('pointerdown', startHold);
+['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => fnfTitle.addEventListener(ev, endHold));
+
+window.verifyAdmin = () => {
+  if (btoa(document.getElementById('adminCode').value) === 'bGFsb2NmbW9kczE=') {
+    store.set('superUser', 'true');
+    alert('Modo superusuario activado.');
+    location.reload();
+  } else {
+    alert('Código incorrecto.');
+  }
+};
+
+// ==========================================
+// NOVEDADES (.txt), FAQ y GALERÍA
+// ==========================================
+window.cargarNovedadesTXT = (id, tipo) => {
+  const box = document.getElementById('texto-novedades-ios');
+  box.textContent = t('Cargando información...', 'Loading...');
+  openPopup('modal-novedades-ios');
+  const path = tipo === 'script' ? `assets/scripts/update/${id}.txt` : `assets/bases/update/${id}.txt`;
+  fetch(path)
+    .then(r => r.ok ? r : fetch('https://raw.githubusercontent.com/LaloCF2/fnf_ports/main/' + path))
+    .then(r => { if (!r.ok) throw new Error('404'); return r.text(); })
+    .then(txt => { box.textContent = txt; })
+    .catch(() => { box.textContent = t('No hay novedades registradas para esta versión aún.', 'No update notes yet.'); });
+};
+window.cerrarModalNovedades = () => closePopup('modal-novedades-ios');
+
+window.toggleFaq = (btn) => {
+  btn.classList.toggle('active');
+  btn.nextElementSibling.classList.toggle('open');
+  vibrate(10);
+};
+
+const GALERIAS = {
+  zarchiver: [1, 2, 3, 4, 5].map(n => `assets/images/help/za/za${n}.webp`),
+  gestor: [1, 2, 3, 4].map(n => `assets/images/help/gestor/gestor${n}.webp`),
+  files: [1, 2, 3, 4, 5, 6, 7].map(n => `assets/images/help/files/files${n}.webp`)
+};
+let galeria = [];
+let galIdx = 0;
+const pintarGaleria = () => {
+  const img = document.getElementById('imagen-gigante');
+  img.removeAttribute('data-fallback');
+  img.src = galeria[galIdx];
+  setText('contador-imagenes', `${galIdx + 1} / ${galeria.length}`);
+};
+window.abrirGaleria = (app) => { galeria = GALERIAS[app] || []; galIdx = 0; pintarGaleria(); document.getElementById('mi-lightbox').classList.add('show'); };
+window.cerrarGaleria = () => document.getElementById('mi-lightbox').classList.remove('show');
+window.cambiarImagen = (d) => { galIdx = (galIdx + d + galeria.length) % galeria.length; pintarGaleria(); };
+
+// ==========================================
+// AJUSTES
+// ==========================================
+const root = document.documentElement.style;
+
+const applyCustomFont = (dataUrl) => {
+  const st = document.createElement('style');
+  st.textContent = `@font-face{font-family:'CustomUserFont';src:url('${dataUrl}') format('truetype');font-display:swap}body,button,input,textarea,select{font-family:'CustomUserFont',sans-serif!important}`;
+  document.head.appendChild(st);
+};
+const savedFont = store.get('customUserFont');
 if (savedFont) applyCustomFont(savedFont);
 
-let chromaInterval;
-const toggleChroma = (enable) => {
-  if (enable) {
-    let hue = 0;
-    clearInterval(chromaInterval);
-    chromaInterval = setInterval(() => {
-      hue = (hue + 2) % 360;
-      document.documentElement.style.setProperty('--neon-blue', `hsl(${hue}, 100%, 50%)`);
-    }, 50);
-  } else {
-    clearInterval(chromaInterval);
-    document.documentElement.style.setProperty('--neon-blue', localStorage.getItem('customThemeColor') || '#00eaff');
-  }
-};
-
-let particleInterval;
-const toggleParticles = (enable) => {
-  const container = document.getElementById('particles-container');
-  if (!container) return;
-  if (enable) {
-    if (particleInterval) clearInterval(particleInterval);
-    container.style.display = 'block';
-
-    const spawnValRaw = parseInt(localStorage.getItem('particlesSpawn') || '25');
-    const spawnRate = Math.max(100, 2500 - (spawnValRaw * 24));
-
-    const speedValRaw = parseInt(localStorage.getItem('particlesSpeed') || '50');
-    const baseSpeed = 14 - (speedValRaw * 0.12);
-
-    particleInterval = setInterval(() => {
-      const p = document.createElement('div');
-      p.className = 'fnf-particle';
-
-      const flechas = [
-        'assets/images/Particles/down.webp',
-        'assets/images/Particles/left.webp',
-        'assets/images/Particles/right.webp',
-        'assets/images/Particles/up.webp'
-      ];
-
-      const img = document.createElement('img');
-      img.src = flechas[Math.floor(Math.random() * flechas.length)];
-
-      img.onerror = () => {
-        const base = 'https://raw.githubusercontent.com/LaloCF2/fnf_ports/main/assets/images/Particles/';
-        img.onerror = null;
-        img.src = base + ['down', 'left', 'right', 'up'][Math.floor(Math.random() * 4)] + '.webp';
-      };
-
-      const escalaAleatoria = Math.random() * 0.5 + 0.8;
-      img.style.transform = `scale(${escalaAleatoria})`;
-
-      p.appendChild(img);
-
-      p.style.left = Math.random() * 100 + 'vw';
-      const dur = Math.random() * (baseSpeed / 2) + baseSpeed;
-      p.style.animationDuration = dur + 's';
-      container.appendChild(p);
-
-      setTimeout(() => p.remove(), (dur + 2) * 1000);
-    }, spawnRate);
-  } else {
-    clearInterval(particleInterval);
-    container.style.display = 'none';
-    container.innerHTML = '';
-  }
-};
-
-const savedTheme = localStorage.getItem('activeTheme') || 'default';
-const themeLink = document.getElementById('theme-stylesheet');
-
-if (savedTheme === 'pro') {
-  themeLink.href = 'css/style2.css';
+function bindSwitch(id, key, onChange) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.checked = store.get(key) === 'true';
+  el.addEventListener('change', () => { store.set(key, String(el.checked)); onChange && onChange(el.checked); vibrate(20); });
 }
 
-window.toggleProMenu = () => {
-  document.body.classList.toggle('pro-menu-open');
-  window.triggerVibrate(15);
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  window.currentLang = localStorage.getItem('fnf_lang') || 'es';
-
-  window.triggerVibrate = (ms = 15) => { if (localStorage.getItem('hapticMode') === 'true' && navigator.vibrate) navigator.vibrate(ms); };
-  document.body.addEventListener('click', (e) => {
-    if (e.target.closest('.btn, .nav-item, .settings-btn, .lang-btn, .profile-btn, .filter-btn, .admin-led-btn, .admin-pin-btn')) window.triggerVibrate(15);
-  });
-
-  window.toggleLanguage = () => {
-    window.currentLang = window.currentLang === 'es' ? 'en' : 'es';
-    localStorage.setItem('fnf_lang', window.currentLang);
-    applyLanguage();
-  };
-  function applyLanguage() {
-    document.querySelectorAll('[data-es][data-en]').forEach(el => {
-      el.classList.add('lang-fade');
-      setTimeout(() => { el.innerHTML = el.getAttribute(`data-${window.currentLang}`); el.classList.remove('lang-fade'); }, 150);
-    });
-    const btn = document.getElementById('langBtn');
-    if (btn) btn.innerHTML = window.currentLang === 'es' ? '🇬🇧 EN' : '🇪🇸 ES';
-  }
-  applyLanguage();
-
-  setTimeout(() => {
-    const profile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-    if (profile) {
-      if (document.getElementById('editProfileName') && profile.name) document.getElementById('editProfileName').value = profile.name;
-      if (document.getElementById('editProfileAvatar') && profile.avatar) {
-        document.getElementById('editProfileAvatar').value = profile.avatar;
-        document.getElementById('profile-avatar-preview').src = profile.avatar;
-      }
-    }
-  }, 500);
-
-  const avInput = document.getElementById('editProfileAvatar');
-  if (avInput) avInput.addEventListener('input', (e) => { document.getElementById('profile-avatar-preview').src = e.target.value.trim() || "https://via.placeholder.com/80/555/fff?text=?"; });
-
-  window.saveProfileChanges = () => {
-    let profile = JSON.parse(localStorage.getItem('fnf_user_profile')) || { key: 'user_' + Math.random().toString(36).substr(2, 9), link: '#' };
-    const name = document.getElementById('editProfileName').value.trim();
-    if (name.length < 3) return alert(window.currentLang === 'es' ? "Nombre muy corto." : "Name too short.");
-    profile.name = name; profile.avatar = document.getElementById('editProfileAvatar').value.trim();
-    localStorage.setItem('fnf_user_profile', JSON.stringify(profile));
-    document.getElementById('profile-popup').classList.remove('show');
-    alert(window.currentLang === 'es' ? "¡Perfil actualizado!" : "Profile updated!");
-  };
-
-  const colorInput = document.getElementById('themeColor');
-  if (colorInput) {
-    colorInput.value = savedColor;
-    colorInput.addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--neon-blue', e.target.value);
-      localStorage.setItem('customThemeColor', e.target.value);
-      if (document.getElementById('chromaToggle').checked) {
-        document.getElementById('chromaToggle').checked = false;
-        toggleChroma(false);
-        localStorage.setItem('chromaMode', 'false');
-      }
-    });
-  }
-
-  const chromaToggle = document.getElementById('chromaToggle');
-  if (chromaToggle) {
-    chromaToggle.checked = localStorage.getItem('chromaMode') === 'true';
-    if (chromaToggle.checked) toggleChroma(true);
-    chromaToggle.addEventListener('change', (e) => {
-      localStorage.setItem('chromaMode', e.target.checked);
-      toggleChroma(e.target.checked);
-    });
-  }
-
-  const particlesToggle = document.getElementById('particlesToggle');
-  const particleSettings = document.getElementById('particle-settings-container');
-  if (particlesToggle) {
-    particlesToggle.checked = localStorage.getItem('particlesMode') === 'true';
-    if (particleSettings) particleSettings.style.display = particlesToggle.checked ? 'block' : 'none';
-
-    if (particlesToggle.checked && localStorage.getItem('lowEndMode') !== 'true') toggleParticles(true);
-    particlesToggle.addEventListener('change', (e) => {
-      localStorage.setItem('particlesMode', e.target.checked);
-      if (particleSettings) particleSettings.style.display = e.target.checked ? 'block' : 'none';
-      toggleParticles(e.target.checked);
-    });
-  }
-
-  const particleScaleSlider = document.getElementById('particleScaleSlider');
-  if (particleScaleSlider) {
-    particleScaleSlider.value = localStorage.getItem('particlesScale') || '40';
-    document.documentElement.style.setProperty('--escala-particulas', particleScaleSlider.value + 'px');
-    particleScaleSlider.addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--escala-particulas', e.target.value + 'px');
-      localStorage.setItem('particlesScale', e.target.value);
-    });
-  }
-
-  const particleSpawnSlider = document.getElementById('particleSpawnSlider');
-  if (particleSpawnSlider) {
-    particleSpawnSlider.value = localStorage.getItem('particlesSpawn') || '25';
-    particleSpawnSlider.addEventListener('change', (e) => {
-      localStorage.setItem('particlesSpawn', e.target.value);
-      if (particlesToggle && particlesToggle.checked) {
-        toggleParticles(false);
-        toggleParticles(true);
-      }
-    });
-  }
-
-  const particleSpeedSlider = document.getElementById('particleSpeedSlider');
-  if (particleSpeedSlider) {
-    particleSpeedSlider.value = localStorage.getItem('particlesSpeed') || '50';
-    particleSpeedSlider.addEventListener('change', (e) => {
-      localStorage.setItem('particlesSpeed', e.target.value);
-    });
-  }
-
-  const blurSlider = document.getElementById('blurSlider');
-  if (blurSlider) {
-    blurSlider.value = savedBlur;
-    blurSlider.addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--glass-blur', e.target.value + 'px');
-      localStorage.setItem('glassBlur', e.target.value);
-    });
-  }
-
-  const lowEndToggle = document.getElementById('lowEndToggle');
-  if (lowEndToggle) {
-    lowEndToggle.checked = localStorage.getItem('lowEndMode') === 'true';
-    lowEndToggle.addEventListener('change', (e) => {
-      localStorage.setItem('lowEndMode', e.target.checked);
-      if (e.target.checked) {
-        document.body.classList.add('low-end-mode');
-        toggleParticles(false);
-      } else {
-        document.body.classList.remove('low-end-mode');
-        if (document.getElementById('particlesToggle').checked) toggleParticles(true);
-      }
-      window.triggerVibrate(30);
-    });
-  }
-
-  const hapticToggle = document.getElementById('hapticToggle');
-  if (hapticToggle) {
-    hapticToggle.checked = localStorage.getItem('hapticMode') === 'true';
-    hapticToggle.addEventListener('change', (e) => {
-      localStorage.setItem('hapticMode', e.target.checked);
-      if (e.target.checked) navigator.vibrate(50);
-    });
-  }
-
-  const pillSlider = document.getElementById('pillSizeSlider');
-  if (pillSlider) {
-    pillSlider.value = savedPillInset;
-    pillSlider.addEventListener('input', (e) => {
-      document.documentElement.style.setProperty('--pill-inset', e.target.value + 'px');
-      localStorage.setItem('pillInset', e.target.value);
-    });
-  }
-
-  const fontInput = document.getElementById('customFontUpload');
-  if (fontInput) {
-    fontInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file && file.name.toLowerCase().endsWith('.ttf')) {
-        const reader = new FileReader();
-        reader.onload = function (evt) {
-          try { localStorage.setItem('customUserFont', evt.target.result); applyCustomFont(evt.target.result); }
-          catch (err) { applyCustomFont(evt.target.result); alert("Archivo muy pesado para guardarse permanente, pero se aplicará ahora."); }
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-
-  window.resetSettings = () => {
-    if (confirm("¿Restablecer diseño predeterminado?")) {
-      localStorage.clear();
-      location.reload();
-    }
-  };
-
-  const isTrueIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const forceIOS = localStorage.getItem('force_ios_ui') === 'true';
-  const isIOS = isTrueIOS || forceIOS;
-
-  window.toggleForceIOS = () => {
-    const current = localStorage.getItem('force_ios_ui') === 'true';
-    localStorage.setItem('force_ios_ui', !current);
-    location.reload();
-  };
-
-  const initAdminBtn = setInterval(() => {
-    const btn = document.getElementById('btnForceIOS');
-    if (btn) { btn.innerHTML = forceIOS ? 'Quitar Interfaz iOS' : 'Forzar Interfaz iOS'; clearInterval(initAdminBtn); }
-  }, 500);
-
-  setTimeout(() => {
-    const nav = document.querySelector('.bottom-nav');
-    const pill = document.getElementById('ios-pill');
-    const navItems = document.querySelectorAll('.nav-item');
-
-    if (isIOS && nav && pill) {
-      nav.classList.add('is-ios');
-      if (navItems[0]) pill.style.width = `${navItems[0].offsetWidth}px`;
-
-      const snapPill = (index) => {
-        pill.classList.remove('is-dragging');
-        const target = navItems[index];
-        if (target) {
-          let currentX = 0;
-          const transformMatch = pill.style.transform.match(/translateX\(([^p]+)px\)/);
-          if (transformMatch) currentX = parseFloat(transformMatch[1]);
-
-          const targetX = target.offsetLeft;
-          const distance = Math.abs(targetX - currentX);
-
-          pill.style.width = `${target.offsetWidth}px`;
-
-          if (distance > 30) {
-            const stretch = Math.min(1 + (distance * 0.002), 1.35);
-            const skew = targetX > currentX ? -10 : 10;
-
-            pill.style.transform = `translateX(${currentX + (targetX - currentX) * 0.5}px) scaleX(${stretch}) scaleY(${1 / stretch}) skewX(${skew}deg)`;
-
-            setTimeout(() => {
-              pill.style.transform = `translateX(${targetX}px) scaleX(1) scaleY(1) skewX(0deg)`;
-            }, 100);
-          } else {
-            pill.style.transform = `translateX(${targetX}px) scaleX(1) scaleY(1) skewX(0deg)`;
-          }
-
-          window.triggerVibrate(25);
-        }
-      };
-
-      const originalSelectSection = window.selectSection;
-      window.selectSection = (sec, el) => {
-        if (originalSelectSection) originalSelectSection(sec, el);
-        const index = Array.from(navItems).indexOf(el);
-        if (index !== -1) snapPill(index);
-      };
-
-      let isDraggingPill = false;
-      let lastXPos = null;
-
-      const moveDrag = (e) => {
-        if (!e.touches && !isDraggingPill) return;
-        if (e.touches) e.preventDefault();
-        isDraggingPill = true;
-        pill.classList.add('is-dragging');
-
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const navRect = nav.getBoundingClientRect();
-        let xPos = Math.max(0, Math.min(clientX - navRect.left, navRect.width));
-
-        let stretch = 1.15;
-        let skew = 0;
-        if (lastXPos !== null) {
-          const diff = xPos - lastXPos;
-          const velocity = Math.min(Math.abs(diff), 25);
-          stretch = 1 + (velocity * 0.02);
-          skew = diff > 0 ? velocity * -0.6 : velocity * 0.6;
-        }
-        lastXPos = xPos;
-
-        const itemWidth = navRect.width / navItems.length;
-        let visualX = Math.max(0, Math.min(xPos - (itemWidth / 2), navRect.width - itemWidth));
-
-        pill.style.transform = `translateX(${visualX}px) scaleX(${stretch}) scaleY(${1 / stretch}) skewX(${skew}deg)`;
-
-        const hoveredIndex = Math.floor(xPos / itemWidth);
-        const targetItem = navItems[hoveredIndex];
-
-        if (targetItem && !targetItem.classList.contains('active')) {
-          const sectionId = targetItem.getAttribute('onclick').match(/'([^']+)'/)[1];
-          document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-          document.getElementById(sectionId).classList.add('active');
-          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-          targetItem.classList.add('active');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          window.triggerVibrate(15);
-        }
-      };
-
-      const endDrag = () => {
-        if (isDraggingPill) {
-          isDraggingPill = false;
-          lastXPos = null;
-          const activeItem = document.querySelector('.nav-item.active');
-          const index = Array.from(navItems).indexOf(activeItem);
-          if (index !== -1) snapPill(index);
-        }
-      };
-
-      nav.addEventListener('touchmove', moveDrag, { passive: false });
-      nav.addEventListener('touchend', endDrag);
-      nav.addEventListener('mousedown', () => isDraggingPill = true);
-      nav.addEventListener('mousemove', moveDrag);
-      nav.addEventListener('mouseup', endDrag);
-      nav.addEventListener('mouseleave', endDrag);
-
-      window.addEventListener('resize', () => {
-        const activeItem = document.querySelector('.nav-item.active');
-        const index = Array.from(navItems).indexOf(activeItem);
-        if (index !== -1) snapPill(index);
-      });
-    }
-  }, 1000);
+// Tema oscuro
+const darkToggle = document.getElementById('darkToggle');
+darkToggle.checked = document.documentElement.getAttribute('data-theme') === 'dark';
+darkToggle.addEventListener('change', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (darkToggle.checked !== isDark) window.toggleTheme();
 });
 
-let newModsData = {};
+// Color de acento (el valor viejo #00eaff era del diseño anterior)
+const colorInput = document.getElementById('themeColor');
+const savedColor = store.get('customThemeColor');
+if (savedColor && savedColor !== '#00eaff') colorInput.value = savedColor;
+colorInput.addEventListener('input', (e) => { root.setProperty('--accent', e.target.value); store.set('customThemeColor', e.target.value); });
 
-onValue(ref(db, 'new_mods_status'), (snap) => {
-  newModsData = snap.val() || {};
+// Cristal
+const blurSlider = document.getElementById('blurSlider');
+blurSlider.value = store.get('glassBlur', '16');
+blurSlider.addEventListener('input', (e) => { root.setProperty('--glass-blur', e.target.value + 'px'); store.set('glassBlur', e.target.value); });
 
-  document.querySelectorAll('.mod-card').forEach(card => {
-    card.classList.remove('is-new-mod');
-  });
-
-  Object.keys(newModsData).forEach(cardId => {
-    if (newModsData[cardId] === true) {
-      const cardElement = document.getElementById(cardId);
-      if (cardElement) {
-        cardElement.classList.add('is-new-mod');
-      }
-    }
-  });
+// Gama baja
+if (store.get('lowEndMode') === 'true') document.body.classList.add('low-end-mode');
+bindSwitch('lowEndToggle', 'lowEndMode', (on) => {
+  document.body.classList.toggle('low-end-mode', on);
+  toggleParticles(!on && store.get('particlesMode') === 'true');
 });
 
-window.toggleNewMod = async (cardId) => {
-  if (!isSuperUser) {
-    alert("No tienes permisos de administrador.");
-    return;
-  }
-
-  const isCurrentlyNew = newModsData[cardId] === true;
-
-  if (confirm(isCurrentlyNew ? "¿Quitar la etiqueta de NUEVO a este mod?" : "¿Marcar este mod como NUEVO?")) {
-
-    await set(ref(db, `new_mods_status/${cardId}`), isCurrentlyNew ? null : true);
-
-  }
-};
-
-// ==========================================
-
-window.brokenLinksData = {};
-
-onValue(ref(db, 'broken_links'), (snap) => {
-  window.brokenLinksData = snap.val() || {};
-
-  document.querySelectorAll('.mod-card').forEach(card => {
-    const exactModId = card.id.replace('card-', '');
-    if (window.brokenLinksData[exactModId]) {
-      card.classList.add('is-broken-mod');
-    } else {
-      card.classList.remove('is-broken-mod');
-    }
-  });
-});
-
-window.reportError = async (modId) => {
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-  if (!user) {
-    document.getElementById('register-popup').classList.add('show');
-    return;
-  }
-
-  if (confirm('🚨 ¿ESTÁS SEGURO? Esto apagará la descarga para todos y alertará al administrador.')) {
-
-    await set(ref(db, `broken_links/${modId}`), {
-      reportedBy: user.name,
-      timestamp: Date.now()
-    });
-
-    alert('🛑 ¡MOD BLOQUEADO! El Administrador ha sido notificado.');
-
-    let modName = "Nombre Desconocido";
-    const modTitleElement = document.querySelector('#card-' + modId + ' h3');
-    if (modTitleElement) {
-      modName = modTitleElement.textContent.trim();
-    }
-
-    const botToken = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI";
-    const chatId = "5429172831";
-
-    const mensaje = `🚨 *ALERTA DE LINK CAÍDO* 🚨\n\nEl usuario *${user.name}* reportó el problema de un enlace caido:\n\n📦 Mod: *${modName}*\n🆔 ID: \`${modId}\`\n\n🛑El Mod se a cerrado.\n\n🛠️ ¡Ve a solucionarlo!`;
-
-    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-    fetch(telegramUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: mensaje, parse_mode: "Markdown" })
-    }).catch(error => console.error("Error Telegram:", error));
-  }
-};
-
-window.fixBrokenLink = async (modId) => {
-  if (!isSuperUser) return;
-  if (confirm('🛠️ ¿Ya solucionaste el link de este mod?')) {
-    await set(ref(db, `broken_links/${modId}`), null);
-  }
-};
-
-// ==========================================
-
-onValue(ref(db, 'ratings'), (snap) => {
-  const ratingsData = snap.val() || {};
-  const userProfile = JSON.parse(localStorage.getItem('fnf_user_profile'));
-  const miLlave = userProfile ? userProfile.key : null;
-
-  document.querySelectorAll('.mod-card').forEach(card => {
-    const exactModId = card.id.replace('card-', '');
-    const modRatings = ratingsData[exactModId] || {};
-
-    const votosArray = Object.values(modRatings);
-    const totalVotos = votosArray.length;
-    let promedio = 0;
-
-    if (totalVotos > 0) {
-      const suma = votosArray.reduce((acc, val) => acc + val, 0);
-      promedio = (suma / totalVotos).toFixed(1);
-    }
-
-    const textoPromedio = document.getElementById(`rating-text-${exactModId}`);
-    if (textoPromedio) {
-      textoPromedio.innerText = `${promedio} ⭐ (${totalVotos})`;
-    }
-
-    const starsContainer = document.getElementById(`stars-${exactModId}`);
-    if (starsContainer) {
-      const miVotoAnterior = miLlave ? modRatings[miLlave] : 0;
-      const spans = starsContainer.querySelectorAll('span');
-
-      spans.forEach(span => {
-        const valorEstrella = parseInt(span.getAttribute('data-val'));
-        if (miVotoAnterior >= valorEstrella) {
-          span.innerText = '★';
-          span.style.color = '#ffd700';
-          span.style.textShadow = '0 0 8px #ffd700';
-        } else {
-          span.innerText = '☆';
-          span.style.color = '#555';
-          span.style.textShadow = 'none';
-        }
-      });
-    }
-  });
-});
-
-window.rateMod = async (modId, calificacion) => {
-  const user = JSON.parse(localStorage.getItem('fnf_user_profile'));
-
-  if (!user) {
-    document.getElementById('register-popup').classList.add('show');
-    return;
-  }
-
-  await set(ref(db, `ratings/${modId}/${user.key}`), calificacion);
-
-  if (window.triggerVibrate) window.triggerVibrate(15);
-};
-
-// ==========================================
-
-window.toggleFaq = function (button) {
-  button.classList.toggle('active');
-
-  const content = button.nextElementSibling;
-
-  if (content.classList.contains('open')) {
-    content.classList.remove('open');
-  } else {
-    content.classList.add('open');
-  }
-
-  if (window.triggerVibrate) window.triggerVibrate(10);
-};
-
-// ==========================================
-
-document.addEventListener("DOMContentLoaded", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const modToUnlock = urlParams.get('unlock');
-
-  if (modToUnlock) {
-    let misSecretos = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
-    if (!misSecretos.includes(modToUnlock)) {
-      misSecretos.push(modToUnlock);
-      localStorage.setItem('unlocked_mods', JSON.stringify(misSecretos));
-
-      setTimeout(() => {
-        document.getElementById('secret-unlocked-popup').classList.add('show');
-        if (window.triggerVibrate) window.triggerVibrate([30, 50, 30]);
-      }, 1000);
-    }
-
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-
-  const misSecretosGuardados = JSON.parse(localStorage.getItem('unlocked_mods') || '[]');
-
-  const esAdmin = localStorage.getItem('superUser') === 'true';
-
-  document.querySelectorAll('.secret-mod').forEach(card => {
-
-    const exactId = card.id.replace('card-', '');
-
-    if (misSecretosGuardados.includes(exactId) || esAdmin) {
-      card.classList.remove('hidden');
-    }
-  });
-});
-
-// ==========================================
-
-let linkParaCompartir = "";
-let textoParaCompartir = "";
-
-window.abrirMenuCompartir = (id, nombreMod) => {
-  if (exigirRegistro()) return;
-  const baseUrl = window.location.origin + window.location.pathname;
-  linkParaCompartir = `${baseUrl}?share=${id}`;
-  textoParaCompartir = `¡Mira esto: *${nombreMod}*! Descárgalo aquí:\n`;
-
-  document.getElementById('share-modal').classList.add('show');
-};
-
-window.enviarWhatsApp = () => {
-  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoParaCompartir + linkParaCompartir)}`;
-  window.open(url, '_blank');
-};
-
-window.enviarTelegram = () => {
-  const url = `https://t.me/share/url?url=${encodeURIComponent(linkParaCompartir)}&text=${encodeURIComponent(textoParaCompartir)}`;
-  window.open(url, '_blank');
-};
-
-window.copiarEnlace = () => {
-  navigator.clipboard.writeText(textoParaCompartir + linkParaCompartir).then(() => {
-    const msg = document.getElementById('mensaje-copiado');
-    msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; }, 3000);
-  });
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const idCompartido = urlParams.get('share');
-
-  if (idCompartido) {
-
-
-    setTimeout(() => {
-
-      if (idCompartido.includes('mod') && window.openModInfo) {
-        window.openModInfo(idCompartido);
-      } else if (idCompartido.includes('apk') && window.openApkInfo) {
-        window.openApkInfo(idCompartido);
-      } else if (idCompartido.includes('script') && window.openScriptInfo) {
-        window.openScriptInfo(idCompartido);
-      }
-
-      const contenidoPopup = document.querySelector('#mod-info-popup .popup-content') || document.querySelector('.popup.show .popup-content');
-
-      if (contenidoPopup) {
-        contenidoPopup.classList.add('brillo-epico');
-
-        setTimeout(() => {
-          contenidoPopup.classList.remove('brillo-epico');
-        }, 6000);
-      }
-
-      window.history.replaceState({}, document.title, window.location.pathname);
-
-    }, 1000);
-  }
-});
-
-// ==========================================
-
-document.addEventListener("DOMContentLoaded", () => {
-  const todasLasImagenes = document.querySelectorAll('img');
-
-  todasLasImagenes.forEach(img => {
-    if (img.src.includes('assets/images/mods') || img.src.includes('webp')) {
-
-      img.setAttribute('loading', 'lazy');
-
-      const contenedor = img.parentElement;
-      if (contenedor) {
-        contenedor.style.position = 'relative';
-
-        let ruedita = contenedor.querySelector('.ruedita-cargando');
-        if (!ruedita) {
-          ruedita = document.createElement('div');
-          ruedita.className = 'ruedita-cargando';
-          contenedor.insertBefore(ruedita, img);
-        }
-
-        const finalizarCarga = () => {
-          if (ruedita) ruedita.style.display = 'none';
-          img.classList.add('img-lazy-cargada');
-        };
-
-        if (img.complete && img.naturalHeight !== 0) {
-          finalizarCarga();
-        } else {
-
-          img.onload = finalizarCarga;
-
-          img.onerror = () => {
-            if (ruedita) ruedita.style.display = 'none';
-          };
-        }
-      }
-    }
-  });
-});
-
-// ==========================================
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(registro => {
-        console.log('¡Modo Offline activado! Alcance:', registro.scope);
-      })
-      .catch(error => {
-        console.log('Falló el Service Worker:', error);
-      });
-  });
+// Vibración
+bindSwitch('hapticToggle', 'hapticMode', (on) => { if (on && navigator.vibrate) navigator.vibrate(50); });
+
+// Partículas FNF
+let particleTimer;
+const ARROWS = ['down', 'left', 'right', 'up'];
+function toggleParticles(enable) {
+  const box = document.getElementById('particles-container');
+  clearInterval(particleTimer);
+  if (!enable) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  const spawnRate = Math.max(250, 2500 - Number(store.get('particlesSpawn', '25')) * 22);
+  const baseSpeed = 14 - Number(store.get('particlesSpeed', '50')) * 0.12;
+  particleTimer = setInterval(() => {
+    if (document.hidden || box.childElementCount > 25) return;
+    const img = document.createElement('img');
+    img.className = 'fnf-particle';
+    img.alt = '';
+    img.src = `assets/images/Particles/${ARROWS[Math.random() * 4 | 0]}.webp`;
+    img.style.left = Math.random() * 100 + 'vw';
+    const dur = Math.random() * (baseSpeed / 2) + baseSpeed;
+    img.style.animationDuration = dur + 's';
+    box.appendChild(img);
+    setTimeout(() => img.remove(), (dur + 1) * 1000);
+  }, spawnRate);
 }
+const particleSettings = document.getElementById('particle-settings-container');
+particleSettings.style.display = store.get('particlesMode') === 'true' ? 'block' : 'none';
+bindSwitch('particlesToggle', 'particlesMode', (on) => {
+  particleSettings.style.display = on ? 'block' : 'none';
+  toggleParticles(on && store.get('lowEndMode') !== 'true');
+});
+if (store.get('particlesMode') === 'true' && store.get('lowEndMode') !== 'true') toggleParticles(true);
 
-// ==========================================
+const scale = document.getElementById('particleScaleSlider');
+scale.value = store.get('particlesScale', '40');
+root.setProperty('--escala-particulas', scale.value + 'px');
+scale.addEventListener('input', (e) => { root.setProperty('--escala-particulas', e.target.value + 'px'); store.set('particlesScale', e.target.value); });
+[['particleSpawnSlider', 'particlesSpawn', '25'], ['particleSpeedSlider', 'particlesSpeed', '50']].forEach(([id, key, def]) => {
+  const s = document.getElementById(id);
+  s.value = store.get(key, def);
+  s.addEventListener('change', (e) => {
+    store.set(key, e.target.value);
+    if (store.get('particlesMode') === 'true' && store.get('lowEndMode') !== 'true') toggleParticles(true);
+  });
+});
 
-document.addEventListener('touchstart', function () { }, { passive: true });
-document.addEventListener('touchmove', function () { }, { passive: true });
-document.addEventListener('wheel', function () { }, { passive: true });
+// Fuente propia
+document.getElementById('customFontUpload').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file || !file.name.toLowerCase().endsWith('.ttf')) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    applyCustomFont(evt.target.result);
+    try { localStorage.setItem('customUserFont', evt.target.result); }
+    catch (err) { alert('Archivo muy pesado para guardarse permanente, pero se aplicará ahora.'); }
+  };
+  reader.readAsDataURL(file);
+});
 
-// ==========================================
-
-window.enviarMensajeAlBot = async function () {
-  const cajaTexto = document.getElementById('txt-mensaje-telegram');
-  const boton = document.getElementById('btn-enviar-telegram');
-  const mensaje = cajaTexto.value.trim();
-
-  if (mensaje === "") {
-    alert("¡Escribe un mensaje primero!");
-    return;
-  }
-
-  let nombreUsuario = "👤 Usuario Invitado";
-  try {
-    const perfil = JSON.parse(localStorage.getItem('fnf_user_profile'));
-    if (perfil) {
-      nombreUsuario = perfil.nombre || perfil.name || perfil.username || perfil.usuario || perfil.key || "👤 Usuario Registrado";
-    }
-  } catch (error) {
-    console.log("No se encontró un perfil guardado.");
-  }
-
-  const TELEGRAM_BOT_TOKEN = "7599981153:AAH6tPHek2C02UeVHc-lACFtfVK_XleB6VI";
-  const TELEGRAM_CHAT_ID = "5429172831";
-
-  const textoFormateado =
-    `🚨 *NUEVO TICKET DE SOPORTE* 🚨
-
-👤 *De:* ${nombreUsuario}
-━━━━━━━━━━━━━━━━━━━━━━━━━
-💬 *Mensaje:*
-${mensaje}
-━━━━━━━━━━━━━━━━━━━━━━━━━
-🌐 _Enviado desde lalocf.2.gitgub/fnf-ports/_`;
-
-  const urlApi = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
-  boton.innerText = "⏳ Enviando...";
-  boton.style.background = "#ffea00";
-
-  try {
-    const respuesta = await fetch(urlApi, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: textoFormateado,
-        parse_mode: 'Markdown'
-      })
-    });
-
-    if (respuesta.ok) {
-      cajaTexto.value = "";
-      boton.innerText = "¡Enviado con éxito! ✨";
-      boton.style.background = "#00ff41";
-
-      setTimeout(() => {
-        boton.innerText = "🚀 Enviar Mensaje";
-        boton.style.background = "var(--neon-blue)";
-      }, 3000);
-    } else {
-      throw new Error("Error en la API");
-    }
-
-  } catch (error) {
-    boton.innerText = "❌ Error al enviar";
-    boton.style.background = "#ff003c";
-    setTimeout(() => {
-      boton.innerText = "🚀 Intentar de nuevo";
-      boton.style.background = "var(--neon-blue)";
-    }, 3000);
-  }
+window.resetSettings = () => {
+  if (!confirm(t('¿Restablecer el diseño predeterminado?', 'Reset to default design?'))) return;
+  ['customThemeColor', 'customUserFont', 'lowEndMode', 'hapticMode', 'glassBlur', 'particlesMode', 'particlesScale', 'particlesSpawn', 'particlesSpeed', 'fnf_theme']
+    .forEach(k => store.remove(k));
+  location.reload();
 };
 
-//===============================================//
+// ==========================================
+// ACTUALIZACIÓN E INSTALACIÓN (PWA)
+// ==========================================
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const modCards = document.querySelectorAll('.mod-card');
+window.closeUpdatePopup = () => {
+  closePopup('update-popup');
+  store.set('lastVersionSeen', APP_VERSION);
+  if (deferredPrompt) setTimeout(() => openPopup('install-popup'), 400);
+};
+window.installApp = async () => {
+  closePopup('install-popup');
+  if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; }
+};
+window.dismissInstall = () => closePopup('install-popup');
 
-  modCards.forEach(card => {
-    const oldTags = card.querySelector('.mod-tags-container');
-    if (oldTags) oldTags.remove();
+if (store.get('lastVersionSeen') !== APP_VERSION) setTimeout(() => openPopup('update-popup'), 600);
 
-    const gama = card.getAttribute('data-gama') || 'low';
-
-    let ramValue = card.getAttribute('data-ram');
-    if (!ramValue) {
-      ramValue = '2GB RAM';
-      if (gama === 'mid') ramValue = '3GB RAM';
-      if (gama === 'mid-high' || gama === 'high') ramValue = '4GB RAM';
-    }
-
-    let engineValue = card.getAttribute('data-engine');
-    if (!engineValue) {
-      engineValue = 'Psych Engine';
-    } else {
-      engineValue = engineValue.replace('⚙️', '').trim();
-    }
-
-    let sizeValue = card.getAttribute('data-size');
-    if (!sizeValue) {
-      const cardId = card.id || 'default';
-      const hash = cardId.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
-      const sizeMB = 150 + Math.abs(hash % 300);
-      sizeValue = `${sizeMB} MB`;
-    } else {
-      sizeValue = sizeValue.replace('📦', '').trim();
-    }
-
-    const searchTags = `${engineValue} ${ramValue} ${sizeValue}`.toLowerCase();
-    card.setAttribute('data-tags', searchTags);
-
-    const tagsContainer = document.createElement('div');
-    tagsContainer.className = 'mod-tags-container';
-    tagsContainer.style.cssText = 'display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap;';
-
-    const engineBadge = document.createElement('span');
-    engineBadge.style.cssText = 'background: rgba(0, 234, 255, 0.1); color: var(--neon-blue); padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid var(--neon-blue); display: inline-flex; align-items: center; gap: 3px;';
-    engineBadge.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/8335/8335020.png" style="width: 12px; height: 12px; object-fit: contain; filter: invert(1);"> ${engineValue}`;
-
-    const ramBadge = document.createElement('span');
-    ramBadge.style.cssText = 'background: rgba(255, 0, 255, 0.1); color: var(--neon-pink); padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid var(--neon-pink); display: inline-flex; align-items: center; gap: 3px;';
-    ramBadge.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/10513/10513938.png" style="width: 12px; height: 12px; object-fit: contain; filter: invert(1);"> ${ramValue}`;
-
-    const sizeBadge = document.createElement('span');
-    sizeBadge.style.cssText = 'background: rgba(0, 255, 65, 0.1); color: #00ff41; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #00ff41; display: inline-flex; align-items: center; gap: 3px;';
-    sizeBadge.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/4007/4007698.png" style="width: 12px; height: 12px; object-fit: contain; filter: invert(1);"> ${sizeValue}`;
-
-    tagsContainer.appendChild(engineBadge);
-    tagsContainer.appendChild(ramBadge);
-    tagsContainer.appendChild(sizeBadge);
-
-    const cardButtons = card.querySelector('.card-buttons');
-    if (cardButtons) {
-      card.insertBefore(tagsContainer, cardButtons);
-    }
-  });
-
-  let rafId = null;
-
-  document.addEventListener('mousemove', (e) => {
-    const card = e.target.closest('.apk-card, .mod-card');
-    if (card) {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const rect = card.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return;
-
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((y - centerY) / centerY) * -15;
-        const rotateY = ((x - centerX) / centerX) * 15;
-
-        const glareX = (x / rect.width) * 100;
-        const glareY = (y / rect.height) * 100;
-
-        card.style.setProperty('--rx', `${rotateX}deg`);
-        card.style.setProperty('--ry', `${rotateY}deg`);
-        card.style.setProperty('--gx', `${glareX}%`);
-        card.style.setProperty('--gy', `${glareY}%`);
-        card.style.setProperty('--g-opacity', '1');
-      });
-    }
-  });
-
-  document.addEventListener('mouseout', (e) => {
-    const card = e.target.closest('.apk-card, .mod-card');
-    if (card && !card.contains(e.relatedTarget)) {
-      if (rafId) cancelAnimationFrame(rafId);
-      card.style.setProperty('--rx', `0deg`);
-      card.style.setProperty('--ry', `0deg`);
-      card.style.setProperty('--g-opacity', '0');
-    }
-  });
-
-  let deviceRafId = null;
-  window.addEventListener('deviceorientation', (e) => {
-    if (e.beta === null || e.gamma === null) return;
-
-    if (deviceRafId) cancelAnimationFrame(deviceRafId);
-    deviceRafId = requestAnimationFrame(() => {
-      let beta = e.beta;
-      let gamma = e.gamma;
-
-      if (beta > 30) beta = 30;
-      if (beta < -30) beta = -30;
-      if (gamma > 30) gamma = 30;
-      if (gamma < -30) gamma = -30;
-
-      const rotateX = (beta / 30) * 15;
-      const rotateY = (gamma / 30) * 15;
-
-      const glareX = ((gamma + 30) / 60) * 100;
-      const glareY = ((beta + 30) / 60) * 100;
-
-      const root = document.documentElement;
-      root.style.setProperty('--m-rx', `${-rotateX}deg`);
-      root.style.setProperty('--m-ry', `${rotateY}deg`);
-      root.style.setProperty('--m-gx', `${glareX}%`);
-      root.style.setProperty('--m-gy', `${glareY}%`);
-      root.style.setProperty('--m-g-opacity', '0.6');
-    });
-  });
-
-});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('./sw.js').catch(err => console.log('Service Worker no disponible:', err.message));
+}
+}).catch(err => console.error(err));
